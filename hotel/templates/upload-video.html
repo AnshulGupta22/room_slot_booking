@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+	<head> 
+   
+      	 <title> Upload A Video </title>
+     
+	</head>
+	<body>
+		<h2>Upload A Video</h2>
+		<form action="" enctype="multipart/form-data" method="POST">
+			{% csrf_token %}
+			<label for="video"> <b> Select a video file: </b> </label> <br/>
+			<input type="file" name="video"><br/><br/><br/>
+			<input type="submit" value="Merge"/>
+		</form>
+	</body>
+</html>
+
