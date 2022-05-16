@@ -1,54 +1,41 @@
 '''
 from django.shortcuts import render
-from django.http import HttpResponse
-from .models import Hotel
+from django.contrib.auth import login, authenticate
+from django.contrib.auth.forms import UserCreationForm
+from django.shortcuts import render, redirect
+
+def home_view(request):
+    return render(request, 'home.html')
+
+def signup_view(request):
+    form = UserCreationForm(request.POST)
+    if form.is_valid():
+        form.save()
+        username = form.cleaned_data.get('username')
+        password = form.cleaned_data.get('password1')
+        user = authenticate(username=username, password=password)
+        login(request, user)
+        return redirect('home')
+    return render(request, 'signup.html', {'form': form})
+'''    
+from django.shortcuts import render, redirect
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
+def indexView(request):
+    return render(request,'index.html')
+@login_required()
 
-def index(request):
-    return HttpResponse("Hello World")
-    
-def count_rooms(request):
-    #count_rooms = Hotel.objects.count()
-    #return HttpResponse(count_rooms)
-    count_rooms = Hotel.objects.all()
-    context = {'hot': count_rooms}
-    return render(request, 'qwert.html', context)
-'''
+def dashboardView(request):
+    return render(request,'dashboard.html')
 
-from django.shortcuts import render,redirect
-from django.contrib.auth.models import Hotel
-from django.contrib import auth
-
-def signup(request):
+def registerView(request):
     if request.method == "POST":
-        if request.POST['password1'] == request.POST['password2']:
-            try:
-                Hotel.objects.get(username = request.POST['username'])
-                return render (request,'accounts/signup.html', {'error':'Username is already taken!'})
-            except Hotel.DoesNotExist:
-                user = Hotel.objects.create_user(request.POST['username'],password=request.POST['password1'])
-                auth.login(request,user)
-                return redirect('home')
-        else:
-            return render (request,'accounts/signup.html', {'error':'Password does not match!'})
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('login_url')
     else:
-        return render(request,'accounts/signup.html')
-
-def login(request):
-    if request.method == 'POST':
-        user = auth.authenticate(username=request.POST['username'],password = request.POST['password'])
-        if user is not None:
-            auth.login(request,user)
-            return redirect('home')
-        else:
-            return render (request,'accounts/login.html', {'error':'Username or password is incorrect!'})
-    else:
-        return render(request,'accounts/login.html')
-
-def logout(request):
-    if request.method == 'POST':
-        auth.logout(request)
-    return redirect('home')
-
-
+        form = UserCreationForm()
+    return render(request,'registration/register.html',{'form':form})
