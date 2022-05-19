@@ -20,7 +20,9 @@ def signup_view(request):
 '''    
 from django.shortcuts import render, redirect
 from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
+from hotel.forms import HotelForm
 
 # Create your views here.
 def indexView(request):
@@ -30,12 +32,20 @@ def indexView(request):
 def dashboardView(request):
     return render(request,'dashboard.html')
 
-def registerView(request):
-    if request.method == "POST":
-        form = UserCreationForm(request.POST)
+def signup(request):
+    if request.method == 'POST':
+        form = HotelForm(request.POST)
         if form.is_valid():
-            form.save()
-            return redirect('login_url')
-    else:
-        form = UserCreationForm()
-    return render(request,'registration/register.html',{'form':form})
+            user = User.objects.create_user(request.POST['username'], request.POST['email'], request.POST['password'])
+            #print(request.POST['username'])
+            user.save()
+            #form.save()
+            return redirect('welcome/')
+        else:
+            context = {'form': form}
+            return render(request, 'signup.html', context)
+    context = {'form': HotelForm()}
+    return render(request, 'signup.html', context)
+    
+def welcome(request):
+    return render(request,'welcome.html')
