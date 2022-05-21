@@ -1,8 +1,12 @@
 <html>
 	<body>
+	    <h1>Register Yourself</h1>
+	    <subs>(as General User)</subs>
+	    <br/><br/>
 		<form method="POST">
 			{% csrf_token %}
 			{{ form }}
+			<br/><br/>
 			<input type="submit" value="Sign Up" />
 		</form>
 	</body>

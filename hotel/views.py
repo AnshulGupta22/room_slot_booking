@@ -35,9 +35,10 @@ def dashboardView(request):
 def signup(request):
     if request.method == 'POST':
         form = HotelForm(request.POST)
-        if form.is_valid():
+        if form.is_valid() and request.POST['password'] == request.POST['confirm_password']:
             user = User.objects.create_user(request.POST['username'], request.POST['email'], request.POST['password'])
-            #print(request.POST['username'])
+            user.first_name = request.POST['first_name']
+            user.last_name = request.POST['last_name']
             user.save()
             #form.save()
             return redirect('welcome/')

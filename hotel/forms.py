@@ -15,9 +15,11 @@ from hotel.models import Hotel
 from django import forms
 
 class HotelForm(forms.ModelForm):
-	class Meta:
-		model = Hotel
-		fields = ['username','email', 'password']
+    password = forms.CharField(widget=forms.PasswordInput)
+    confirm_password = forms.CharField(widget=forms.PasswordInput)
+    class Meta:
+        model = Hotel
+        fields = ['username', 'first_name', 'last_name', 'email']
 
 #from django.contrib.auth.forms import UserCreationForm
 #from django.contrib.auth.forms import AuthenticationForm
