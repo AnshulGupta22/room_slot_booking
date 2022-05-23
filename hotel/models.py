@@ -3,8 +3,14 @@ from django.db import models
 # Create your models here.
 
 class Hotel(models.Model):
-    username = models.CharField(max_length=120)
+    username = models.CharField(max_length=30)
     first_name = models.CharField(max_length=120)
     last_name = models.CharField(max_length=120)
     email = models.EmailField()
 
+class Room(models.Model):
+    rooms_available = models.PositiveSmallIntegerField()
+
+class TimeSlot(models.Model):
+    room_number = models.PositiveSmallIntegerField()
+    room_available = models.TimeField()

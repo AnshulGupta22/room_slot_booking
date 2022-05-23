@@ -20,6 +20,12 @@ class HotelForm(forms.ModelForm):
     class Meta:
         model = Hotel
         fields = ['username', 'first_name', 'last_name', 'email']
+        
+class SigninForm(forms.ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput)
+    class Meta:
+        model = Hotel
+        fields = ['username']
 
 #from django.contrib.auth.forms import UserCreationForm
 #from django.contrib.auth.forms import AuthenticationForm

@@ -5,9 +5,10 @@
 	    <br/><br/>
 		<form method="POST">
 			{% csrf_token %}
-			{{ form }}
-			<br/><br/>
+			{{ form.as_p }}
 			<input type="submit" value="Sign Up" />
 		</form>
+		<!--Already have an account? <a href = "http://localhost:8000/hotel/signin/"> Sign in </a> instead-->
+		<a href = "{% url 'hotel:signin' %}"> Logout </a>
 	</body>
 </html>
