@@ -1,0 +1,12 @@
+<html>
+	<body>
+	    <h1>Sign in</h1>
+	    <subs>(as General User)</subs>
+	    <br/><br/>
+		<form method="POST">
+			{% csrf_token %}
+			{{ form.as_p }}
+			<input type="submit" value="Sign in" />
+		</form>
+	</body>
+</html>
