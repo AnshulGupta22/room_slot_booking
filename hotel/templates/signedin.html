@@ -1,6 +1,55 @@
-Sucessfully Signed in
+<!DOCTYPE html>
+<html>
+	<body>
+		<a href = "{% url 'hotel:logout' %}"> Logout </a>
+	    {% if rooms %}
+			<ol>
+			{% for room in rooms %}
+			    <li><h4>Room number: {{ room.room_number }}</h4></li>
+			<ol>
+			    {% if room.room_available_from1 != None and room.room_available_till1 != None %}
+			<ul>
+			    <li>Room available from: {{ room.room_available_from1 }}</li>
+			    <li>Room available till: {{ room.room_available_till1 }}</li>
+			    {% endif %}
+			    {% if room.room_available_from2 != None and room.room_available_till2 != None %}
+			    <br/>
+			    <li>Room available from: {{ room.room_available_from2 }}</li>
+			    <li>Room available till: {{ room.room_available_till2 }}</li>
+			    {% endif %}
+			    {% if room.room_available_from3 != None and room.room_available_till3 != None %}
+			    <br/>
+			    <li>Room available from: {{ room.room_available_from3 }}</li>
+			    <li>Room available till: {{ room.room_available_till3 }}</li>
+			    {% endif %}
+			    {% if room.room_available_from4 != None and room.room_available_till4 != None %}
+			    <br/>
+			    <li>Room available from: {{ room.room_available_from4 }}</li>
+			    <li>Room available till: {{ room.room_available_till4 }}</li>
+			    {% endif %}
+			    {% if room.room_available_from5 != None and room.room_available_till5 != None %}
+			    <br/>
+			    <li>Room available from: {{ room.room_available_from5 }}</li>
+			    <li>Room available till: {{ room.room_available_till5 }}</li>
+			    {% endif %}
+			    {% if room.room_available_from6 != None and room.room_available_till6 != None %}
+			    <br/>
+			    <li>Room available from: {{ room.room_available_from6 }}</li>
+			    <li>Room available till: {{ room.room_available_till6 }}</li>
+			    {% endif %}
+			{% endfor %}
+		{% else %}
+	    		<p>No rooms are available.</p>
+	    	</ul>
+	    {% endif %}
+	    <br/>
+	    <a href = "{% url 'hotel:book' %}"> Next </a>
+		<!--Already have an account? <a href = "http://localhost:8000/hotel/signin/"> Sign in </a> instead-->
+		<!--<a href = "{% url 'hotel:signin' %}"> Logout </a>-->
+	</body>
+</html>
 
-<a href = "{% url 'hotel:logout' %}"> Logout </a>
+
 <!--
 <form method="POST">
 			{% csrf_token %}

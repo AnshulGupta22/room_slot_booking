@@ -5,6 +5,7 @@ from django.contrib import admin
 #from hotel.models import Hotel
 #admin.site.register(Hotel)
 
-from hotel.models import Room, TimeSlot
-admin.site.register(Room)
+from hotel.models import TimeSlot, RoomAvailable
+admin.site.register(RoomAvailable)
+#admin.site.register(Room)
 admin.site.register(TimeSlot)

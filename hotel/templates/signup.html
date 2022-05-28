@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 	<body>
 	    <h1>Register Yourself</h1>
@@ -8,7 +9,7 @@
 			{{ form.as_p }}
 			<input type="submit" value="Sign Up" />
 		</form>
-		<!--Already have an account? <a href = "http://localhost:8000/hotel/signin/"> Sign in </a> instead-->
-		<a href = "{% url 'hotel:signin' %}"> Logout </a>
+		Already have an account? <a href = "{% url 'hotel:signin' %}"> Sign in </a> instead
+		<!--<a href = "{% url 'hotel:signin' %}"> Logout </a>-->
 	</body>
 </html>
