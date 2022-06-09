@@ -9,11 +9,11 @@ urlpatterns = [
     #path('dashboard/',views.dashboardView,name="dashboard"),
     #path('login/',LoginView.as_view(),name="login_url"),
     path('home/', views.home, name="home"),
-    path('book/', views.book, name="book"),
+    path('book/', views.booking, name="book"),
     path('signup/', views.sign_up, name="signup"),
     path('signup/welcome/', views.welcome),
     path('signin/', views.sign_in, name="signin"),
-    path('signin/signedin/', views.signedin),
+    path('signin/signedin/', views.booking),
     path('logout/', views.logout_view, name="logout"),
     #path('logout/',LogoutView.as_view(next_page='dashboard'),name="logout"),
 ]

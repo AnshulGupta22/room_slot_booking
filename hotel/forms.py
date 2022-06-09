@@ -11,7 +11,7 @@ class RegisterForm(UserCreationForm):
 	model = User
 	fields = ["username", "email", "password1", "password2"]
 '''
-from hotel.models import Hotel, Book
+from hotel.models import Hotel, Room, Booking
 from django import forms
 
 class HotelForm(forms.ModelForm):
@@ -29,9 +29,14 @@ class SigninForm(forms.ModelForm):
         
 class BookForm(forms.ModelForm):
     class Meta:
-        model = Book
-        fields = ['room_number', 'book_from', 'book_till']
+        model = Booking
+        fields = ['book_from', 'book_till']
 
+class AvailabilityForm(forms.ModelForm):
+    class Meta:
+        model = Booking
+        fields = ['book_from', 'book_till', 'category']
+        
 #from django.contrib.auth.forms import UserCreationForm
 #from django.contrib.auth.forms import AuthenticationForm
 '''
