@@ -16,10 +16,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 #from django.contrib.auth import views as auth_views
-#from blog.forms import LoginForm
+#from hotel.forms import SigninForm, LoginForm
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('hotel/',include('hotel.urls', namespace='hotel')),
-    #path('signup/', auth_views.LoginView.as_view(template_name='signup.html', authentication_form=SignupForm), name='signup'),
+    #path('signin/', auth_views.LoginView, {'template_name': 'signin.html', 'authentication_form': SigninForm}, name='signin'),
+    #path('signin/', auth_views.LoginView.as_view(template_name='signin.html', authentication_form=LoginForm), name='signin'),
+    #path('logout/', auth_views.LogoutView.as_view(next_page='/signin'), name='logout'),
 ]

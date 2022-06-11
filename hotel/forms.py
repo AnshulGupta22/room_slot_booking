@@ -13,6 +13,7 @@ class RegisterForm(UserCreationForm):
 '''
 from hotel.models import Hotel, Room, Booking
 from django import forms
+from django.contrib.auth.forms import AuthenticationForm
 
 class HotelForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput)
@@ -36,7 +37,11 @@ class AvailabilityForm(forms.ModelForm):
     class Meta:
         model = Booking
         fields = ['book_from', 'book_till', 'category']
-        
+'''        
+class LoginForm(AuthenticationForm):
+	username = forms.CharField(label="Username", max_length=30, widget=forms.TextInput(attrs={'name': 'username'}))
+	password = forms.CharField(label="Password", max_length=30,widget=forms.PasswordInput(attrs={'name': 'password'}))
+'''	
 #from django.contrib.auth.forms import UserCreationForm
 #from django.contrib.auth.forms import AuthenticationForm
 '''

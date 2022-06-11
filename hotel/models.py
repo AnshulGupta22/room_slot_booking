@@ -1,6 +1,8 @@
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.conf import settings
+#import datetime
+from datetime import date
 # Create your models here.
 
 class Hotel(models.Model):
@@ -10,7 +12,11 @@ class Hotel(models.Model):
     email = models.EmailField()
 
 class RoomAvailable(models.Model):
-    rooms_available = models.PositiveSmallIntegerField(validators=[MaxValueValidator(10)])
+    #rooms_available = models.PositiveSmallIntegerField(validators=[MaxValueValidator(10)])
+    room_number =  models.PositiveSmallIntegerField(validators=[MaxValueValidator(100),MinValueValidator(1)])
+    available_from = models.DateTimeField()
+    available_till = models.DateTimeField()
+    room_number =  models.PositiveSmallIntegerField()
 '''
 class Room(models.Model):
 	room = models.PositiveSmallIntegerField(unique=True, validators=[MaxValueValidator(10),MinValueValidator(1)])
