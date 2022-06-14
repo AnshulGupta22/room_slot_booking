@@ -11,21 +11,41 @@ class Hotel(models.Model):
     last_name = models.CharField(max_length=120)
     email = models.EmailField()
 
-class RoomAvailable(models.Model):
+class Room(models.Model):
     #rooms_available = models.PositiveSmallIntegerField(validators=[MaxValueValidator(10)])
-    room_number =  models.PositiveSmallIntegerField(validators=[MaxValueValidator(100),MinValueValidator(1)])
-    available_from = models.DateTimeField()
-    available_till = models.DateTimeField()
-    room_number =  models.PositiveSmallIntegerField()
+    room_number =  models.PositiveSmallIntegerField(validators=[MaxValueValidator(1000),MinValueValidator(1)])
+    #available_from = models.DateTimeField()
+    #available_till = models.DateTimeField()
+    available_from = models.TimeField()
+    available_till = models.TimeField()
+    advance = models.PositiveSmallIntegerField()
+    ROOM_CATEGORIES = (
+        ('YAC', 'AC'),
+        ('NAC', 'NON-AC'),
+        ('DEL', 'DELUXE'),
+        ('KIN', 'KING'),
+        ('QUE', 'QUEEN'),
+    )
+    category = models.CharField(max_length=3, choices=ROOM_CATEGORIES)
+    room_capacity = (
+        ('one', '1'),
+        ('two', '2'),
+        ('thr', '3'),
+        ('fou', '4'),
+    )
+    capacity = models.CharField(max_length=3, choices=room_capacity)
+    #room_number =  models.PositiveSmallIntegerField()
 '''
 class Room(models.Model):
 	room = models.PositiveSmallIntegerField(unique=True, validators=[MaxValueValidator(10),MinValueValidator(1)])
 '''
-class Room(models.Model):
+class Customer(models.Model):
     #user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete = models.CASCADE)
     user = models.CharField(max_length=30)
-    book_from = models.DateTimeField()
-    book_till = models.DateTimeField()
+    book_from_date = models.DateField()
+    #book_from = models.TimeField()
+    book_from_time = models.TimeField()
+    book_till_time = models.TimeField()
     room_number =  models.PositiveSmallIntegerField(validators=[MaxValueValidator(100),MinValueValidator(1)])
     ROOM_CATEGORIES = (
         ('YAC', 'AC'),
@@ -35,7 +55,15 @@ class Room(models.Model):
         ('QUE', 'QUEEN'),
     )
     category = models.CharField(max_length=3, choices=ROOM_CATEGORIES)
+    room_capacity = (
+        ('one', '1'),
+        ('two', '2'),
+        ('thr', '3'),
+        ('fou', '4'),
+    )
+    capacity = models.CharField(max_length=3, choices=room_capacity)
     
+'''    
 class Booking(models.Model):
     #user = models.CharField(max_length=30)
     book_from = models.DateTimeField()
@@ -47,7 +75,7 @@ class Booking(models.Model):
         ('KIN', 'KING'),
         ('QUE', 'QUEEN'),
     )
-    category = models.CharField(max_length=3, choices=ROOM_CATEGORIES)
+    category = models.CharField(max_length=3, choices=ROOM_CATEGORIES)'''
 '''    
 class Book(models.Model):
     room_number = models.PositiveSmallIntegerField(validators=[MaxValueValidator(10),MinValueValidator(1)])
