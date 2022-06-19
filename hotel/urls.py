@@ -15,5 +15,6 @@ urlpatterns = [
     path('signin/', views.sign_in, name="signin"),
     path('signin/signedin/', views.booking),
     path('logout/', views.logout_view, name="logout"),
+    path('yac/', views.yac, name="yac"),
     #path('logout/',LogoutView.as_view(next_page='dashboard'),name="logout"),
 ]

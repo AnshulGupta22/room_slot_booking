@@ -1,0 +1,39 @@
+<html>
+	<body>
+	{% if categories %}
+		{% for category in categories %}
+			<p>
+			{% if category == 'YAC' %}
+				<p>{{ category }}</p>
+				<p>gjgjhkhkjkj</p>
+				<a href = "{% url 'hotel:yac' %}"> Book Now </a>
+			{% endif %}
+			</p>
+			<p>
+			{% if category == 'NAC' %}
+				hfbgd
+			{% endif %}
+			</p>
+			<p>
+			{% if category == 'DEL' %}
+				bvddd
+			{% endif %}
+			</p>
+			<p>
+			{% if category == 'KIN' %}
+				awcv
+			{% endif %}
+			</p>
+			<p>
+			{% if category == 'QUE' %}
+				scvff
+			{% endif %}
+			</p>
+		    <!--<p>category</p>-->
+		{% endfor %}
+	{% else %}
+			<p> No rooms are available </p>
+	{% endif %}
+	</body>
+</html>
+

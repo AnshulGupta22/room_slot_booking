@@ -28,10 +28,10 @@ class Room(models.Model):
     )
     category = models.CharField(max_length=3, choices=ROOM_CATEGORIES)
     room_capacity = (
-        ('one', '1'),
-        ('two', '2'),
-        ('thr', '3'),
-        ('fou', '4'),
+        ('1', '1'),
+        ('2', '2'),
+        ('3', '3'),
+        ('4', '4'),
     )
     capacity = models.CharField(max_length=3, choices=room_capacity)
     #room_number =  models.PositiveSmallIntegerField()
@@ -56,10 +56,10 @@ class Customer(models.Model):
     )
     category = models.CharField(max_length=3, choices=ROOM_CATEGORIES)
     room_capacity = (
-        ('one', '1'),
-        ('two', '2'),
-        ('thr', '3'),
-        ('fou', '4'),
+        ('1', '1'),
+        ('2', '2'),
+        ('3', '3'),
+        ('4', '4'),
     )
     capacity = models.CharField(max_length=3, choices=room_capacity)
     

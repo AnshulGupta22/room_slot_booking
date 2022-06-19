@@ -11,6 +11,11 @@ import datetime
 # Create your views here.
 
 username = ''
+converted_book_from_date = datetime.date(1996, 12, 11)
+converted_book_from_time = datetime.time(13, 24, 56)
+converted_book_till_time = datetime.time(13, 24, 56)
+capacity = 1
+dict1 = dict()
 
 # Function to convert string to date
 def convert_to_date(date_time):
@@ -36,7 +41,8 @@ def sign_up(request):
                 user.first_name = request.POST['first_name']
                 user.last_name = request.POST['last_name']
                 user.save()
-                return redirect('welcome/')
+                username = request.POST['username']
+                return redirect('../book/')
             except:
        	        return HttpResponse("Username already exist")
         else:
@@ -55,7 +61,7 @@ def sign_in(request):
             user = authenticate(request, username=username, password=password)
             if user is not None:
                 login(request, user)
-                return redirect('signedin/')
+                return redirect('../book/')
             else:
                 return HttpResponse("Invalid Credentials")
         else:
@@ -71,23 +77,41 @@ def logout_view(request):
     #return redirect('signin/')
     
 def check_availability(category, book_date, check_in, check_out, now, capacity):
-    #check_in = book_from.time()
-    room_list = Room.objects.filter(category = category, available_from__lt = check_in,  available_till__gt =  check_out)
+    #dict1 = dict()
+    room_list = Room.objects.filter(available_from__lte = check_in, available_till__gte =  check_out, capacity__gte = capacity)
+    print("vetgtegv")
+    print(room_list)
+    print("tgevd")
     for room in room_list:
-        booking_list = Customer.objects.filter(book_from_time__lt = check_out,  book_till_time__gt = check_in, book_from_date = book_date)
-        if not booking_list:
-            booked_number = room.room_number    
-            nextD = now + datetime.timedelta(days=room.advance)
-            
-            
-            if(book_date <= nextD.date()):
-                #nextD = now + datetime.timedelta(days=5)
-                #avb = Room.objects.filter(available_from__lt = check_in,  available_till__gt =  check_out, room_number = booked_number)
-                #if avb:
+        max_book = now + datetime.timedelta(days=room.advance) 
+        if(book_date <= max_book.date()):
+            taken = Customer.objects.filter(book_from_date = book_date, book_from_time__lt = check_out, book_till_time__gt = check_in)
+            print(taken)
+            if not taken:
+                all_rooms = list()
+                global dict1
+                if room.category not in dict1:
+                    first_room = list()
+                    first_room.append(room.room_number)
+                    #global dict1
+                    dict1[room.category] = first_room
+                    #dict1[room.category] = room.room_number
+                '''else:
+                    all_rooms = dict1[room.category]
+                    all_rooms.append(room.room_number)
+                    #global dict1
+                    dict1[room.category] = all_rooms'''
+    #print(dict1['YAC'][0])
+    return dict1
+'''        
+                #for num in all_rooms:
+                    properties = Room.objects.filter(room_number = num)
+                    cat = list()
+                    cat.append(properties.category)
                 time_slot = Customer(user = username, book_from_date = book_date, book_from_time = check_in, book_till_time = check_out, room_number = booked_number, category = category, capacity = capacity)
                 time_slot.save()
                 return True
-    return False
+    return False'''
     
 @login_required(login_url="/hotel/signin/")
 def booking(request):
@@ -102,11 +126,25 @@ def booking(request):
             book_from_time = request.POST['book_from_time']
             book_till_time = request.POST['book_till_time']
             category = request.POST['category']
+            global capacity
             capacity = request.POST['capacity']
+            global converted_book_from_date
             converted_book_from_date = convert_to_date(book_from_date)
+            global converted_book_from_time
             converted_book_from_time = convert_to_time(book_from_time)
+            global converted_book_till_time
             converted_book_till_time = convert_to_time(book_till_time)
-            if(check_availability(category, converted_book_from_date, converted_book_from_time, converted_book_till_time, now, capacity)):
+            to_let = dict()
+            to_let = check_availability(category, converted_book_from_date, converted_book_from_time, converted_book_till_time, now, capacity)
+            if to_let != {}:
+                response = to_let.keys()
+                #return HttpResponse(to_let.keys())
+                '''response = 'Blogs:'
+                for blog in to_let.keys():
+                    response += '<br \> {0}'.format(blog)
+                #return HttpResponse(response)'''
+                context = {'categories': response}
+                return render(request, 'suss.html', context)
                 return HttpResponse("Booked")
             return HttpResponse("Not Booked")
         else:
@@ -114,3 +152,10 @@ def booking(request):
             return render(request, 'book.html', context)
     context = {'form': AvailabilityForm()}
     return render(request, 'book.html', context)
+    
+def yac(request):
+    if request.method == 'POST':
+        time_slot = Customer(user = username, book_from_date = converted_book_from_date, book_from_time = converted_book_from_time, book_till_time = converted_book_till_time, room_number = dict1['YAC'][0], category = 'YAC', capacity = capacity)
+        time_slot.save()
+        return HttpResponse("Booked")
+    return render(request, 'yac.html')
