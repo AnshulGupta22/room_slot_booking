@@ -14,11 +14,6 @@ class Hotel(models.Model):
 class Room(models.Model):
     #rooms_available = models.PositiveSmallIntegerField(validators=[MaxValueValidator(10)])
     room_number =  models.PositiveSmallIntegerField(validators=[MaxValueValidator(1000),MinValueValidator(1)])
-    #available_from = models.DateTimeField()
-    #available_till = models.DateTimeField()
-    available_from = models.TimeField()
-    available_till = models.TimeField()
-    advance = models.PositiveSmallIntegerField()
     ROOM_CATEGORIES = (
         ('YAC', 'AC'),
         ('NAC', 'NON-AC'),
@@ -34,6 +29,14 @@ class Room(models.Model):
         ('4', '4'),
     )
     capacity = models.CharField(max_length=3, choices=room_capacity)
+    #available_from = models.DateTimeField()
+    #available_till = models.DateTimeField()
+    available_from = models.TimeField()
+    available_till = models.TimeField()
+    advance = models.PositiveSmallIntegerField()
+    
+    '''def __str__(self):
+        return self.room_number, self.category, self.capacity, self.available_from, self.available_till, self.advance'''
     #room_number =  models.PositiveSmallIntegerField()
 '''
 class Room(models.Model):
@@ -62,6 +65,9 @@ class Customer(models.Model):
         ('4', '4'),
     )
     capacity = models.CharField(max_length=3, choices=room_capacity)
+    '''
+    def __str__(self):
+        return self.user, self.book_from_date, self.book_from_time, self.book_till_time, self.room_number, self.category, self.capacity'''
     
 '''    
 class Booking(models.Model):

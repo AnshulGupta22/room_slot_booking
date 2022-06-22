@@ -4,7 +4,7 @@
 			{% csrf_token %}
 			{{ form.as_p }}
 			<input type="submit" value="Book" />
-			<p> <a href="{% url 'hotel:logout' %}"> Logout </a> </p>
+			<p> <a href="{% url 'hotel:signin' %}"> Logout </a> </p>
 		</form>
 	</body>
 </html>

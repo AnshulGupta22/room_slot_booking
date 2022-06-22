@@ -1,38 +1,47 @@
+<!DOCTYPE html>
 <html>
 	<body>
 	{% if categories %}
 		{% for category in categories %}
-			<p>
+			
 			{% if category == 'YAC' %}
 				<p>{{ category }}</p>
 				<p>gjgjhkhkjkj</p>
-				<a href = "{% url 'hotel:yac' %}"> Book Now </a>
+				<p><a href = "{% url 'hotel:yac' %}"> Book Now </a></p>
+				<hr>
 			{% endif %}
-			</p>
-			<p>
+			
 			{% if category == 'NAC' %}
-				hfbgd
+				<p>{{ category }}</p>
+				<p>bhhhdef</p>
+				<p><a href = "{% url 'hotel:yac' %}"> Book Now </a></p>
+				<hr>
 			{% endif %}
-			</p>
-			<p>
+			
 			{% if category == 'DEL' %}
-				bvddd
+				<p>{{ category }}</p>
+				<p>kbhjgftr</p>
+				<p><a href = "{% url 'hotel:yac' %}"> Book Now </a></p>
+				<hr>
 			{% endif %}
-			</p>
-			<p>
+			
 			{% if category == 'KIN' %}
-				awcv
+				<p>{{ category }}</p>
+				<p>bghfrfgbx</p>
+				<p><a href = "{% url 'hotel:yac' %}"> Book Now </a></p>
+				<hr>
 			{% endif %}
-			</p>
-			<p>
+			
 			{% if category == 'QUE' %}
-				scvff
+				<p>{{ category }}</p>
+				<p>rfvsf</p>
+				<p><a href = "{% url 'hotel:yac' %}"> Book Now </a></p>
 			{% endif %}
-			</p>
+			
 		    <!--<p>category</p>-->
 		{% endfor %}
 	{% else %}
-			<p> No rooms are available </p>
+		<p> No rooms are available </p>
 	{% endif %}
 	</body>
 </html>

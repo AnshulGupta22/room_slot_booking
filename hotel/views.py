@@ -7,10 +7,12 @@ from hotel.forms import HotelForm, SigninForm, AvailabilityForm
 from django.http import HttpResponse
 from . models import Customer, Room, Hotel
 import datetime
+from django.db.models import Q
 
 # Create your views here.
 
 username = ''
+registered = 0
 converted_book_from_date = datetime.date(1996, 12, 11)
 converted_book_from_time = datetime.time(13, 24, 56)
 converted_book_till_time = datetime.time(13, 24, 56)
@@ -41,7 +43,10 @@ def sign_up(request):
                 user.first_name = request.POST['first_name']
                 user.last_name = request.POST['last_name']
                 user.save()
+                global username
                 username = request.POST['username']
+                global registered
+                registered = 1
                 return redirect('../book/')
             except:
        	        return HttpResponse("Username already exist")
@@ -52,56 +57,67 @@ def sign_up(request):
     return render(request, 'signup.html', context)
 
 def sign_in(request):
-    if request.method == 'POST':
-        form = SigninForm(request.POST)
-        if form.is_valid():
-            global username
-            username = request.POST['username']
-            password = request.POST['password']
-            user = authenticate(request, username=username, password=password)
-            if user is not None:
-                login(request, user)
-                return redirect('../book/')
+    global registered
+    if registered == 0:
+        if request.method == 'POST':
+            form = SigninForm(request.POST)
+            if form.is_valid():
+                global username
+                username = request.POST['username']
+                password = request.POST['password']
+                user = authenticate(request, username=username, password=password)
+                if user is not None:
+                    login(request, user)
+                    return redirect('../book/')
+                else:
+                    return HttpResponse("Invalid Credentials")
             else:
-                return HttpResponse("Invalid Credentials")
-        else:
-            context = {'form': form}
-            return render(request, 'signin.html', context)
-    context = {'form': SigninForm()}
-    return render(request, 'signin.html', context)
+                context = {'form': form}
+                return render(request, 'signin.html', context)
+        context = {'form': SigninForm()}
+        return render(request, 'signin.html', context)
+    else:
+        return redirect('../book/')
 
 def logout_view(request):
     logout(request)
     # Redirect to a success page.
-    return render(request,'logout.html')
-    #return redirect('signin/')
+    #return render(request,'logout.html')
+    return redirect('../signin/')
     
 def check_availability(category, book_date, check_in, check_out, now, capacity):
-    #dict1 = dict()
+    global dict1
     room_list = Room.objects.filter(available_from__lte = check_in, available_till__gte =  check_out, capacity__gte = capacity)
-    print("vetgtegv")
-    print(room_list)
-    print("tgevd")
+    #print("vetgtegv")
+    #print(room_list)
+    #print("tgevd")
     for room in room_list:
         max_book = now + datetime.timedelta(days=room.advance) 
         if(book_date <= max_book.date()):
-            taken = Customer.objects.filter(book_from_date = book_date, book_from_time__lt = check_out, book_till_time__gt = check_in)
+            #This logic works for a particular room
+            taken = Customer.objects.filter(Q(Q(book_from_time__lt = check_out) | Q(book_till_time__gt = check_in)) & Q(room_number = room.room_number) & Q(book_from_date = book_date))
+            #taken = Customer.objects.filter((Q(book_from_time__lt = check_out) | Q(book_till_time__gt = check_in)), room_number = room.room_number, book_from_date = book_date)
+            #taken = Customer.objects.filter(book_from_date = book_date, book_from_time__lt = check_out, book_till_time__gt = check_in) 
+            print(room)
             print(taken)
+            print(not taken)
             if not taken:
-                all_rooms = list()
-                global dict1
+                #all_rooms = list()
+                #global dict1
                 if room.category not in dict1:
-                    first_room = list()
-                    first_room.append(room.room_number)
+                    #first_room = list()
+                    #first_room.append(room.room_number)
                     #global dict1
-                    dict1[room.category] = first_room
-                    #dict1[room.category] = room.room_number
+                    #dict1[room.category] = first_room
+                    dict1[room.category] = room.room_number
                 '''else:
                     all_rooms = dict1[room.category]
                     all_rooms.append(room.room_number)
                     #global dict1
                     dict1[room.category] = all_rooms'''
-    #print(dict1['YAC'][0])
+    print("vetgtegv")
+    print(dict1)
+    print("tyuuih")
     return dict1
 '''        
                 #for num in all_rooms:
@@ -155,7 +171,7 @@ def booking(request):
     
 def yac(request):
     if request.method == 'POST':
-        time_slot = Customer(user = username, book_from_date = converted_book_from_date, book_from_time = converted_book_from_time, book_till_time = converted_book_till_time, room_number = dict1['YAC'][0], category = 'YAC', capacity = capacity)
+        time_slot = Customer(user = username, book_from_date = converted_book_from_date, book_from_time = converted_book_from_time, book_till_time = converted_book_till_time, room_number = dict1['YAC'], category = 'YAC', capacity = capacity)
         time_slot.save()
         return HttpResponse("Booked")
     return render(request, 'yac.html')
