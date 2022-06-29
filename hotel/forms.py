@@ -11,22 +11,28 @@ class RegisterForm(UserCreationForm):
 	model = User
 	fields = ["username", "email", "password1", "password2"]
 '''
-from hotel.models import Hotel, Customer, Room
+from hotel.models import Customer, Booking, Signin
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm
 
-class HotelForm(forms.ModelForm):
+class CustomerForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput)
     confirm_password = forms.CharField(widget=forms.PasswordInput)
     class Meta:
-        model = Hotel
-        fields = ['username', 'first_name', 'last_name', 'email']
+        model = Customer
+        fields = ['desired_username', 'first_name', 'last_name', 'email']
         
 class SigninForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput)
     class Meta:
-        model = Hotel
+        model = Signin
         fields = ['username']
+
+class BookingForm(forms.ModelForm):
+    class Meta:
+        model = Booking
+        fields = ['book_from_date', 'book_from_time', 'book_till_time', 'capacity']
+        
 '''  
 class BookForm(forms.ModelForm):
     class Meta:
@@ -38,10 +44,7 @@ class AvailabilityForm(forms.ModelForm):
         model = Booking
         fields = ['book_from', 'book_till', 'category']
 '''
-class AvailabilityForm(forms.ModelForm):
-    class Meta:
-        model = Customer
-        fields = ['book_from_date', 'book_from_time', 'book_till_time', 'category', 'capacity']
+
 '''        
 class LoginForm(AuthenticationForm):
 	username = forms.CharField(label="Username", max_length=30, widget=forms.TextInput(attrs={'name': 'username'}))

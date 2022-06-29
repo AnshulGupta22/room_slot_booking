@@ -3,46 +3,46 @@
 	<body>
 	{% if categories %}
 		{% for category in categories %}
-			
 			{% if category == 'YAC' %}
-				<p>{{ category }}</p>
+				<h3>AC</h3>
 				<p>gjgjhkhkjkj</p>
 				<p><a href = "{% url 'hotel:yac' %}"> Book Now </a></p>
 				<hr>
 			{% endif %}
 			
 			{% if category == 'NAC' %}
-				<p>{{ category }}</p>
+				<h3>Non AC</h3>
 				<p>bhhhdef</p>
-				<p><a href = "{% url 'hotel:yac' %}"> Book Now </a></p>
+				<p><a href = "{% url 'hotel:nac' %}"> Book Now </a></p>
 				<hr>
 			{% endif %}
 			
 			{% if category == 'DEL' %}
-				<p>{{ category }}</p>
+				<h3>Deluxe</h3>
 				<p>kbhjgftr</p>
-				<p><a href = "{% url 'hotel:yac' %}"> Book Now </a></p>
+				<p><a href = "{% url 'hotel:deluxe' %}"> Book Now </a></p>
 				<hr>
 			{% endif %}
 			
 			{% if category == 'KIN' %}
-				<p>{{ category }}</p>
+				<h3>King</h3>
 				<p>bghfrfgbx</p>
-				<p><a href = "{% url 'hotel:yac' %}"> Book Now </a></p>
+				<p><a href = "{% url 'hotel:king' %}"> Book Now </a></p>
 				<hr>
 			{% endif %}
 			
 			{% if category == 'QUE' %}
-				<p>{{ category }}</p>
+				<h3>Queen</h3>
 				<p>rfvsf</p>
-				<p><a href = "{% url 'hotel:yac' %}"> Book Now </a></p>
+				<p><a href = "{% url 'hotel:queen' %}"> Book Now </a></p>
+				<hr>
 			{% endif %}
-			
 		    <!--<p>category</p>-->
 		{% endfor %}
 	{% else %}
 		<p> No rooms are available </p>
 	{% endif %}
+	<p> <a href="{% url 'hotel:signin' %}"> Logout </a> </p>
 	</body>
 </html>
 
