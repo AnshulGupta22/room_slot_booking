@@ -17,9 +17,9 @@ username = None
 #registered = 0
 #now = datetime.datetime(2015, 10, 29, 23, 55, 59, 342380)
 now = None
-converted_book_from_date = None
-converted_book_from_time = None
-converted_book_till_time = None
+book_date = None
+check_in = None
+check_out = None
 capacity = None
 '''
 converted_book_from_date = datetime.date(1996, 12, 11)
@@ -96,9 +96,9 @@ def logout_view(request):
     return redirect('../signin/')
     
 #def check_availability(book_date, check_in, check_out, now, capacity):
-def check_availability(book_date, check_in, check_out, capacity):
+def check_availability():
     global dict1
-    dict1 = dict()
+    dict1 = list()
     room_list = Room.objects.filter(available_from__lte = check_in, available_till__gte =  check_out, capacity__gte = capacity)
     print("vetgtegv")
     print(room_list)
@@ -129,7 +129,7 @@ def check_availability(book_date, check_in, check_out, capacity):
                     #first_room = list()
                     #first_room.append(room.room_number)
                     #global dict1
-                    dict1[room.category] = room.room_number
+                    dict1.append(room.category)
             
                     '''print("jvcd")
                     print(dict1) 
@@ -174,17 +174,17 @@ def booking(request):
             book_till_time = request.POST['book_till_time']
             global capacity
             capacity = request.POST['capacity']
-            global converted_book_from_date
-            converted_book_from_date = convert_to_date(book_from_date)
-            global converted_book_from_time
-            converted_book_from_time = convert_to_time(book_from_time)
-            global converted_book_till_time
-            converted_book_till_time = convert_to_time(book_till_time)
-            to_let = dict()
+            global book_date
+            book_date = convert_to_date(book_from_date)
+            global check_in
+            check_in = convert_to_time(book_from_time)
+            global check_out
+            check_out = convert_to_time(book_till_time)
+            to_let = list()
             #to_let = check_availability(converted_book_from_date, converted_book_from_time, converted_book_till_time, now, capacity)
-            to_let = check_availability(converted_book_from_date, converted_book_from_time, converted_book_till_time, capacity)
-            if to_let != {}:
-                response = to_let.keys()
+            to_let = check_availability()
+            if to_let != []:
+                response = to_let
                 #return HttpResponse(to_let.keys())
                 '''response = 'Blogs:'
                 for blog in to_let.keys():
@@ -201,9 +201,26 @@ def booking(request):
    
 @login_required(login_url="/hotel/signin/") 
 def yac(request):
-    time_slot = Booking(customer_name = username, book_from_date = converted_book_from_date, book_from_time = converted_book_from_time, book_till_time = converted_book_till_time, room_number = dict1['YAC'], category = 'YAC', capacity = capacity)
-    time_slot.save()
-    return HttpResponse("Booked")
+    global dict1
+    dict1 = list()
+    room_list = Room.objects.filter(available_from__lte = check_in, available_till__gte =  check_out, capacity__gte = capacity, category = 'YAC')
+    print("vetgtegv")
+    print(room_list)
+    print("tgevd")
+    #global now
+    for room in room_list:
+        max_book = now + datetime.timedelta(days=room.advance)
+        if(book_date <= max_book.date()):
+            added_check_out = check_out.replace(hour=(check_out.hour+1) % 24)
+            subtracted_check_in = check_in.replace(hour=(check_in.hour-1) % 24)
+            #print(added_check_out)
+            #This logic works for a particular room
+            taken = Booking.objects.filter(Q(Q(book_from_time__lt = added_check_out) | Q(book_till_time__gt = subtracted_check_in)) & Q(room_number = room.room_number) & Q(book_from_date = book_date))
+            if not taken:
+                time_slot = Booking(customer_name = username, book_from_date = book_date, book_from_time = check_in, book_till_time = check_out, room_number = room.room_number, category = 'YAC', capacity = capacity)
+                time_slot.save()
+                return HttpResponse("Booked")
+    return HttpResponse("Not available")
     '''
     if request.method == 'POST':
         time_slot = Booking(customer_name = username, book_from_date = converted_book_from_date, book_from_time = converted_book_from_time, book_till_time = converted_book_till_time, room_number = dict1['YAC'], category = 'YAC', capacity = capacity)
@@ -213,9 +230,30 @@ def yac(request):
     
 @login_required(login_url="/hotel/signin/")
 def nac(request):
-    time_slot = Booking(customer_name = username, book_from_date = converted_book_from_date, book_from_time = converted_book_from_time, book_till_time = converted_book_till_time, room_number = dict1['NAC'], category = 'NAC', capacity = capacity)
+    global dict1
+    dict1 = list()
+    room_list = Room.objects.filter(available_from__lte = check_in, available_till__gte =  check_out, capacity__gte = capacity, category = 'NAC')
+    print("vetgtegv")
+    print(room_list)
+    print("tgevd")
+    #global now
+    for room in room_list:
+        max_book = now + datetime.timedelta(days=room.advance)
+        if(book_date <= max_book.date()):
+            added_check_out = check_out.replace(hour=(check_out.hour+1) % 24)
+            subtracted_check_in = check_in.replace(hour=(check_in.hour-1) % 24)
+            #print(added_check_out)
+            #This logic works for a particular room
+            taken = Booking.objects.filter(Q(Q(book_from_time__lt = added_check_out) | Q(book_till_time__gt = subtracted_check_in)) & Q(room_number = room.room_number) & Q(book_from_date = book_date))
+            if not taken:
+                time_slot = Booking(customer_name = username, book_from_date = book_date, book_from_time = check_in, book_till_time = check_out, room_number = room.room_number, category = 'NAC', capacity = capacity)
+                time_slot.save()
+                return HttpResponse("Booked")
+    return HttpResponse("Not available")
+    
+    '''time_slot = Booking(customer_name = username, book_from_date = converted_book_from_date, book_from_time = converted_book_from_time, book_till_time = converted_book_till_time, room_number = dict1['NAC'], category = 'NAC', capacity = capacity)
     time_slot.save()
-    return HttpResponse("Booked")
+    return HttpResponse("Booked")'''
     '''
     if request.method == 'POST':
         time_slot = Booking(customer_name = username, book_from_date = converted_book_from_date, book_from_time = converted_book_from_time, book_till_time = converted_book_till_time, room_number = dict1['NAC'], category = 'NAC', capacity = capacity)
@@ -225,9 +263,30 @@ def nac(request):
     
 @login_required(login_url="/hotel/signin/")
 def deluxe(request):
-    time_slot = Booking(customer_name = username, book_from_date = converted_book_from_date, book_from_time = converted_book_from_time, book_till_time = converted_book_till_time, room_number = dict1['DEL'], category = 'DEL', capacity = capacity)
+    global dict1
+    dict1 = list()
+    room_list = Room.objects.filter(available_from__lte = check_in, available_till__gte =  check_out, capacity__gte = capacity, category = 'DEL')
+    print("vetgtegv")
+    print(room_list)
+    print("tgevd")
+    #global now
+    for room in room_list:
+        max_book = now + datetime.timedelta(days=room.advance)
+        if(book_date <= max_book.date()):
+            added_check_out = check_out.replace(hour=(check_out.hour+1) % 24)
+            subtracted_check_in = check_in.replace(hour=(check_in.hour-1) % 24)
+            #print(added_check_out)
+            #This logic works for a particular room
+            taken = Booking.objects.filter(Q(Q(book_from_time__lt = added_check_out) | Q(book_till_time__gt = subtracted_check_in)) & Q(room_number = room.room_number) & Q(book_from_date = book_date))
+            if not taken:
+                time_slot = Booking(customer_name = username, book_from_date = book_date, book_from_time = check_in, book_till_time = check_out, room_number = room.room_number, category = 'DEL', capacity = capacity)
+                time_slot.save()
+                return HttpResponse("Booked")
+    return HttpResponse("Not available")
+    
+    '''time_slot = Booking(customer_name = username, book_from_date = converted_book_from_date, book_from_time = converted_book_from_time, book_till_time = converted_book_till_time, room_number = dict1['DEL'], category = 'DEL', capacity = capacity)
     time_slot.save()
-    return HttpResponse("Booked")
+    return HttpResponse("Booked")'''
     '''
     if request.method == 'POST':
         time_slot = Booking(customer_name = username, book_from_date = converted_book_from_date, book_from_time = converted_book_from_time, book_till_time = converted_book_till_time, room_number = dict1['DEL'], category = 'DEL', capacity = capacity)
@@ -237,9 +296,30 @@ def deluxe(request):
     
 @login_required(login_url="/hotel/signin/")
 def king(request):
-    time_slot = Booking(customer_name = username, book_from_date = converted_book_from_date, book_from_time = converted_book_from_time, book_till_time = converted_book_till_time, room_number = dict1['KIN'], category = 'KIN', capacity = capacity)
+    global dict1
+    dict1 = list()
+    room_list = Room.objects.filter(available_from__lte = check_in, available_till__gte =  check_out, capacity__gte = capacity, category = 'KIN')
+    print("vetgtegv")
+    print(room_list)
+    print("tgevd")
+    #global now
+    for room in room_list:
+        max_book = now + datetime.timedelta(days=room.advance)
+        if(book_date <= max_book.date()):
+            added_check_out = check_out.replace(hour=(check_out.hour+1) % 24)
+            subtracted_check_in = check_in.replace(hour=(check_in.hour-1) % 24)
+            #print(added_check_out)
+            #This logic works for a particular room
+            taken = Booking.objects.filter(Q(Q(book_from_time__lt = added_check_out) | Q(book_till_time__gt = subtracted_check_in)) & Q(room_number = room.room_number) & Q(book_from_date = book_date))
+            if not taken:
+                time_slot = Booking(customer_name = username, book_from_date = book_date, book_from_time = check_in, book_till_time = check_out, room_number = room.room_number, category = 'KIN', capacity = capacity)
+                time_slot.save()
+                return HttpResponse("Booked")
+    return HttpResponse("Not available")
+    
+    '''time_slot = Booking(customer_name = username, book_from_date = converted_book_from_date, book_from_time = converted_book_from_time, book_till_time = converted_book_till_time, room_number = dict1['KIN'], category = 'KIN', capacity = capacity)
     time_slot.save()
-    return HttpResponse("Booked")
+    return HttpResponse("Booked")'''
     '''
     if request.method == 'POST':
         time_slot = Booking(customer_name = username, book_from_date = converted_book_from_date, book_from_time = converted_book_from_time, book_till_time = converted_book_till_time, room_number = dict1['KIN'], category = 'KIN', capacity = capacity)
@@ -249,9 +329,30 @@ def king(request):
     
 @login_required(login_url="/hotel/signin/")
 def queen(request):
-    time_slot = Booking(customer_name = username, book_from_date = converted_book_from_date, book_from_time = converted_book_from_time, book_till_time = converted_book_till_time, room_number = dict1['QUE'], category = 'QUE', capacity = capacity)
+    global dict1
+    dict1 = list()
+    room_list = Room.objects.filter(available_from__lte = check_in, available_till__gte =  check_out, capacity__gte = capacity, category = 'QUE')
+    print("vetgtegv")
+    print(room_list)
+    print("tgevd")
+    #global now
+    for room in room_list:
+        max_book = now + datetime.timedelta(days=room.advance)
+        if(book_date <= max_book.date()):
+            added_check_out = check_out.replace(hour=(check_out.hour+1) % 24)
+            subtracted_check_in = check_in.replace(hour=(check_in.hour-1) % 24)
+            #print(added_check_out)
+            #This logic works for a particular room
+            taken = Booking.objects.filter(Q(Q(book_from_time__lt = added_check_out) | Q(book_till_time__gt = subtracted_check_in)) & Q(room_number = room.room_number) & Q(book_from_date = book_date))
+            if not taken:
+                time_slot = Booking(customer_name = username, book_from_date = book_date, book_from_time = check_in, book_till_time = check_out, room_number = room.room_number, category = 'QUE', capacity = capacity)
+                time_slot.save()
+                return HttpResponse("Booked")
+    return HttpResponse("Not available")
+    
+    '''time_slot = Booking(customer_name = username, book_from_date = converted_book_from_date, book_from_time = converted_book_from_time, book_till_time = converted_book_till_time, room_number = dict1['QUE'], category = 'QUE', capacity = capacity)
     time_slot.save()
-    return HttpResponse("Booked")
+    return HttpResponse("Booked")'''
     
 @login_required(login_url="/hotel/signin/")
 def future(request, booking_id=None):
@@ -261,13 +362,12 @@ def future(request, booking_id=None):
             booking.delete()
         except:   
             return HttpResponse("This booking no longer exists.")
-    else:
-        global now
-        now = timezone.now()
+    global now
+    now = timezone.now()
 #fur_dat = now.replace(day=(now.day+1) % )
-        booking_objects = Booking.objects.filter(customer_name = username, book_from_date__gte = now.date())
-        context = {'future_bookings': booking_objects}
-        return render(request, 'future_bookings.html', context)
+    booking_objects = Booking.objects.filter(customer_name = username, book_from_date__gte = now.date())
+    context = {'future_bookings': booking_objects}
+    return render(request, 'future_bookings.html', context)
     
 @login_required(login_url="/hotel/signin/")
 def all_bookings(request):
