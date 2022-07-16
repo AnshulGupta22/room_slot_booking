@@ -17,7 +17,7 @@ urlpatterns = [
     path('queen/', views.queen, name='queen'),
     path('future/', views.future, name='future'),
     path('future/<int:booking_id>/', views.future, name='delete_booking'),
-    path('all_bookings/', views.all_bookings, name='all_bookings'),
+    #path('all_bookings/', views.all_bookings, name='all_bookings'),
     #path('logout/',LogoutView.as_view(next_page='dashboard'),name='logout'),
     #path('',views.indexView,name='home'),
     #path('login/',LoginView.as_view(),name='login_url'),

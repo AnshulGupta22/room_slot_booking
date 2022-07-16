@@ -9,6 +9,7 @@ from . models import Customer, Room, Booking
 import datetime
 from django.db.models import Q
 from django.utils import timezone
+#from django.core.cache import cache
 
 # Create your views here.
 
@@ -219,13 +220,13 @@ def yac(request):
             if not taken:
                 time_slot = Booking(customer_name = username, book_from_date = book_date, book_from_time = check_in, book_till_time = check_out, room_number = room.room_number, category = 'YAC', capacity = capacity)
                 time_slot.save()
-                return HttpResponse("Booked")
+                return render(request, 'booked.html')
     return HttpResponse("Not available")
     '''
     if request.method == 'POST':
         time_slot = Booking(customer_name = username, book_from_date = converted_book_from_date, book_from_time = converted_book_from_time, book_till_time = converted_book_till_time, room_number = dict1['YAC'], category = 'YAC', capacity = capacity)
         time_slot.save()
-        return HttpResponse("Booked")
+        return render(request, 'booked.html')
     return render(request, 'yac.html')'''
     
 @login_required(login_url="/hotel/signin/")
@@ -248,17 +249,17 @@ def nac(request):
             if not taken:
                 time_slot = Booking(customer_name = username, book_from_date = book_date, book_from_time = check_in, book_till_time = check_out, room_number = room.room_number, category = 'NAC', capacity = capacity)
                 time_slot.save()
-                return HttpResponse("Booked")
+                return render(request, 'booked.html')
     return HttpResponse("Not available")
     
     '''time_slot = Booking(customer_name = username, book_from_date = converted_book_from_date, book_from_time = converted_book_from_time, book_till_time = converted_book_till_time, room_number = dict1['NAC'], category = 'NAC', capacity = capacity)
     time_slot.save()
-    return HttpResponse("Booked")'''
+    return render(request, 'booked.html')'''
     '''
     if request.method == 'POST':
         time_slot = Booking(customer_name = username, book_from_date = converted_book_from_date, book_from_time = converted_book_from_time, book_till_time = converted_book_till_time, room_number = dict1['NAC'], category = 'NAC', capacity = capacity)
         time_slot.save()
-        return HttpResponse("Booked")
+        return render(request, 'booked.html')
     return render(request, 'nac.html')'''
     
 @login_required(login_url="/hotel/signin/")
@@ -281,17 +282,17 @@ def deluxe(request):
             if not taken:
                 time_slot = Booking(customer_name = username, book_from_date = book_date, book_from_time = check_in, book_till_time = check_out, room_number = room.room_number, category = 'DEL', capacity = capacity)
                 time_slot.save()
-                return HttpResponse("Booked")
+                return render(request, 'booked.html')
     return HttpResponse("Not available")
     
     '''time_slot = Booking(customer_name = username, book_from_date = converted_book_from_date, book_from_time = converted_book_from_time, book_till_time = converted_book_till_time, room_number = dict1['DEL'], category = 'DEL', capacity = capacity)
     time_slot.save()
-    return HttpResponse("Booked")'''
+    return render(request, 'booked.html')'''
     '''
     if request.method == 'POST':
         time_slot = Booking(customer_name = username, book_from_date = converted_book_from_date, book_from_time = converted_book_from_time, book_till_time = converted_book_till_time, room_number = dict1['DEL'], category = 'DEL', capacity = capacity)
         time_slot.save()
-        return HttpResponse("Booked")
+        return render(request, 'booked.html')
     return render(request, 'deluxe.html')'''
     
 @login_required(login_url="/hotel/signin/")
@@ -314,17 +315,17 @@ def king(request):
             if not taken:
                 time_slot = Booking(customer_name = username, book_from_date = book_date, book_from_time = check_in, book_till_time = check_out, room_number = room.room_number, category = 'KIN', capacity = capacity)
                 time_slot.save()
-                return HttpResponse("Booked")
+                return render(request,'booked.html')
     return HttpResponse("Not available")
     
     '''time_slot = Booking(customer_name = username, book_from_date = converted_book_from_date, book_from_time = converted_book_from_time, book_till_time = converted_book_till_time, room_number = dict1['KIN'], category = 'KIN', capacity = capacity)
     time_slot.save()
-    return HttpResponse("Booked")'''
+    return render(request, 'booked.html')'''
     '''
     if request.method == 'POST':
         time_slot = Booking(customer_name = username, book_from_date = converted_book_from_date, book_from_time = converted_book_from_time, book_till_time = converted_book_till_time, room_number = dict1['KIN'], category = 'KIN', capacity = capacity)
         time_slot.save()
-        return HttpResponse("Booked")
+        return render(request, 'booked.html')
     return render(request, 'king.html')'''
     
 @login_required(login_url="/hotel/signin/")
@@ -347,15 +348,16 @@ def queen(request):
             if not taken:
                 time_slot = Booking(customer_name = username, book_from_date = book_date, book_from_time = check_in, book_till_time = check_out, room_number = room.room_number, category = 'QUE', capacity = capacity)
                 time_slot.save()
-                return HttpResponse("Booked")
+                return render(request, 'booked.html')
     return HttpResponse("Not available")
     
     '''time_slot = Booking(customer_name = username, book_from_date = converted_book_from_date, book_from_time = converted_book_from_time, book_till_time = converted_book_till_time, room_number = dict1['QUE'], category = 'QUE', capacity = capacity)
     time_slot.save()
-    return HttpResponse("Booked")'''
+    return render(request, 'booked.html')'''
     
 @login_required(login_url="/hotel/signin/")
 def future(request, booking_id=None):
+    #cache.clear()
     if booking_id:
         try:
             booking = Booking.objects.get(id=booking_id)
@@ -366,23 +368,26 @@ def future(request, booking_id=None):
     now = timezone.now()
 #fur_dat = now.replace(day=(now.day+1) % )
     booking_objects = Booking.objects.filter(customer_name = username, book_from_date__gte = now.date())
-    context = {'future_bookings': booking_objects}
+    all_booking_objects = Booking.objects.filter(customer_name = username, book_from_date__lt = now.date())
+    #context = {'all_bookings': all_booking_objects}
+    context = {'future_bookings': booking_objects, 'all_bookings': all_booking_objects}
     return render(request, 'future_bookings.html', context)
-    
+'''
 @login_required(login_url="/hotel/signin/")
 def all_bookings(request):
     all_booking_objects = Booking.objects.filter(customer_name = username)
     context = {'all_bookings': all_booking_objects}
-    return render(request, 'all_bookings.html', context)
-    '''
+    return render(request, 'all_bookings.html', context)'''
+'''    
     if request.method == 'POST':
         time_slot = Booking(customer_name = username, book_from_date = converted_book_from_date, book_from_time = converted_book_from_time, book_till_time = converted_book_till_time, room_number = dict1['QUE'], category = 'QUE', capacity = capacity)
         time_slot.save()
-        return HttpResponse("Booked")
-    return render(request, 'queen.html')'''
+        return render(request, 'booked.html')
+    return render(request, 'queen.html')
 #print(future_bookings)
     #future_bookings = Booking.objects.get(customer_name = username, book_from_date__gte = now.date())
-    '''for fields in future_bookings:
+    
+    for fields in future_bookings:
         print(fields.customer_name)
         print(fields.book_from_date)
         print(fields.book_from_time)

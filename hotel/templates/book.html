@@ -2,11 +2,10 @@
 	<body>
 		<form action="" method="POST">
 			{% csrf_token %}
-			<p> <a href="{% url 'hotel:future' %}"> Future Bookings </a> </p>
-			<p> <a href="{% url 'hotel:all_bookings' %}"> All Bookings </a> </p>
+			<p> <a href="{% url 'hotel:future' %}"> Your Bookings </a> </p>
 			{{ form.as_p }}
 			<input type="submit" value="RESERVE" />
-			<p> <a href="{% url 'hotel:signin' %}"> Logout </a> </p>
+			<p> <a href="{% url 'hotel:logout' %}"> Logout </a> </p>
 		</form>
 	</body>
 </html>

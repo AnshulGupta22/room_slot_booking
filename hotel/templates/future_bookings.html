@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html>
 	<body>
-	{% if future_bookings %}
+	<p> <a href="{% url 'hotel:book' %}"> Back To Reservation Page </a> </p>
+	{% if future_bookings or all_bookings %}
 		{% for future_booking in future_bookings %}
 		    <p><b>Booking Date</b> - {{ future_booking.book_from_date }}</p>
 		    <p><b>Booking From Time</b> - {{ future_booking.book_from_time }}</p>
@@ -11,10 +12,20 @@
 		    <a href='/hotel/future/{{future_booking.id}}'> Delete </a>
 		    <hr>
 		{% endfor %}
+
+		{% for all_booking in all_bookings %}
+		    <p><b>Booking Date</b> - {{ all_booking.book_from_date }}</p>
+		    <p><b>Booking From Time</b> - {{ all_booking.book_from_time }}</p>
+		    <p><b>Booking Till Time</b> - {{ all_booking.book_till_time }}</p>
+		    <p><b>Category</b> - {{ all_booking.category }}</p>
+		    <p><b>Capacity</b> - {{ all_booking.capacity }}</p>
+		    <!--<a href='/hotel/future/{{all_booking.id}}'> Delete </a>-->
+		    <hr>
+		{% endfor %}
 	{% else %}
-		<p> No Future Bookings. </p>
+		<p> No Bookings. </p>
 	{% endif %}
-	<p> <a href="{% url 'hotel:signin' %}"> Logout </a> </p>
+	<p> <a href="{% url 'hotel:logout' %}"> Logout </a> </p>
 	</body>
 </html>
 
