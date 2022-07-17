@@ -1,77 +1,71 @@
 from django.shortcuts import render, redirect
-#from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
-from hotel.forms import CustomerForm, SigninForm, BookingForm
-from django.http import HttpResponse
-from . models import Customer, Room, Booking
 import datetime
 from django.db.models import Q
 from django.utils import timezone
-#from django.core.cache import cache
+from django.http import HttpResponse
+
+from django.contrib.auth.models import User
+from hotel.forms import CustomerForm, SignInForm, BookingForm
+from . models import Customer, Room, Booking
 
 # Create your views here.
 
-#username = ''
 username = None
-#registered = 0
-#now = datetime.datetime(2015, 10, 29, 23, 55, 59, 342380)
 now = None
 book_date = None
 check_in = None
 check_out = None
 capacity = None
-'''
-converted_book_from_date = datetime.date(1996, 12, 11)
-converted_book_from_time = datetime.time(13, 24, 56)
-converted_book_till_time = datetime.time(13, 24, 56)
-'''
-dict1 = None
+available_categories = None
 
-# Function to convert string to date
+"""Function to convert string to date."""
 def convert_to_date(date_time):
     format = '%Y-%m-%d'
     datetime_str = datetime.datetime.strptime(date_time, format).date()
     return datetime_str
 
-# Function to convert string to time
+"""Function to convert string to time."""
 def convert_to_time(date_time):
     format = '%H:%M'
     datetime_str = datetime.datetime.strptime(date_time, format).time()
     return datetime_str
-    
+
+"""Function to go to home page."""
 def home(request):
     return render(request,'home.html')
     
+"""Function for sign up."""
 def sign_up(request):
     if request.method == 'POST':
         form = CustomerForm(request.POST)
-        if form.is_valid() and request.POST['password'] == request.POST['confirm_password']:
+        if (form.is_valid() and 
+            request.POST['password'] == request.POST['confirm_password']):
             try:
-                user = User.objects.create_user(request.POST['desired_username'],  request.POST['email'], request.POST['password'])
+                user = User.objects.create_user(
+                    request.POST['desired_username'], 
+                    request.POST['email'], request.POST['password']
+                    )
                 user.first_name = request.POST['first_name']
                 user.last_name = request.POST['last_name']
                 user.save()
-                global username
-                username = request.POST['desired_username']
-                #global registered
-                #registered = 1
-                login(request, user)
-                return redirect('../book/')
             except:
        	        return HttpResponse("Username already exist")
+       	    global username
+            username = request.POST['desired_username']
+            login(request, user)
+            return redirect('../book/')
         else:
             context = {'form': form}
             return render(request, 'signup.html', context)
     context = {'form': CustomerForm()}
     return render(request, 'signup.html', context)
 
+"""Function for sign in."""
 def sign_in(request):
-    #global registered
-    #if registered == 0:
     if request.method == 'POST':
-        form = SigninForm(request.POST)
+        form = SignInForm(request.POST)
         if form.is_valid():
             global username
             username = request.POST['username']
@@ -85,91 +79,57 @@ def sign_in(request):
         else:
             context = {'form': form}
             return render(request, 'signin.html', context)
-    context = {'form': SigninForm()}
+    context = {'form': SignInForm()}
     return render(request, 'signin.html', context)
-    #else:
-    #    return redirect('../book/')
 
+"""Function for log out."""
 def logout_view(request):
     logout(request)
-    # Redirect to a success page.
-    #return render(request,'logout.html')
     return redirect('../signin/')
-    
-#def check_availability(book_date, check_in, check_out, now, capacity):
+
+"""Function that returns the list of available categories."""
 def check_availability():
-    global dict1
-    dict1 = list()
-    room_list = Room.objects.filter(available_from__lte = check_in, available_till__gte =  check_out, capacity__gte = capacity)
-    print("vetgtegv")
-    print(room_list)
-    print("tgevd")
-    #global now
+    global available_categories
+    available_categories = list()
+    room_list = Room.objects.filter(
+        available_from__lte=check_in, 
+        available_till__gte=check_out, 
+        capacity__gte=capacity
+        )
     for room in room_list:
+        # Calculating the maximum date to which a room can be
+        # booked in advance.
         max_book = now + datetime.timedelta(days=room.advance)
         if(book_date <= max_book.date()):
-            added_check_out = check_out.replace(hour=(check_out.hour+1) % 24)
-            subtracted_check_in = check_in.replace(hour=(check_in.hour-1) % 24)
-            #print(added_check_out)
-            #This logic works for a particular room
-            taken = Booking.objects.filter(Q(Q(book_from_time__lt = added_check_out) | Q(book_till_time__gt = subtracted_check_in)) & Q(room_number = room.room_number) & Q(book_from_date = book_date))
-            #taken = Customer.objects.filter((Q(book_from_time__lt = check_out) | Q(book_till_time__gt = check_in)), room_number = room.room_number, book_from_date = book_date)
-            #taken = Customer.objects.filter(book_from_date = book_date, book_from_time__lt = check_out, book_till_time__gt = check_in) 
-            '''print(room)
-            print(taken)
-            print(not taken)'''
-            print(taken)
+            # To ensure no rooms are booked within a gap of 1 hour
+            # after checkout.
+            added_check_out = check_out.replace(
+                hour = (check_out.hour + 1) % 24
+                )
+            # To ensure no rooms are booked within a gap of 1 hour
+            # before checkin.
+            subtracted_check_in = check_in.replace(
+                hour = (check_in.hour- 1 ) % 24
+            )
+            # Checking if the room is already booked.
+            taken = Booking.objects.filter(Q(Q(book_from_time__lt=added_check_out)
+                                           | Q(book_till_time__gt=subtracted_check_in)) 
+                                           & Q(room_number=room.room_number) 
+                                           & Q(book_from_date=book_date))
             if not taken:
-                #all_rooms = list()
-                #global dict1
-                print("bhvla")
-                print(taken)
-                print(room.category)
-                print(dict1)
-                if room.category not in dict1:
-                    #first_room = list()
-                    #first_room.append(room.room_number)
-                    #global dict1
-                    dict1.append(room.category)
-            
-                    '''print("jvcd")
-                    print(dict1) 
-                    print("xdvbh")'''     
-                '''else:
-                    all_rooms = dict1[room.category]
-                    all_rooms.append(room.room_number)
-                    #global dict1
-                    dict1[room.category] = all_rooms'''
-    '''print("vetgtegv")
-    print(dict1)
-    print("tyuuih")'''
-    return dict1
-'''        
-                #for num in all_rooms:
-                    properties = Room.objects.filter(room_number = num)
-                    cat = list()
-                    cat.append(properties.category)
-                time_slot = Customer(user = username, book_from_date = book_date, book_from_time = check_in, book_till_time = check_out, room_number = booked_number, category = category, capacity = capacity)
-                time_slot.save()
-                return True
-    return False'''
-    
+                if room.category not in available_categories:
+                    # Appending available category.
+                    available_categories.append(room.category)
+    return available_categories
+
+"""Function to return the available categories."""
 @login_required(login_url="/hotel/signin/")
 def booking(request):
     if request.method == 'POST':
         form = BookingForm(request.POST)
         if form.is_valid():
             global now
-            #now = datetime.datetime.now()
             now = timezone.now()
-            
-            print("gteg")
-            print(now)
-            #print(rgv)
-            print("vnhhhf")
-            #nextD = now + datetime.timedelta(days=5)
-            #print(nextD)
-            #print(now+1)
             book_from_date = request.POST['book_from_date']
             book_from_time = request.POST['book_from_time']
             book_till_time = request.POST['book_till_time']
@@ -182,15 +142,9 @@ def booking(request):
             global check_out
             check_out = convert_to_time(book_till_time)
             to_let = list()
-            #to_let = check_availability(converted_book_from_date, converted_book_from_time, converted_book_till_time, now, capacity)
             to_let = check_availability()
-            if to_let != []:
+            if to_let:
                 response = to_let
-                #return HttpResponse(to_let.keys())
-                '''response = 'Blogs:'
-                for blog in to_let.keys():
-                    response += '<br \> {0}'.format(blog)
-                #return HttpResponse(response)'''
                 context = {'categories': response}
                 return render(request, 'categories.html', context)
             return HttpResponse("Not Available")
@@ -200,202 +154,229 @@ def booking(request):
     context = {'form': BookingForm()}
     return render(request, 'book.html', context)
    
-@login_required(login_url="/hotel/signin/") 
+"""Function to book room of this category if available."""
+@login_required(login_url="/hotel/signin/")
 def yac(request):
-    global dict1
-    dict1 = list()
-    room_list = Room.objects.filter(available_from__lte = check_in, available_till__gte =  check_out, capacity__gte = capacity, category = 'YAC')
-    print("vetgtegv")
-    print(room_list)
-    print("tgevd")
-    #global now
+    # List of rooms for the given category.
+    room_list = Room.objects.filter(
+        available_from__lte = check_in, 
+        available_till__gte =  check_out, 
+        capacity__gte = capacity, category = 'YAC'
+        )
     for room in room_list:
         max_book = now + datetime.timedelta(days=room.advance)
         if(book_date <= max_book.date()):
-            added_check_out = check_out.replace(hour=(check_out.hour+1) % 24)
-            subtracted_check_in = check_in.replace(hour=(check_in.hour-1) % 24)
-            #print(added_check_out)
-            #This logic works for a particular room
-            taken = Booking.objects.filter(Q(Q(book_from_time__lt = added_check_out) | Q(book_till_time__gt = subtracted_check_in)) & Q(room_number = room.room_number) & Q(book_from_date = book_date))
+            # To ensure no rooms are booked within a gap of 1 hour
+            # after checkout.
+            added_check_out = check_out.replace(    
+                hour=(check_out.hour + 1) % 24
+                )
+            # To ensure no rooms are booked within a gap of 1 hour
+            # before checkin.
+            subtracted_check_in = check_in.replace(
+                hour=(check_in.hour - 1) % 24
+                )
+            taken = Booking.objects.filter(
+                Q(Q(book_from_time__lt = added_check_out) 
+                | Q(book_till_time__gt = subtracted_check_in)) 
+                & Q(room_number = room.room_number) 
+                & Q(book_from_date = book_date))
             if not taken:
-                time_slot = Booking(customer_name = username, book_from_date = book_date, book_from_time = check_in, book_till_time = check_out, room_number = room.room_number, category = 'YAC', capacity = capacity)
+                time_slot = Booking(
+                    customer_name=username, 
+                    book_from_date=book_date, 
+                    book_from_time=check_in, 
+                    book_till_time=check_out, 
+                    room_number=room.room_number, 
+                    category='YAC', capacity=capacity
+                    )
                 time_slot.save()
                 return render(request, 'booked.html')
     return HttpResponse("Not available")
-    '''
-    if request.method == 'POST':
-        time_slot = Booking(customer_name = username, book_from_date = converted_book_from_date, book_from_time = converted_book_from_time, book_till_time = converted_book_till_time, room_number = dict1['YAC'], category = 'YAC', capacity = capacity)
-        time_slot.save()
-        return render(request, 'booked.html')
-    return render(request, 'yac.html')'''
     
+"""Function to book room of this category if available."""
 @login_required(login_url="/hotel/signin/")
 def nac(request):
-    global dict1
-    dict1 = list()
-    room_list = Room.objects.filter(available_from__lte = check_in, available_till__gte =  check_out, capacity__gte = capacity, category = 'NAC')
-    print("vetgtegv")
-    print(room_list)
-    print("tgevd")
-    #global now
+    # List of rooms for the given category.
+    room_list = Room.objects.filter(
+        available_from__lte=check_in, 
+        available_till__gte=check_out, 
+        capacity__gte=capacity, category='NAC'
+        )
     for room in room_list:
         max_book = now + datetime.timedelta(days=room.advance)
         if(book_date <= max_book.date()):
-            added_check_out = check_out.replace(hour=(check_out.hour+1) % 24)
-            subtracted_check_in = check_in.replace(hour=(check_in.hour-1) % 24)
-            #print(added_check_out)
-            #This logic works for a particular room
-            taken = Booking.objects.filter(Q(Q(book_from_time__lt = added_check_out) | Q(book_till_time__gt = subtracted_check_in)) & Q(room_number = room.room_number) & Q(book_from_date = book_date))
+            # To ensure no rooms are booked within a gap of 1 hour
+            # after checkout.
+            added_check_out = check_out.replace(
+                hour=(check_out.hour + 1) % 24
+                )
+            # To ensure no rooms are booked within a gap of 1 hour
+            # before checkin.
+            subtracted_check_in = check_in.replace(
+                hour=(check_in.hour- 1 ) % 24
+                )
+            taken = Booking.objects.filter(
+                Q(Q(book_from_time__lt=added_check_out) 
+                | Q(book_till_time__gt=subtracted_check_in)) 
+                & Q(room_number=room.room_number) 
+                & Q(book_from_date=book_date))
             if not taken:
-                time_slot = Booking(customer_name = username, book_from_date = book_date, book_from_time = check_in, book_till_time = check_out, room_number = room.room_number, category = 'NAC', capacity = capacity)
+                time_slot = Booking(
+                    customer_name=username, 
+                    book_from_date=book_date, 
+                    book_from_time=check_in, 
+                    book_till_time=check_out, 
+                    room_number=room.room_number, 
+                    category='NAC', capacity=capacity
+                    )
                 time_slot.save()
                 return render(request, 'booked.html')
     return HttpResponse("Not available")
     
-    '''time_slot = Booking(customer_name = username, book_from_date = converted_book_from_date, book_from_time = converted_book_from_time, book_till_time = converted_book_till_time, room_number = dict1['NAC'], category = 'NAC', capacity = capacity)
-    time_slot.save()
-    return render(request, 'booked.html')'''
-    '''
-    if request.method == 'POST':
-        time_slot = Booking(customer_name = username, book_from_date = converted_book_from_date, book_from_time = converted_book_from_time, book_till_time = converted_book_till_time, room_number = dict1['NAC'], category = 'NAC', capacity = capacity)
-        time_slot.save()
-        return render(request, 'booked.html')
-    return render(request, 'nac.html')'''
-    
+"""Function to book room of this category if available."""
 @login_required(login_url="/hotel/signin/")
 def deluxe(request):
-    global dict1
-    dict1 = list()
-    room_list = Room.objects.filter(available_from__lte = check_in, available_till__gte =  check_out, capacity__gte = capacity, category = 'DEL')
-    print("vetgtegv")
-    print(room_list)
-    print("tgevd")
-    #global now
+    # List of rooms for the given category
+    room_list = Room.objects.filter(
+        available_from__lte=check_in, 
+        available_till__gte=check_out, 
+        capacity__gte=capacity, category = 'DEL'
+        )
     for room in room_list:
         max_book = now + datetime.timedelta(days=room.advance)
         if(book_date <= max_book.date()):
-            added_check_out = check_out.replace(hour=(check_out.hour+1) % 24)
-            subtracted_check_in = check_in.replace(hour=(check_in.hour-1) % 24)
-            #print(added_check_out)
-            #This logic works for a particular room
-            taken = Booking.objects.filter(Q(Q(book_from_time__lt = added_check_out) | Q(book_till_time__gt = subtracted_check_in)) & Q(room_number = room.room_number) & Q(book_from_date = book_date))
+            # To ensure no rooms are booked within a gap of 1 hour
+            # after checkout.
+            added_check_out=check_out.replace(
+                hour=(check_out.hour + 1) % 24
+                )
+            # To ensure no rooms are booked within a gap of 1 hour
+            # before checkin.
+            subtracted_check_in = check_in.replace(
+                hour=(check_in.hour - 1) % 24
+                )
+            taken = Booking.objects.filter(
+                Q(Q(book_from_time__lt=added_check_out) 
+                | Q(book_till_time__gt=subtracted_check_in)) 
+                & Q(room_number=room.room_number) 
+                & Q(book_from_date=book_date))
             if not taken:
-                time_slot = Booking(customer_name = username, book_from_date = book_date, book_from_time = check_in, book_till_time = check_out, room_number = room.room_number, category = 'DEL', capacity = capacity)
+                time_slot = Booking(
+                    customer_name=username, 
+                    book_from_date=book_date, 
+                    book_from_time=check_in, 
+                    book_till_time=check_out, 
+                    room_number=room.room_number, 
+                    category='DEL', capacity=capacity
+                    )
                 time_slot.save()
                 return render(request, 'booked.html')
     return HttpResponse("Not available")
     
-    '''time_slot = Booking(customer_name = username, book_from_date = converted_book_from_date, book_from_time = converted_book_from_time, book_till_time = converted_book_till_time, room_number = dict1['DEL'], category = 'DEL', capacity = capacity)
-    time_slot.save()
-    return render(request, 'booked.html')'''
-    '''
-    if request.method == 'POST':
-        time_slot = Booking(customer_name = username, book_from_date = converted_book_from_date, book_from_time = converted_book_from_time, book_till_time = converted_book_till_time, room_number = dict1['DEL'], category = 'DEL', capacity = capacity)
-        time_slot.save()
-        return render(request, 'booked.html')
-    return render(request, 'deluxe.html')'''
-    
-@login_required(login_url="/hotel/signin/")
+"""Function to book room of this category if available."""
+@login_required(login_url = "/hotel/signin/")
 def king(request):
-    global dict1
-    dict1 = list()
-    room_list = Room.objects.filter(available_from__lte = check_in, available_till__gte =  check_out, capacity__gte = capacity, category = 'KIN')
-    print("vetgtegv")
-    print(room_list)
-    print("tgevd")
-    #global now
+    # List of rooms for the given category.
+    room_list = Room.objects.filter(
+        available_from__lte=check_in, 
+        available_till__gte= check_out, 
+        capacity__gte=capacity, category='KIN'
+        )
     for room in room_list:
         max_book = now + datetime.timedelta(days=room.advance)
         if(book_date <= max_book.date()):
-            added_check_out = check_out.replace(hour=(check_out.hour+1) % 24)
-            subtracted_check_in = check_in.replace(hour=(check_in.hour-1) % 24)
-            #print(added_check_out)
-            #This logic works for a particular room
-            taken = Booking.objects.filter(Q(Q(book_from_time__lt = added_check_out) | Q(book_till_time__gt = subtracted_check_in)) & Q(room_number = room.room_number) & Q(book_from_date = book_date))
+            # To ensure no rooms are booked within a gap of 1 hour
+            # after checkout.
+            added_check_out = check_out.replace(
+                hour=(check_out.hour + 1) % 24
+                )
+            # To ensure no rooms are booked within a gap of 1 hour
+            # before checkin.
+            subtracted_check_in = check_in.replace(
+                hour=(check_in.hour - 1) % 24
+                )
+            taken = Booking.objects.filter(
+                Q(Q(book_from_time__lt=added_check_out) 
+                | Q(book_till_time__gt=subtracted_check_in)) 
+                & Q(room_number=room.room_number) 
+                & Q(book_from_date=book_date))
             if not taken:
-                time_slot = Booking(customer_name = username, book_from_date = book_date, book_from_time = check_in, book_till_time = check_out, room_number = room.room_number, category = 'KIN', capacity = capacity)
+                time_slot = Booking(
+                    customer_name=username, 
+                    book_from_date=book_date, 
+                    book_from_time=check_in, 
+                    book_till_time=check_out, 
+                    room_number=room.room_number, 
+                    category='KIN', capacity=capacity
+                    )
                 time_slot.save()
                 return render(request,'booked.html')
     return HttpResponse("Not available")
     
-    '''time_slot = Booking(customer_name = username, book_from_date = converted_book_from_date, book_from_time = converted_book_from_time, book_till_time = converted_book_till_time, room_number = dict1['KIN'], category = 'KIN', capacity = capacity)
-    time_slot.save()
-    return render(request, 'booked.html')'''
-    '''
-    if request.method == 'POST':
-        time_slot = Booking(customer_name = username, book_from_date = converted_book_from_date, book_from_time = converted_book_from_time, book_till_time = converted_book_till_time, room_number = dict1['KIN'], category = 'KIN', capacity = capacity)
-        time_slot.save()
-        return render(request, 'booked.html')
-    return render(request, 'king.html')'''
-    
+"""Function to book room of this category if available."""
 @login_required(login_url="/hotel/signin/")
 def queen(request):
-    global dict1
-    dict1 = list()
-    room_list = Room.objects.filter(available_from__lte = check_in, available_till__gte =  check_out, capacity__gte = capacity, category = 'QUE')
-    print("vetgtegv")
-    print(room_list)
-    print("tgevd")
-    #global now
+    # List of rooms for the given category
+    room_list = Room.objects.filter(
+        available_from__lte=check_in, 
+        available_till__gte=check_out, 
+        capacity__gte=capacity, category='QUE'
+        )
     for room in room_list:
         max_book = now + datetime.timedelta(days=room.advance)
         if(book_date <= max_book.date()):
-            added_check_out = check_out.replace(hour=(check_out.hour+1) % 24)
-            subtracted_check_in = check_in.replace(hour=(check_in.hour-1) % 24)
-            #print(added_check_out)
-            #This logic works for a particular room
-            taken = Booking.objects.filter(Q(Q(book_from_time__lt = added_check_out) | Q(book_till_time__gt = subtracted_check_in)) & Q(room_number = room.room_number) & Q(book_from_date = book_date))
+            # To ensure no rooms are booked within a gap of 1 hour
+            # after checkout.
+            added_check_out = check_out.replace(
+                hour = (check_out.hour + 1) % 24
+                )
+            # To ensure no rooms are booked within a gap of 1 hour
+            # before checkin.
+            subtracted_check_in = check_in.replace(
+                hour = (check_in.hour - 1 ) % 24
+                )
+            taken = Booking.objects.filter(
+                Q(Q(book_from_time__lt=added_check_out) 
+                | Q(book_till_time__gt=subtracted_check_in)) 
+                & Q(room_number=room.room_number) 
+                & Q(book_from_date=book_date))
             if not taken:
-                time_slot = Booking(customer_name = username, book_from_date = book_date, book_from_time = check_in, book_till_time = check_out, room_number = room.room_number, category = 'QUE', capacity = capacity)
+                time_slot = Booking(
+                    customer_name=username, 
+                    book_from_date=book_date, 
+                    book_from_time=check_in, 
+                    book_till_time=check_out, 
+                    room_number=room.room_number, 
+                    category='QUE', capacity=capacity
+                    )
                 time_slot.save()
                 return render(request, 'booked.html')
     return HttpResponse("Not available")
-    
-    '''time_slot = Booking(customer_name = username, book_from_date = converted_book_from_date, book_from_time = converted_book_from_time, book_till_time = converted_book_till_time, room_number = dict1['QUE'], category = 'QUE', capacity = capacity)
-    time_slot.save()
-    return render(request, 'booked.html')'''
-    
+
+"""Function to return all the bookings."""
 @login_required(login_url="/hotel/signin/")
-def future(request, booking_id=None):
-    #cache.clear()
+def all_bookings(request, booking_id=None):
     if booking_id:
         try:
-            booking = Booking.objects.get(id=booking_id)
-            booking.delete()
+            booking = Booking.objects.get(id=booking_id)    
         except:   
             return HttpResponse("This booking no longer exists.")
+        booking.delete()
     global now
     now = timezone.now()
-#fur_dat = now.replace(day=(now.day+1) % )
-    booking_objects = Booking.objects.filter(customer_name = username, book_from_date__gte = now.date())
-    all_booking_objects = Booking.objects.filter(customer_name = username, book_from_date__lt = now.date())
-    #context = {'all_bookings': all_booking_objects}
-    context = {'future_bookings': booking_objects, 'all_bookings': all_booking_objects}
-    return render(request, 'future_bookings.html', context)
-'''
-@login_required(login_url="/hotel/signin/")
-def all_bookings(request):
-    all_booking_objects = Booking.objects.filter(customer_name = username)
-    context = {'all_bookings': all_booking_objects}
-    return render(request, 'all_bookings.html', context)'''
-'''    
-    if request.method == 'POST':
-        time_slot = Booking(customer_name = username, book_from_date = converted_book_from_date, book_from_time = converted_book_from_time, book_till_time = converted_book_till_time, room_number = dict1['QUE'], category = 'QUE', capacity = capacity)
-        time_slot.save()
-        return render(request, 'booked.html')
-    return render(request, 'queen.html')
-#print(future_bookings)
-    #future_bookings = Booking.objects.get(customer_name = username, book_from_date__gte = now.date())
-    
-    for fields in future_bookings:
-        print(fields.customer_name)
-        print(fields.book_from_date)
-        print(fields.book_from_time)
-        print(fields.book_till_time)
-        print(fields.room_number)
-        print(fields.category)
-        print(fields.capacity)
-        #customer_bookings = "Date: " + fields.book_from_date + "\nCheck-in time: " + fields.book_from_time + "\nCheck-out time: " + fields.book_till_time + "\nPeople: " + fields.capacity + "\Category: " + fields.category +"\n"
-        #print(customer_bookings)'''
-    #print(booking_objects)
-    #return HttpResponse(booking_objects)
+    # Future bookings.
+    future_bookings = Booking.objects.filter(
+        customer_name=username, 
+        book_from_date__gt=now.date()
+        )
+    # Current and past bookings.
+    current_and_past_bookings = Booking.objects.filter(
+        customer_name=username, book_from_date__lte=now.date()
+        )
+    context = {
+        'future_bookings': future_bookings, 
+        'current_and_past_bookings': current_and_past_bookings
+        }
+    return render(request, 'all_bookings.html', context)
+

@@ -1,37 +1,30 @@
-'''
-from django import forms
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import User
-
-
-class RegisterForm(UserCreationForm):
-    email = forms.EmailField()
-
-    class Meta:
-	model = User
-	fields = ["username", "email", "password1", "password2"]
-'''
-from hotel.models import Customer, Booking, Signin
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm
 
+from hotel.models import Customer, Booking, SignIn
+
+"""class used when a user sign up."""
 class CustomerForm(forms.ModelForm):
-    password = forms.CharField(widget=forms.PasswordInput)
-    confirm_password = forms.CharField(widget=forms.PasswordInput)
+    password = forms.CharField(widget = forms.PasswordInput)
+    confirm_password = forms.CharField(widget = forms.PasswordInput)
     class Meta:
         model = Customer
         fields = ['desired_username', 'first_name', 'last_name', 'email']
         
-class SigninForm(forms.ModelForm):
-    password = forms.CharField(widget=forms.PasswordInput)
+"""class used when a user sign in."""
+class SignInForm(forms.ModelForm):
+    password = forms.CharField(widget = forms.PasswordInput)
     class Meta:
-        model = Signin
+        model = SignIn
         fields = ['username']
 
+"""class used when a user books a room slot."""
 class BookingForm(forms.ModelForm):
     class Meta:
         model = Booking
-        fields = ['book_from_date', 'book_from_time', 'book_till_time', 'capacity']
+        fields = [
+            'book_from_date', 'book_from_time', 'book_till_time', 'capacity'
+            ]
         
 '''  
 class BookForm(forms.ModelForm):
