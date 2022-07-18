@@ -10,7 +10,6 @@
 		    <p><b>Category</b> - {{ future_booking.category }}</p>
 		    <p><b>Capacity</b> - {{ future_booking.capacity }}</p>
 		    <a href='/hotel/all_bookings/{{future_booking.id}}'> Delete </a>
-		    <!--<a href="{% url 'hotel:all_bookings/{{future_booking.id}}' %}"> Delete </a>-->
 		    <hr>
 		{% endfor %}
 
@@ -20,7 +19,6 @@
 		    <p><b>Booking Till Time</b> - {{ current_and_past_booking.book_till_time }}</p>
 		    <p><b>Category</b> - {{ current_and_past_booking.category }}</p>
 		    <p><b>Capacity</b> - {{ current_and_past_booking.capacity }}</p>
-		    <!--<a href='/hotel/future/{{current_and_past_booking.id}}'> Delete </a>-->
 		    <hr>
 		{% endfor %}
 	{% else %}

@@ -21,6 +21,7 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('hotel/',include('hotel.urls', namespace='hotel')),
+    path('api-auth/', include('rest_framework.urls')),
     #path('signin/', auth_views.LoginView, {'template_name': 'signin.html', 'authentication_form': SigninForm}, name='signin'),
     #path('signin/', auth_views.LoginView.as_view(template_name='signin.html', authentication_form=LoginForm), name='signin'),
     #path('logout/', auth_views.LogoutView.as_view(next_page='/signin'), name='logout'),

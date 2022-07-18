@@ -75,7 +75,7 @@ def sign_in(request):
                 login(request, user)
                 return redirect('../book/')
             else:
-                return HttpResponse("Invalid Credentials")
+                return HttpResponse("Invalid credentials")
         else:
             context = {'form': form}
             return render(request, 'signin.html', context)
@@ -129,6 +129,7 @@ def booking(request):
         form = BookingForm(request.POST)
         if form.is_valid():
             global now
+            # now is the date and time on which the user is booking.
             now = timezone.now()
             book_from_date = request.POST['book_from_date']
             book_from_time = request.POST['book_from_time']
@@ -137,17 +138,25 @@ def booking(request):
             capacity = request.POST['capacity']
             global book_date
             book_date = convert_to_date(book_from_date)
-            global check_in
-            check_in = convert_to_time(book_from_time)
-            global check_out
-            check_out = convert_to_time(book_till_time)
-            to_let = list()
-            to_let = check_availability()
-            if to_let:
-                response = to_let
-                context = {'categories': response}
-                return render(request, 'categories.html', context)
-            return HttpResponse("Not Available")
+            if book_date >= now.date():
+                global check_in
+                check_in = convert_to_time(book_from_time)
+                if check_in >= now.time():
+                    global check_out
+                    check_out = convert_to_time(book_till_time)
+                    to_let = list()
+                    to_let = check_availability()
+                    if to_let:
+                        response = to_let
+                        context = {'categories': response}
+                        return render(request, 'categories.html', context)
+                    return HttpResponse("Not Available")
+                else:
+                    context = {'form': BookingForm()}
+                    return render(request, 'book.html', context)
+            else:
+                context = {'form': BookingForm()}
+                return render(request, 'book.html', context)
         else:
             context = {'form': BookingForm()}
             return render(request, 'book.html', context)
@@ -359,10 +368,10 @@ def queen(request):
 def all_bookings(request, booking_id=None):
     if booking_id:
         try:
-            booking = Booking.objects.get(id=booking_id)    
+            booking = Booking.objects.get(id=booking_id)
+            booking.delete()
         except:   
             return HttpResponse("This booking no longer exists.")
-        booking.delete()
     global now
     now = timezone.now()
     # Future bookings.
