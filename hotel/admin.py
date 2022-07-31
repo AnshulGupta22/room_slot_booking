@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from hotel.models import Customer, Room, Booking
+from hotel.models import Room, Booking
 
 # Register your models here.
 

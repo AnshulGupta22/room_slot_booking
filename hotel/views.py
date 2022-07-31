@@ -10,6 +10,16 @@ from django.contrib.auth.models import User
 from hotel.forms import CustomerForm, SignInForm, BookingForm
 from . models import Customer, Room, Booking
 
+
+##############################################
+from rest_framework import status
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.response import Response
+#from . models import Customer
+from . serializers import RoomSerializer
+#from rest_framework.authentication import BasicAuthentication
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
+
 # Create your views here.
 
 username = None
@@ -389,3 +399,55 @@ def all_bookings(request, booking_id=None):
         }
     return render(request, 'all_bookings.html', context)
 
+
+
+
+##################################################################################
+@api_view(['GET', 'POST'])
+#@authentication_classes([BasicAuthentication])
+@permission_classes([IsAuthenticated])
+def room_list(request, format=None):
+    """
+    List all rooms, or create a new room.
+    """
+    if request.method == 'GET':
+        rooms = Room.objects.all()
+        serializer = RoomSerializer(rooms, many=True)
+        return Response(serializer.data)
+
+    elif request.method == 'POST':
+        serializer = RoomSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+########################################################################################
+
+
+
+@api_view(['GET', 'PUT', 'DELETE'])
+@permission_classes([IsAdminUser])
+def room_detail(request, pk, format=None):
+    """
+    Retrieve, update or delete a code room.
+    """
+    try:
+        room = Room.objects.get(pk=pk)
+    except Room.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        serializer = RoomSerializer(room)
+        return Response(serializer.data)
+
+    elif request.method == 'PUT':
+        serializer = RoomSerializer(room, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    elif request.method == 'DELETE':
+        room.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
