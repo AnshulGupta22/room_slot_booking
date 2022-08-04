@@ -16,9 +16,13 @@ urlpatterns = [
     path('king/', views.king, name='king'),
     path('queen/', views.queen, name='queen'),
     path('all_bookings/', views.all_bookings, name='all_bookings'),
-    path('all_bookings/<int:booking_id>/', views.all_bookings, name='delete_booking'),
+    path('all_bookings/<int:pk>/', views.all_bookings, name='delete_booking'),
     path('rooms/', views.room_list),
     path('rooms/<int:pk>/', views.room_detail),
+    path('users/', views.user_list),
+    path('users/<int:pk>/', views.user_detail),
+    path('bookings/', views.booking_list),
+    path('bookings/<int:pk>/', views.booking_detail),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

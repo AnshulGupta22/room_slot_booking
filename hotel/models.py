@@ -5,7 +5,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 
 """class used when a user sign up."""
 class Customer(models.Model):
-    desired_username = models.CharField(max_length=30)
+    desired_username = models.CharField(max_length=30, primary_key=True)
     first_name = models.CharField(max_length=120)
     last_name = models.CharField(max_length=120)
     email = models.EmailField()
@@ -17,7 +17,8 @@ class SignIn(models.Model):
 """class used to represent a room."""
 class Room(models.Model):
     room_number =  models.PositiveSmallIntegerField(
-        validators=[MaxValueValidator(1000), MinValueValidator(1)]
+        validators=[MaxValueValidator(1000), MinValueValidator(1)], 
+        primary_key=True
         )
     ROOM_CATEGORIES = (
         ('YAC', 'AC'),

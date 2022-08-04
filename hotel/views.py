@@ -13,10 +13,12 @@ from . models import Customer, Room, Booking
 
 ##############################################
 from rest_framework import status
-from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.decorators import (api_view, authentication_classes, 
+permission_classes)
 from rest_framework.response import Response
 #from . models import Customer
-from . serializers import RoomSerializer
+from . serializers import (RoomSerializer, CustomerSerializer, 
+BookingSerializer)
 #from rest_framework.authentication import BasicAuthentication
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 
@@ -148,22 +150,23 @@ def booking(request):
             capacity = request.POST['capacity']
             global book_date
             book_date = convert_to_date(book_from_date)
-            if book_date >= now.date():
-                global check_in
-                check_in = convert_to_time(book_from_time)
-                if check_in >= now.time():
-                    global check_out
-                    check_out = convert_to_time(book_till_time)
-                    to_let = list()
-                    to_let = check_availability()
-                    if to_let:
-                        response = to_let
-                        context = {'categories': response}
-                        return render(request, 'categories.html', context)
-                    return HttpResponse("Not Available")
-                else:
+            global check_in
+            check_in = convert_to_time(book_from_time)
+            if (book_date > now.date() or (book_date == now.date() 
+            and check_in >= now.time())):               
+                #if check_in >= now.time():
+                global check_out
+                check_out = convert_to_time(book_till_time)
+                to_let = list()
+                to_let = check_availability()
+                if to_let:
+                    response = to_let
+                    context = {'categories': response}
+                    return render(request, 'categories.html', context)
+                return HttpResponse("Not Available")
+                '''else:
                     context = {'form': BookingForm()}
-                    return render(request, 'book.html', context)
+                    return render(request, 'book.html', context)'''
             else:
                 context = {'form': BookingForm()}
                 return render(request, 'book.html', context)
@@ -375,10 +378,10 @@ def queen(request):
 
 """Function to return all the bookings."""
 @login_required(login_url="/hotel/signin/")
-def all_bookings(request, booking_id=None):
-    if booking_id:
+def all_bookings(request, pk=None):
+    if pk:
         try:
-            booking = Booking.objects.get(id=booking_id)
+            booking = Booking.objects.get(pk=pk)
             booking.delete()
         except:   
             return HttpResponse("This booking no longer exists.")
@@ -405,7 +408,8 @@ def all_bookings(request, booking_id=None):
 ##################################################################################
 @api_view(['GET', 'POST'])
 #@authentication_classes([BasicAuthentication])
-@permission_classes([IsAuthenticated])
+#@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminUser])
 def room_list(request, format=None):
     """
     List all rooms, or create a new room.
@@ -430,7 +434,7 @@ def room_list(request, format=None):
 @permission_classes([IsAdminUser])
 def room_detail(request, pk, format=None):
     """
-    Retrieve, update or delete a code room.
+    Retrieve, update or delete a room.
     """
     try:
         room = Room.objects.get(pk=pk)
@@ -451,3 +455,109 @@ def room_detail(request, pk, format=None):
     elif request.method == 'DELETE':
         room.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+        
+##################################################################################
+@api_view(['GET', 'POST'])
+@permission_classes([IsAdminUser])
+def user_list(request, format=None):
+    """
+    List all users, or create a new user.
+    """
+    if request.method == 'GET':
+        users = Customer.objects.all()
+        serializer = CustomerSerializer(users, many=True)
+        return Response(serializer.data)
+
+    elif request.method == 'POST':
+        serializer = CustomerSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+########################################################################################
+
+
+
+@api_view(['GET', 'PUT', 'DELETE'])
+@permission_classes([IsAdminUser])
+def user_detail(request, pk, format=None):
+    """
+    Retrieve, update or delete a customer.
+    """
+    try:
+        user = Customer.objects.get(pk=pk)
+    except Customer.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        serializer = CustomerSerializer(user)
+        return Response(serializer.data)
+
+    elif request.method == 'PUT':
+        serializer = CustomerSerializer(user, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    elif request.method == 'DELETE':
+        user.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+        
+        
+##################################################################################
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+def booking_list(request, format=None):
+    username = request.user.username
+    """
+    List all bookings, or create a new booking.
+    """
+    if request.method == 'GET':
+        if request.user.is_active and request.user.is_superuser:
+            bookings = Booking.objects.all()
+            serializer = BookingSerializer2(bookings, many=True)
+            return Response(serializer.data)
+        bookings = Booking.objects.filter(customer_name=username)
+        serializer = BookingSerializer(bookings, many=True)
+        return Response(serializer.data)
+
+    elif request.method == 'POST':
+        serializer = BookingSerializer(data=request.data)
+        if serializer.is_valid():
+            print(serializer.validated_data['category'])
+            serializer.save(customer_name=username, room_number=10)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+########################################################################################
+
+
+
+@api_view(['GET', 'PUT', 'DELETE'])
+@permission_classes([IsAdminUser])
+def booking_detail(request, pk, format=None):
+    """
+    Retrieve, update or delete a customer.
+    """
+    try:
+        booking = Booking.objects.get(pk=pk)
+    except Booking.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        serializer = BookingSerializer(booking)
+        return Response(serializer.data)
+
+    elif request.method == 'PUT':
+        serializer = BookingSerializer(booking, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    elif request.method == 'DELETE':
+        booking.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+        
