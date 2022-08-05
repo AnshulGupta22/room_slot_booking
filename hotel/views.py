@@ -21,6 +21,7 @@ from . serializers import (RoomSerializer, CustomerSerializer,
 BookingSerializer)
 #from rest_framework.authentication import BasicAuthentication
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
+import json
 
 # Create your views here.
 
@@ -146,8 +147,8 @@ def booking(request):
             book_from_date = request.POST['book_from_date']
             book_from_time = request.POST['book_from_time']
             book_till_time = request.POST['book_till_time']
-            global capacity
-            capacity = request.POST['capacity']
+            #global capacity
+            #capacity = request.POST['capacity']
             global book_date
             book_date = convert_to_date(book_from_date)
             global check_in
@@ -155,6 +156,8 @@ def booking(request):
             if (book_date > now.date() or (book_date == now.date() 
             and check_in >= now.time())):               
                 #if check_in >= now.time():
+                global capacity
+                capacity = request.POST['capacity']
                 global check_out
                 check_out = convert_to_time(book_till_time)
                 to_let = list()
@@ -526,9 +529,32 @@ def booking_list(request, format=None):
     elif request.method == 'POST':
         serializer = BookingSerializer(data=request.data)
         if serializer.is_valid():
-            print(serializer.validated_data['category'])
-            serializer.save(customer_name=username, room_number=10)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            #print(serializer.validated_data['category'])
+            global now
+            # now is the date and time on which the user is booking.
+            now = timezone.now()
+            global book_date
+            book_date = serializer.validated_data['book_from_date']
+            global check_in
+            check_in = serializer.validated_data['book_from_time']
+            if (book_date > now.date() or (book_date == now.date() 
+            and check_in >= now.time())):               
+                global check_out
+                check_out = serializer.validated_data['book_till_time']
+                global capacity
+                capacity = serializer.validated_data['capacity']
+                to_let = list()
+                to_let = check_availability()
+                #print(to_let)
+                if to_let:
+                    response = to_let
+                    context = {'categories': response}
+                else:
+                    context = dict()
+                #json_object = json.dumps(context)
+                #print(type(json_object))
+                #serializer.save(customer_name=username, room_number=10)
+                return Response(context)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
 ########################################################################################
