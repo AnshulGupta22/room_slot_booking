@@ -11,8 +11,22 @@ class CustomerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Customer
         fields = ['desired_username', 'first_name', 'last_name', 'email']
+     
+class BookingSerializerAdmin(serializers.ModelSerializer):
+    class Meta:
+        model = Booking
+        fields = ['customer_name', 'book_from_date', 'book_from_time', 
+        'book_till_time',  'room_number', 'category', 'capacity']
         
-class BookingSerializer(serializers.ModelSerializer):
+class BookingSerializerGet(serializers.ModelSerializer):
+    class Meta:
+        model = Booking
+        #fields = ['id', 'customer_name', 'book_from_date', 'book_from_time', 
+        #'book_till_time',  'room_number', 'category', 'capacity']
+        fields = ['id', 'book_from_date', 'book_from_time', 
+        'book_till_time', 'category', 'capacity']
+        
+class BookingSerializerBook(serializers.ModelSerializer):
     class Meta:
         model = Booking
         #fields = ['id', 'customer_name', 'book_from_date', 'book_from_time', 
@@ -20,8 +34,3 @@ class BookingSerializer(serializers.ModelSerializer):
         fields = ['book_from_date', 'book_from_time', 
         'book_till_time', 'capacity']
         
-class BookingSerializer2(serializers.ModelSerializer):
-    class Meta:
-        model = Booking
-        fields = ['id', 'customer_name', 'book_from_date', 'book_from_time', 
-        'book_till_time',  'room_number', 'category', 'capacity']

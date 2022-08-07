@@ -18,7 +18,7 @@ permission_classes)
 from rest_framework.response import Response
 #from . models import Customer
 from . serializers import (RoomSerializer, CustomerSerializer, 
-BookingSerializer)
+BookingSerializerBook, BookingSerializerAdmin, BookingSerializerGet)
 #from rest_framework.authentication import BasicAuthentication
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 import json
@@ -182,6 +182,12 @@ def booking(request):
 """Function to book room of this category if available."""
 @login_required(login_url="/hotel/signin/")
 def yac(request):
+    global username
+    global book_date
+    global check_in
+    global check_out
+    global room_number
+    global capacity
     # List of rooms for the given category.
     room_list = Room.objects.filter(
         available_from__lte = check_in, 
@@ -216,12 +222,31 @@ def yac(request):
                     category='YAC', capacity=capacity
                     )
                 time_slot.save()
-                return render(request, 'booked.html')
+               
+                book_date = None                
+                check_in = None               
+                check_out = None                
+                room_number = None                
+                category = None               
+                capacity = None
+                return render(request, 'booked.html')               
+    book_date = None                
+    check_in = None               
+    check_out = None                
+    room_number = None                
+    category = None               
+    capacity = None
     return HttpResponse("Not available")
     
 """Function to book room of this category if available."""
 @login_required(login_url="/hotel/signin/")
 def nac(request):
+    global username
+    global book_date
+    global check_in
+    global check_out
+    global room_number
+    global capacity
     # List of rooms for the given category.
     room_list = Room.objects.filter(
         available_from__lte=check_in, 
@@ -256,12 +281,32 @@ def nac(request):
                     category='NAC', capacity=capacity
                     )
                 time_slot.save()
+               
+                book_date = None                
+                check_in = None               
+                check_out = None                
+                room_number = None                
+                category = None               
+                capacity = None
                 return render(request, 'booked.html')
+                    
+    book_date = None                
+    check_in = None               
+    check_out = None                
+    room_number = None                
+    category = None               
+    capacity = None
     return HttpResponse("Not available")
     
 """Function to book room of this category if available."""
 @login_required(login_url="/hotel/signin/")
 def deluxe(request):
+    global username
+    global book_date
+    global check_in
+    global check_out
+    global room_number
+    global capacity
     # List of rooms for the given category
     room_list = Room.objects.filter(
         available_from__lte=check_in, 
@@ -296,12 +341,32 @@ def deluxe(request):
                     category='DEL', capacity=capacity
                     )
                 time_slot.save()
+                                
+                book_date = None                
+                check_in = None               
+                check_out = None                
+                room_number = None                
+                category = None               
+                capacity = None
                 return render(request, 'booked.html')
+                    
+    book_date = None                
+    check_in = None               
+    check_out = None                
+    room_number = None                
+    category = None               
+    capacity = None
     return HttpResponse("Not available")
     
 """Function to book room of this category if available."""
 @login_required(login_url = "/hotel/signin/")
 def king(request):
+    global username
+    global book_date
+    global check_in
+    global check_out
+    global room_number
+    global capacity
     # List of rooms for the given category.
     room_list = Room.objects.filter(
         available_from__lte=check_in, 
@@ -336,12 +401,32 @@ def king(request):
                     category='KIN', capacity=capacity
                     )
                 time_slot.save()
+                                
+                book_date = None                
+                check_in = None               
+                check_out = None                
+                room_number = None                
+                category = None               
+                capacity = None
                 return render(request,'booked.html')
+                    
+    book_date = None                
+    check_in = None               
+    check_out = None                
+    room_number = None                
+    category = None               
+    capacity = None
     return HttpResponse("Not available")
     
 """Function to book room of this category if available."""
 @login_required(login_url="/hotel/signin/")
 def queen(request):
+    global username
+    global book_date
+    global check_in
+    global check_out
+    global room_number
+    global capacity
     # List of rooms for the given category
     room_list = Room.objects.filter(
         available_from__lte=check_in, 
@@ -376,7 +461,20 @@ def queen(request):
                     category='QUE', capacity=capacity
                     )
                 time_slot.save()
-                return render(request, 'booked.html')
+                                
+                book_date = None                
+                check_in = None               
+                check_out = None                
+                room_number = None                
+                category = None               
+                capacity = None
+                return render(request, 'booked.html')                
+    book_date = None                
+    check_in = None               
+    check_out = None                
+    room_number = None                
+    category = None               
+    capacity = None
     return HttpResponse("Not available")
 
 """Function to return all the bookings."""
@@ -410,9 +508,7 @@ def all_bookings(request, pk=None):
 
 ##################################################################################
 @api_view(['GET', 'POST'])
-#@authentication_classes([BasicAuthentication])
-#@permission_classes([IsAuthenticated])
-@permission_classes([IsAdminUser])
+#@permission_classes([IsAdminUser])
 def room_list(request, format=None):
     """
     List all rooms, or create a new room.
@@ -434,7 +530,7 @@ def room_list(request, format=None):
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
-@permission_classes([IsAdminUser])
+#@permission_classes([IsAdminUser])
 def room_detail(request, pk, format=None):
     """
     Retrieve, update or delete a room.
@@ -461,7 +557,7 @@ def room_detail(request, pk, format=None):
         
 ##################################################################################
 @api_view(['GET', 'POST'])
-@permission_classes([IsAdminUser])
+#@permission_classes([IsAdminUser])
 def user_list(request, format=None):
     """
     List all users, or create a new user.
@@ -483,7 +579,7 @@ def user_list(request, format=None):
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
-@permission_classes([IsAdminUser])
+#@permission_classes([IsAdminUser])
 def user_detail(request, pk, format=None):
     """
     Retrieve, update or delete a customer.
@@ -513,21 +609,28 @@ def user_detail(request, pk, format=None):
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
 def booking_list(request, format=None):
+    global username
     username = request.user.username
     """
     List all bookings, or create a new booking.
     """
     if request.method == 'GET':
         if request.user.is_active and request.user.is_superuser:
-            bookings = Booking.objects.all()
-            serializer = BookingSerializer2(bookings, many=True)
+            bookings = Booking.objects.all().order_by('-book_from_date')
+            serializer = BookingSerializerAdmin(bookings, many=True)
             return Response(serializer.data)
         bookings = Booking.objects.filter(customer_name=username)
-        serializer = BookingSerializer(bookings, many=True)
+        serializer = BookingSerializerGet(bookings, many=True)
         return Response(serializer.data)
-
+    
     elif request.method == 'POST':
-        serializer = BookingSerializer(data=request.data)
+        if request.user.is_active and request.user.is_superuser:
+            serializer = BookingSerializerAdmin(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer = BookingSerializerBook(data=request.data)
         if serializer.is_valid():
             #print(serializer.validated_data['category'])
             global now
@@ -559,10 +662,75 @@ def booking_list(request, format=None):
         
 ########################################################################################
 
+##################################################################################
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def booking_category(request, category, format=None):
 
+    global username
+    global book_date
+    global check_in
+    global check_out
+    global room_number
+    global capacity
+    
+    # List of rooms for the given category.
+    try:
+        room_list = Room.objects.filter(
+            available_from__lte = check_in, 
+            available_till__gte =  check_out, 
+            capacity__gte = capacity, category = category
+            )
+    except:
+        return Response({'msg': 'Not available'})
+    for room in room_list:
+        max_book = now + datetime.timedelta(days=room.advance)
+        if(book_date <= max_book.date()):
+            # To ensure no rooms are booked within a gap of 1 hour
+            # after checkout.
+            added_check_out = check_out.replace(    
+                hour=(check_out.hour + 1) % 24
+                )
+            # To ensure no rooms are booked within a gap of 1 hour
+            # before checkin.
+            subtracted_check_in = check_in.replace(
+                hour=(check_in.hour - 1) % 24
+                )
+            taken = Booking.objects.filter(
+                Q(Q(book_from_time__lt = added_check_out) 
+                | Q(book_till_time__gt = subtracted_check_in)) 
+                & Q(room_number = room.room_number) 
+                & Q(book_from_date = book_date))
+            if not taken:
+                time_slot = Booking(
+                    customer_name=username, 
+                    book_from_date=book_date, 
+                    book_from_time=check_in, 
+                    book_till_time=check_out, 
+                    room_number=room.room_number, 
+                    category=category, capacity=capacity
+                    )
+                time_slot.save()
+                
+                username = None                
+                book_date = None                
+                check_in = None               
+                check_out = None                
+                room_number = None                
+                category = None               
+                capacity = None
+                return Response({'msg': 'Booked'})
+    username = None
+    book_date = None
+    check_in = None
+    check_out = None
+    room_number = None
+    category = None
+    capacity = None
+    return Response({'msg': 'Not available'})
 
 @api_view(['GET', 'PUT', 'DELETE'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsAuthenticated])
 def booking_detail(request, pk, format=None):
     """
     Retrieve, update or delete a customer.
@@ -571,19 +739,31 @@ def booking_detail(request, pk, format=None):
         booking = Booking.objects.get(pk=pk)
     except Booking.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
-
-    if request.method == 'GET':
-        serializer = BookingSerializer(booking)
-        return Response(serializer.data)
-
-    elif request.method == 'PUT':
-        serializer = BookingSerializer(booking, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
+    obj = Booking.objects.first()
+    field_value = getattr(obj, 'customer_name')
+    if request.user.is_active and request.user.is_superuser:
+        if request.method == 'GET':
+            serializer = BookingSerializerBook(booking)
             return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    elif request.method == 'DELETE':
-        booking.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-        
+        elif request.method == 'PUT':
+            serializer = BookingSerializerBook(booking, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        elif request.method == 'DELETE':
+            booking.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+    elif request.user.username == field_value:
+        global now
+        now = timezone.now()
+        # Future bookings.
+        field_value2 = getattr(obj, 'book_from_date')
+        if(field_value2 > now.date()):
+            booking.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response({'msg': 'Past booking'}, status=status.HTTP_410_GONE)
+    else:
+        return Response({'msg': 'Not allowed'}, status=status.HTTP_403_FORBIDDEN)
