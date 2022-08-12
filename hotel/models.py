@@ -9,7 +9,7 @@ class Customer(models.Model):
     first_name = models.CharField(max_length=120)
     last_name = models.CharField(max_length=120)
     email = models.EmailField()
-    
+
 """class used when a user sign up using API."""
 class CustomerAPI(models.Model):
     desired_username = models.CharField(max_length=30, primary_key=True)
@@ -18,15 +18,15 @@ class CustomerAPI(models.Model):
     email = models.EmailField()
     password = models.CharField(max_length=120)
     confirm_password = models.CharField(max_length=120)
-    
+
 """class used when a user sign in."""
 class SignIn(models.Model):
     username = models.CharField(max_length=30)
-    
+
 """class used to represent a room."""
 class Room(models.Model):
     room_number =  models.PositiveSmallIntegerField(
-        validators=[MaxValueValidator(1000), MinValueValidator(1)], 
+        validators=[MaxValueValidator(1000), MinValueValidator(1)],
         primary_key=True
         )
     ROOM_CATEGORIES = (
@@ -47,7 +47,7 @@ class Room(models.Model):
     available_from = models.TimeField()
     available_till = models.TimeField()
     advance = models.PositiveSmallIntegerField()
-    
+
 """class used when a user books a room slot."""
 class Booking(models.Model):
     customer_name = models.CharField(max_length=30)

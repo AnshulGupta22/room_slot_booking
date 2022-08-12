@@ -10,7 +10,7 @@ class CustomerForm(forms.ModelForm):
     class Meta:
         model = Customer
         fields = ['desired_username', 'first_name', 'last_name', 'email']
-        
+
 """class used when a user sign in."""
 class SignInForm(forms.ModelForm):
     password = forms.CharField(widget = forms.PasswordInput)
@@ -24,4 +24,4 @@ class BookingForm(forms.ModelForm):
         model = Booking
         fields = ['book_from_date', 'book_from_time', 'book_till_time', 
                     'capacity']
-            
+

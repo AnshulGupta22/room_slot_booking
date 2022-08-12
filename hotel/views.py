@@ -6,22 +6,19 @@ from django.db.models import Q
 from django.utils import timezone
 from django.http import HttpResponse
 
+from rest_framework import status
+from rest_framework.decorators import (api_view, permission_classes)
+from rest_framework.response import Response
+from .serializers import (RoomSerializer, CustomerSerializer,
+                            BookingSerializerBook,  BookingSerializerAdmin,
+                            BookingSerializerGet,
+                            BookingSerializerAdminWithoutid,
+                            CustomerAPISerializer)
+from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
+
 from django.contrib.auth.models import User
 from hotel.forms import CustomerForm, SignInForm, BookingForm
 from .models import Customer, Room, Booking, CustomerAPI
-
-##############################################
-from rest_framework import status
-#from rest_framework.decorators import (api_view, authentication_classes, permission_classes) 
-from rest_framework.decorators import (api_view, permission_classes)
-from rest_framework.response import Response
-from .serializers import (RoomSerializer, CustomerSerializer, 
-                            BookingSerializerBook,  BookingSerializerAdmin, 
-                            BookingSerializerGet, 
-                            BookingSerializerAdminWithoutid, CustomerAPISerializer)
-from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
-
-# import json
 
 # Create your views here.
 
@@ -59,7 +56,7 @@ def home(request):
 def sign_up(request):
     if request.method == 'POST':
         form = CustomerForm(request.POST)
-        if (form.is_valid() and 
+        if (form.is_valid() and
             request.POST['password'] == request.POST['confirm_password']):
             try:
                 user = User.objects.create_user(
@@ -91,7 +88,7 @@ def sign_in(request):
             global normal_username
             normal_username = request.POST['username']
             password = request.POST['password']
-            user = authenticate(request, username=normal_username, 
+            user = authenticate(request, username=normal_username,
                                 password=password)
             if user is not None:
                 login(request, user)
@@ -119,13 +116,13 @@ def check_availability(normal):
         check_in = normal_check_in
         check_out = normal_check_out
         capacity = normal_capacity
-        
+
     else:
         book_date = api_book_date
         check_in = api_check_in
         check_out = api_check_out
         capacity = api_capacity
-        
+
     available_categories = list()
     room_list = Room.objects.filter(
         available_from__lte=check_in,
@@ -172,15 +169,14 @@ def booking(request):
             global normal_check_in
             normal_check_in = convert_to_time(book_from_time)
             # now is the date and time on which the user is booking.
-            if (normal_book_date > now.date() or 
-                (normal_book_date == now.date() and 
+            if (normal_book_date > now.date() or
+                (normal_book_date == now.date() and
                 normal_check_in >= now.time())):
                 global normal_capacity
                 normal_capacity = request.POST['capacity']
                 global normal_check_out
                 normal_check_out = convert_to_time(book_till_time)
                 to_let = list()
-                #to_let = check_availability(normal_book_date, normal_check_in,  normal_check_out, normal_capacity)
                 to_let = check_availability(True)
                 if to_let:
                     response = to_let
@@ -195,6 +191,7 @@ def booking(request):
         else:
             context = {'form': BookingForm()}
             return render(request, 'book.html', context)
+
     context = {'form': BookingForm()}
     return render(request, 'book.html', context)
 
@@ -246,14 +243,12 @@ def room_category(request, room_type):
                 normal_capacity = None
                 flag = True
                 return flag
-                # return render(request, 'booked.html')
     normal_book_date = None
     normal_check_in = None
     normal_check_out = None
     category = None
     normal_capacity = None
     return flag
-    # return HttpResponse("Unavailable")
 
 """Function to book room of this category if available."""
 @login_required(login_url="/hotel/signin/")
@@ -320,10 +315,11 @@ def all_bookings(request, pk=None):
     }
     return render(request, 'all_bookings.html', context)
 
-##################################################################################
+"""API endpoints for User management, Rooms, Time Slots, and corresponding 
+Bookings.
+"""
 
 @api_view(['GET', 'POST'])
-# @permission_classes([IsAdminUser])
 def room_list(request, format=None):
     """
     List all rooms, or create a new room.
@@ -341,7 +337,6 @@ def room_list(request, format=None):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET', 'PUT', 'DELETE'])
-# @permission_classes([IsAdminUser])
 def room_detail(request, pk, format=None):
     """
     Retrieve, update or delete a room.
@@ -370,19 +365,13 @@ def room_detail(request, pk, format=None):
 @permission_classes([AllowAny])
 def user_list(request, format=None):
     """
-    List all users, or create a new user.
+    To register a user.
     """
-    '''if request.method == 'GET':
-        users = Customer.objects.all()
-        serializer = CustomerSerializer(users, many=True)
-        return Response(serializer.data)
-
-    elif request.method == 'POST':'''
     if request.method == 'POST':
         serializer = CustomerAPISerializer(data=request.data)
         if serializer.is_valid():
-            if(serializer.validated_data['password'] == 
-                serializer.validated_data['confirm_password']): 
+            if(serializer.validated_data['password'] ==
+                serializer.validated_data['confirm_password']):
                 try:
                     user = User.objects.create_user(
                         serializer.validated_data['desired_username'],
@@ -392,63 +381,19 @@ def user_list(request, format=None):
                     user.first_name = serializer.validated_data['first_name']
                     user.last_name = serializer.validated_data['last_name']
                     user.save()
-                    return Response(serializer.data, 
+                    return Response(serializer.data,
                                     status=status.HTTP_201_CREATED)
                 except:
-                    return Response({'msg': 'Username already exist.'}, 
+                    return Response({'msg': 'Username already exist.'},
                                     status=
                                     status.HTTP_422_UNPROCESSABLE_ENTITY)
-                                    
+
             else:
-                return Response({'msg': 'Password and confirmation password do not match.'},  status=status.HTTP_422_UNPROCESSABLE_ENTITY)
-                #serializer.save()     
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-'''
-serializer.validated_data['book_till_time']
-
-if (form.is_valid() and 
-            request.POST['password'] == request.POST['confirm_password']):
-            try:
-                user = User.objects.create_user(
-                    request.POST['desired_username'],
-                    request.POST['email'], request.POST['password']
-                )
-                user.first_name = request.POST['first_name']
-                user.last_name = request.POST['last_name']
-                user.save()
-            except:
-                return HttpResponse("Username already exist")
-            global normal_username
-            normal_username = request.POST['desired_username']
-            login(request, user)
-            return redirect('../book/')
-      
-@api_view(['GET', 'PUT', 'DELETE'])
-# @permission_classes([IsAdminUser])
-def user_detail(request, pk, format=None):
-    """
-    Retrieve, update or delete a customer.
-    """
-    try:
-        user = Customer.objects.get(pk=pk)
-    except Customer.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-
-    if request.method == 'GET':
-        serializer = CustomerSerializer(user)
-        return Response(serializer.data)
-
-    elif request.method == 'PUT':
-        serializer = CustomerSerializer(user, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
+                return Response({'msg':
+                    'Password and confirmation password do not match.'},
+                    status=status.HTTP_422_UNPROCESSABLE_ENTITY)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    elif request.method == 'DELETE':
-        user.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-'''  
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
 def booking_list(request, format=None):
@@ -473,9 +418,9 @@ def booking_list(request, format=None):
             serializer = BookingSerializerAdminWithoutid(data=request.data)
             if serializer.is_valid():
                 serializer.save()
-                return Response(serializer.data, 
+                return Response(serializer.data,
                                 status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, 
+            return Response(serializer.errors,
             status=status.HTTP_400_BAD_REQUEST)
         serializer = BookingSerializerBook(data=request.data)
         if serializer.is_valid():
@@ -492,8 +437,6 @@ def booking_list(request, format=None):
                 global api_capacity
                 api_capacity = serializer.validated_data['capacity']
                 to_let = list()
-                #to_let = check_availability(api_book_date, api_check_in, 
-                                            #api_check_out, api_capacity)
                 to_let = check_availability(False)
                 if to_let:
                     response = to_let
@@ -501,11 +444,9 @@ def booking_list(request, format=None):
 
                 else:
                     context = dict()
-                # json_object = json.dumps(context)
-                # print(type(json_object))
-                # serializer.save(customer_name=normal_username, room_number=10)
+
                 return Response(context)
-            return Response({'msg': 'Cannot book for past.'}, 
+            return Response({'msg': 'Cannot book for past.'},
                             status=status.HTTP_422_UNPROCESSABLE_ENTITY)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -529,7 +470,7 @@ def booking_category(request, category, format=None):
             capacity__gte=api_capacity, category=category
         )
     except:
-        return Response({'msg': 'Unavailable'}, 
+        return Response({'msg': 'Unavailable'},
                         status=status.HTTP_404_NOT_FOUND)
     for room in room_list:
         max_book = now + datetime.timedelta(days=room.advance)
@@ -568,7 +509,7 @@ def booking_category(request, category, format=None):
                 category = None
                 api_capacity = None
                 return Response({'msg': 'Booked'})
-        return Response({'msg': 'Unavailable.'}, 
+        return Response({'msg': 'Unavailable.'},
                         status=status.HTTP_404_NOT_FOUND)
     api_username = None
     api_book_date = None
@@ -587,8 +528,9 @@ def booking_detail(request, pk, format=None):
     try:
         booking = Booking.objects.get(pk=pk)
     except Booking.DoesNotExist:
-        return Response({'msg': 'Not Found'}, 
+        return Response({'msg': 'Not Found'},
                         status=status.HTTP_404_NOT_FOUND)
+    # To get the user name from the request body.
     obj = Booking.objects.first()
     field_value = getattr(obj, 'customer_name')
     if request.user.is_active and request.user.is_superuser:
@@ -599,10 +541,10 @@ def booking_detail(request, pk, format=None):
         elif request.method == 'PUT':
             serializer = BookingSerializerAdminWithoutid(booking, 
                                                             data=request.data)
-            if serializer.is_valid(): 
+            if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data)
-            return Response(serializer.errors, 
+            return Response(serializer.errors,
                             status=status.HTTP_400_BAD_REQUEST)
 
         elif request.method == 'DELETE':
@@ -612,15 +554,16 @@ def booking_detail(request, pk, format=None):
     # To check if it is a normal user checking the booking details of 
     # his/her room.
     elif request.user.username == field_value:
-        # Future bookings.
+        # To get book from date from the request body.
         field_value2 = getattr(obj, 'book_from_date')
+        # To check if the deleted booking is for future.
         if (field_value2 > now.date()):
             booking.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
-            
-        return Response({'msg': 'Past booking'}, 
+
+        return Response({'msg': 'Past booking'},
                         status=status.HTTP_422_UNPROCESSABLE_ENTITY)
-        
+
     else:
-        return Response({'msg': 'Not allowed'}, 
+        return Response({'msg': 'Not allowed'},
                         status=status.HTTP_403_FORBIDDEN)
