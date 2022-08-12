@@ -10,6 +10,15 @@ class Customer(models.Model):
     last_name = models.CharField(max_length=120)
     email = models.EmailField()
     
+"""class used when a user sign up using API."""
+class CustomerAPI(models.Model):
+    desired_username = models.CharField(max_length=30, primary_key=True)
+    first_name = models.CharField(max_length=120)
+    last_name = models.CharField(max_length=120)
+    email = models.EmailField()
+    password = models.CharField(max_length=120)
+    confirm_password = models.CharField(max_length=120)
+    
 """class used when a user sign in."""
 class SignIn(models.Model):
     username = models.CharField(max_length=30)
