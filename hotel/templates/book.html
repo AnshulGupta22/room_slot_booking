@@ -1,5 +1,10 @@
+{% load static %}
+<!DOCTYPE html>
 <html>
-	<body>
+    <head>
+        <script src="{% static 'hotel/js/welcome.js' %}"></script>
+    </head>
+	<body onload="greet()">
 		<form action="" method="POST">
 			{% csrf_token %}
 			<p> <a href="{% url 'hotel:all_bookings' %}"> Your Bookings </a> </p>
