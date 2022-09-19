@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+	<body>
+	    <h1>Register Yourself</h1>
+	    <subs>(as General User)</subs>
+	    <br/><br/>
+		<form method="POST">
+			{% csrf_token %}
+			{{ form.as_p }}
+			<input type="submit" value="Sign Up" />
+		</form>
+		<br/>
+		Already have an account? <a href = "{% url 'hotel:signin' %}"> Sign in </a> instead
+	</body>
+</html>

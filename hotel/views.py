@@ -271,7 +271,7 @@ def nac(request):
 """Function to book room of this category if available."""
 @login_required(login_url="/hotel/signin/")
 def deluxe(request):
-    flag = room_category('DEL')
+    flag = room_category(request, 'DEL')
     if flag:
         return render(request, 'booked.html')
     return HttpResponse("Unavailable")

@@ -1,9 +1,78 @@
 <!DOCTYPE html>
 <html>
+  <head>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
+    <style>
+      *{
+	      padding: 0;
+	      margin: 0;
+      }
+
+      body {
+        background: url(http://wrbbradio.org/wp-content/uploads/2016/10/grey-background-07.jpg) no-repeat center fixed;
+        background-size: cover;
+        font-family: "Raleway", Arial, Helvetica, sans-serif;
+      }
+
+      .container {
+	      position: absolute;
+	      top:30%;
+	      left: 50%;
+	      transform: translate(-50%, -50%);
+        padding: 6px;
+      }
+
+      .fontLabel{
+        color: white;
+      }
+
+      .box{
+        background: rgb(0, 175, 0);
+	      width: 30%;
+	      height: 50%;
+	      margin-top: 10%;
+	      border-radius: 5px;
+      }
+      
+      .submit{
+	      float: center;
+	      border: none;
+	      color: white;
+	      background: #ff6600;
+        cursor: pointer;
+        border-radius: 5px;
+        padding: 12px;
+        text-decoration: none;
+      }
+
+      .submit:link, .submit:visited {
+        background-color: rgb(255, 51, 51);
+      }
+
+      .submit:hover, .submit:active {
+        background-color: rgb(179, 0, 0);
+      }
+      
+      a.one:visited {color:#0000ff;}
+      a.one:hover {color:#ffcc00;}
+      
+      .booked {
+        text-align:center;
+      }
+      
+      h1{
+        margin-top: 40px;
+      }
+    </style>
+  </head>
 	<body>
-	<p> Booked </p>
-	<p> <a href="{% url 'hotel:book' %}"> Back To Reservation Page </a> </p>
-	<p> <a href="{% url 'hotel:logout' %}"> Logout </a> </p>
+	  <div class="container box fl fontLabel booked">
+      <h1>Booked</h1>
+      <br/><br/><br/><br/>
+      <p> <a class="submit" href="{% url 'hotel:book' %}"> Back To Reservation Page </a> </p>
+      <br/><br/>
+      <p> <a class="one" href="{% url 'hotel:logout' %}"> Logout </a> </p>
+    </div>
 	</body>
 </html>
 
