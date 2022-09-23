@@ -182,7 +182,7 @@ def check_availability(normal):
                     # }
 
                     # asd = 0
-                    # if (room.category == KING){
+                    # if (room.category == KING){ 
                     # asd = asd++
                     # }
                     # if yui< no_of_rooms
