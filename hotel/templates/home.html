@@ -8,8 +8,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
+    <link rel="stylesheet" type="text/css" href="{% static 'hotel/css/base.css' %}">
     <style>
-      a.fa {
+      /*a.fa {
         padding: 3px;
         border-radius: 3px;
         font-size: 1em;
@@ -58,6 +59,28 @@
 
       body,h1,h2,h3,h4,h5,h6 {font-family: "Raleway", Arial, Helvetica, sans-serif;}
 
+      
+      .fa {
+        font-size: 1.2em;
+      }
+
+      a.ert:link, a.ert:visited {
+        background-color: white;
+        color: black;
+        border: 2px solid green;
+        padding: 3px 6px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        margin: 3px;
+        border-radius: 5px;
+      }
+
+      a.ert:hover, a.ert:active {
+        background-color: green;
+        color: white;
+      }*/
+
       .container {
         padding: 2px 16px;
       }
@@ -70,9 +93,9 @@
       }
 
       #fac {
-      margin: 20px;
-      font-size: 1.1em;
-      color: rgb(153, 51, 51);
+        margin: 20px;
+        font-size: 1.1em;
+        color: rgb(153, 51, 51);
       }
 
       .card2 {
@@ -100,7 +123,9 @@
         font-size: 1.2em;
       }
 
-      .button4 {border-radius: 40px;}
+      .button4 {
+        border-radius: 40px;
+      }
 
       .service {
         padding: 10px;
@@ -121,33 +146,12 @@
         margin: 7px;
       }
 
-      .fa {
-        font-size: 1.2em;
-      }
-
       .checked {
         color: orange;
       }
 
       .conct {
         width: 30px;
-      }
-      
-      a.ert:link, a.ert:visited {
-        background-color: white;
-        color: black;
-        border: 2px solid green;
-        padding: 3px 6px;
-        text-align: center;
-        text-decoration: none;
-        display: inline-block;
-        margin: 3px;
-        border-radius: 5px;
-      }
-
-      a.ert:hover, a.ert:active {
-        background-color: green;
-        color: white;
       }
 
       .featr{
@@ -276,20 +280,16 @@
         line-height: 140%;
       }
 
-      .luxury-collection{
-        font-size: 13px;
-      }
-
       .card3{
-        display:inline-block;
+        display: inline-block;
       }
 
       #wifi{
-        font-size:16px;
+        font-size: 16px;
       }
 
       #rev{
-        margin-left:10px;
+        margin-left: 10px;
       }
 
     </style>
@@ -302,8 +302,8 @@
       <a href="#features" class="w3-bar-item w3-button w3-mobile">Features</a>
       <a href="#services" class="w3-bar-item w3-button w3-mobile">Services</a>
       <a href="#contact" class="w3-bar-item w3-button w3-mobile">Contact</a>
-      <a href = "{% url 'hotel:signin' %}" class="w3-right ert"> Sign In </a>
       <a href = "{% url 'hotel:signup' %}" class="w3-right ert"> Sign Up </a>
+      <a href = "{% url 'hotel:signin' %}" class="w3-right ert"> Sign In </a>
     </div>
     <button onclick="topFunction()" id="myBtn" title="Go to top">Top</button>
 
@@ -332,81 +332,81 @@
 
     <!-- Page content -->
     <div class="w3-content" style="max-width:1532px;">
-      <div class="anshul"><h2 id = "hotel-name">Anshul Hotel</h2>
-        <p>A Luxury Collection Hotel, Mumbai</p></div>
+      <div class="anshul">
+        <h2 id = "hotel-name">Anshul Hotel</h2>
+        <p>A Luxury Collection Hotel, Mumbai</p>
+      </div>
       <div class="w3-row-padding" id="about">
         <div class="w3-col l4 12">
           <h3>About</h3>
           <h6>Our hotel is one of a kind. It is truely amazing. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.</h6>
-        <p>We accept: <i class="fa fa-credit-card w3-large"></i> <i class="fa fa-cc-mastercard w3-large"></i> <i class="fa fa-cc-amex w3-large"></i> <i class="fa fa-cc-cc-visa w3-large"></i><i class="fa fa-cc-paypal w3-large"></i></p>
+          <p>We accept: <i class="fa fa-credit-card w3-large"></i> <i class="fa fa-cc-mastercard w3-large"></i> <i class="fa fa-cc-amex w3-large"></i> <i class="fa fa-cc-cc-visa w3-large"></i><i class="fa fa-cc-paypal w3-large"></i></p>
         </div>
         <div class="w3-col l8 12">
           <img src="{% static 'hotel/images/hotel.jpg' %}" alt="The Hotel" class="full-breadth">
         </div>
       </div>
-        <div class="w3-row-padding w3-large w3-center" style="margin:32px 0">
+      <div class="w3-row-padding w3-large w3-center" style="margin:32px 0">
         <div class="w3-third"><i class="fa fa-map-marker w3-text-red"></i> Some address, Mumbai, India</div>
         <div class="w3-third"><i class="fa fa-phone w3-text-red"></i> Phone: +91 9541674792</div>
         <div class="w3-third"><i class="fa fa-envelope w3-text-red"></i> Email: mail123@gmail.com</div>
       </div>
-        <br/>
-    <div class="slideshow-container">
+      <br/>
+      <div class="slideshow-container">
+        <div class="mySlides fade">
+          <img src="{% static 'hotel/images/img_nature_wide.jpg' %}" alt="Nature" class="full-breadth img2">
+          <div class="text body2">Caption Text</div>
+        </div>
+        <div class="mySlides fade">
+          <img src="{% static 'hotel/images/img_snow_wide.jpg' %}" alt="Snow" class="full-breadth img2">
+          <div class="text body2">Caption Two</div>
+        </div>
 
-    <div class="mySlides fade">
-      <img src="{% static 'hotel/images/img_nature_wide.jpg' %}" alt="Nature" class="full-breadth img2">
-      <div class="text body2">Caption Text</div>
-    </div>
+        <div class="mySlides fade">
+          <img src="{% static 'hotel/images/img_mountains_wide.jpg' %}" alt="Mountains" class="full-breadth img2">
+          <div class="text body2">Caption Three</div>
+        </div>
 
-    <div class="mySlides fade">
-      <img src="{% static 'hotel/images/img_snow_wide.jpg' %}" alt="Snow" class="full-breadth img2">
-      <div class="text body2">Caption Two</div>
-    </div>
+        <a class="prev" onclick="plusSlides(-1)">❮</a>
+        <a class="next" onclick="plusSlides(1)">❯</a>
 
-    <div class="mySlides fade">
-      <img src="{% static 'hotel/images/img_mountains_wide.jpg' %}" alt="Mountains" class="full-breadth img2">
-      <div class="text body2">Caption Three</div>
-    </div>
+      </div>
+      <br>
 
-    <a class="prev" onclick="plusSlides(-1)">❮</a>
-    <a class="next" onclick="plusSlides(1)">❯</a>
+      <div style="text-align:center">
+        <span class="dot" onclick="currentSlide(1)"></span> 
+        <span class="dot" onclick="currentSlide(2)"></span> 
+        <span class="dot" onclick="currentSlide(3)"></span> 
+      </div>
 
-    </div>
-    <br>
+      <script>
+      let slideIndex = 1;
+      showSlides(slideIndex);
 
-    <div style="text-align:center">
-      <span class="dot" onclick="currentSlide(1)"></span> 
-      <span class="dot" onclick="currentSlide(2)"></span> 
-      <span class="dot" onclick="currentSlide(3)"></span> 
-    </div>
-
-    <script>
-    let slideIndex = 1;
-    showSlides(slideIndex);
-
-    function plusSlides(n) {
-      showSlides(slideIndex += n);
-    }
-
-    function currentSlide(n) {
-      showSlides(slideIndex = n);
-    }
-
-    function showSlides(n) {
-      let i;
-      let slides = document.getElementsByClassName("mySlides");
-      let dots = document.getElementsByClassName("dot");
-      if (n > slides.length) {slideIndex = 1}    
-      if (n < 1) {slideIndex = slides.length}
-      for (i = 0; i < slides.length; i++) {
-        slides[i].style.display = "none";  
+      function plusSlides(n) {
+        showSlides(slideIndex += n);
       }
-      for (i = 0; i < dots.length; i++) {
-        dots[i].className = dots[i].className.replace(" active", "");
+
+      function currentSlide(n) {
+        showSlides(slideIndex = n);
       }
-      slides[slideIndex-1].style.display = "block";  
-      dots[slideIndex-1].className += " active";
-    }
-    </script>
+
+      function showSlides(n) {
+        let i;
+        let slides = document.getElementsByClassName("mySlides");
+        let dots = document.getElementsByClassName("dot");
+        if (n > slides.length) {slideIndex = 1}    
+        if (n < 1) {slideIndex = slides.length}
+        for (i = 0; i < slides.length; i++) {
+          slides[i].style.display = "none";  
+        }
+        for (i = 0; i < dots.length; i++) {
+          dots[i].className = dots[i].className.replace(" active", "");
+        }
+        slides[slideIndex-1].style.display = "block";  
+        dots[slideIndex-1].className += " active";
+      }
+      </script>
 
       <div class="container">
         <p><span id='fac'>Facilities and Amenities </span><span class="header-divider"> Concierge Desk </span> <span class="header-divider"> Butler Services </span> <span class="header-divider"> Free Parking </span> <span class="header-divider"> Free Wi-Fi <i class="fa fa-wifi" id="wifi"></i></span> <span class="header-divider"> Arcade </span> <span class="header-divider"> Pool </span></p> 
@@ -420,7 +420,7 @@
     <span class="fa fa-star checked"></span>
     <p id="rev"> 4.8 average based on 5254 reviews.</p>
     <div class="w3-row-padding" id="features">
-        <h3 class = "featr">Features</h3>
+      <h3 class = "featr">Features</h3>
     </div>
     <div class="flex-cont">
       <div class="boxx"><img class="box_img" src="{% static 'hotel/images/hotel.jpg' %}" alt="The Band"></div>
@@ -444,14 +444,14 @@
     </div>
     <div class="w3-row-padding" id="services">
       <h3 class = "featr">Services</h3>
-  </div>
-      <div class="card2 card3">
+    </div>
+    <div class="card2 card3">
       <img src="{% static 'hotel/images/jeans3.jpg' %}" alt="Denim Jeans" class="full-breadth">
       <h1>Kaya Kalp - The service</h1>
       <p class="service">A fragrant haven that melts away the stresses and strains of daily life, with both ancient and modern treatments practiced by trained therapists. This award-winning service is spread across three floors.</p>
       <p><button class="button button4">Explore</button></p>
     </div>
-      <div class="card2 card3">
+    <div class="card2 card3">
       <img src="{% static 'hotel/images/jeans3.jpg' %}" alt="Denim Jeans" class="full-breadth">
       <h1>Kaya Kalp - The service</h1>
       <p class="service">A fragrant haven that melts away the stresses and strains of daily life, with both ancient and modern treatments practiced by trained therapists. This award-winning service is spread across three floors.</p>
@@ -536,12 +536,11 @@
         <i class="fa fa-phone w3-text-red conct"></i> Phone: +91 9541674792<br>
         <i class="fa fa-envelope w3-text-red conct"> </i> Email: mail123@gmail.com<br>
       </div>
-
-    <!-- End page content -->
     </div>
+    <!-- End page content -->
 
     <!-- Footer -->
-    <footer class="w3-padding-32 w3-black w3-center w3-margin-top">
+    <footer class="w3-padding-32 w3-black w3-center w3-margin-top" id="foott">
       <h5>Find Us On</h5>
       <div class="w3-xlarge w3-padding-16">
         <a href="#" class="fa fa-facebook"></a>
@@ -549,6 +548,7 @@
         <a href="#" class="fa fa-twitter"></a>
         <a href="#" class="fa fa-youtube"></a>
         <a href="#" class="fa fa-linkedin-square"></a>
+      </div>
       <p>Powered by <a href="https://www.w3schools.com/w3css/default.asp" target="_blank" class="w3-hover-text-green">w3.css</a></p>
     </footer>
 

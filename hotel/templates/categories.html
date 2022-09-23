@@ -1,25 +1,51 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
+<html lang="en">
   <head>
+    <title>Room Categories</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="{% static 'hotel/css/base.css' %}">
     <style>
-      body{
+      /*body{
         background: url(http://wrbbradio.org/wp-content/uploads/2016/10/grey-background-07.jpg) no-repeat center fixed;
         background-size: cover;
         font-family: "Raleway", Arial, Helvetica, sans-serif;
       }
-      .card {
-        box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
-        transition: 0.3s;
-        width: 40%;
-        margin: 15px;
+
+      *{
+	      padding: 0;
+	      margin: 0;
+      }
+      
+      a.one:visited {color:#0000ff;}
+      a.one:hover {color:#ffcc00;}
+
+      a.button-link{
+        color: white;
         border-radius: 5px;
-        background-color: rgb(237, 237, 237);
+        border: none;
+        padding: 10px 20px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
       }
 
-      .card:hover {
-        box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+      a.button-link:link, a.button-link:visited {
+        background-color: rgb(255, 51, 51);
+      }
+
+      a.button-link:hover, a.button-link:active {
+        background-color: rgb(179, 0, 0);
+
+      }
+
+      #body-color{
+        background-color:#f1f1f1 !important;
+      }*/
+
+      .card-width {
+        width: 40%;
       }
 
       img {
@@ -29,47 +55,49 @@
         margin-right: 10px;
       }
 
-      .container {
+      .container3 {
         padding: 2px 16px;
       }
+
+      body{
+        padding: 0; margin: 0;
+      }
       
-      a.button-link:link, a.button-link:visited {
-        background-color: white;
-        color: black;
-        border: 2px solid green;
-        padding: 10px 20px;
-        text-align: center;
-        text-decoration: none;
-        display: inline-block;
+      #foott{
+        margin-top: 25px;
       }
 
-      a.button-link:hover, a.button-link:active {
-        background-color: green;
-        color: white;
+      .room-photo {
+        margin-right: 20px;
+        margin-bottom: 15px;
       }
-
-      a.one:visited {color:#0000ff;}
-      a.one:hover {color:#ffcc00;}
     </style>
   </head>
-	<body>
-	  <p> <a class="one" href="{% url 'hotel:logout' %}"> Logout </a> </p>
+	<body id="body-color">
+    <!-- Navigation Bar -->
+    <div class="w3-bar w3-white w3-large">
+      <div class="w3-bar-item w3-red w3-mobile"><i class="fa fa-bed w3-margin-right"></i>Logo</div>
+      <a href = "{% url 'hotel:logout' %}" class="w3-right ert"> Logout </a>
+    </div>
+    <div id="lef-hea">
+      <h1>Select a Category</h1>
+    </div>
 	  {% if categories %}
 		  {% for category in categories %}
 			  {% if category == 'YAC' %}
-		      <div class="card">
-            <img src = "{% static 'hotel/images/ac.jpg' %}" alt="Room">
-              <div class="container">
-                <h2><b>AC</b></h2> 
-                <p>Situated in an exclusive block, these rooms with dark wood paneling, soft décor and spacious bathrooms with walk-in shower chambers, are ultimate in privacy and comfort.</p>
-                <b>Accommodation Details</b>
-                <ul>
-                  <li>20% off on food & soft beverages,Spa, Salon & laundry</li>
-                  <li>2 major meals ;pre-set Lunch & Dinner at Coffee Shop</li>
-                  <li>Wi-Fi</li>
-                </ul>
-                <p><a class="button-link" href = "{% url 'hotel:yac' %}"> Book Now </a></p>
-              </div>
+		      <div class="card card-width">
+            <img src = "{% static 'hotel/images/ac.jpg' %}" alt="Room" class="room-photo">
+            <div class="container3">
+              <h2><b>AC</b></h2> 
+              <p>Situated in an exclusive block, these rooms with dark wood paneling, soft décor and spacious bathrooms with walk-in shower chambers, are ultimate in privacy and comfort.</p>
+              <b>Accommodation Details</b>
+              <ul>
+                <li>20% off on food & soft beverages,Spa, Salon & laundry</li>
+                <li>2 major meals ;pre-set Lunch & Dinner at Coffee Shop</li>
+                <li>Wi-Fi</li>
+              </ul>
+              <p><a class="submit" href = "{% url 'hotel:yac' %}"> Book Now </a></p>
+            </div>
           </div>
 			      <!--<table>
 				      <th>AC</th>
@@ -79,20 +107,20 @@
 			  {% endif %}
 			  
 			  {% if category == 'NAC' %}
-		      <div class="card">
-            <img src = "{% static 'hotel/images/non-ac.jpeg' %}" alt="Room">
-              <div class="container">
-                <h2><b>Non AC</b></h2> 
-                <p>Situated in an exclusive block, these rooms with dark wood paneling, soft décor and spacious bathrooms with walk-in shower chambers, are ultimate in privacy and comfort.</p>
-                <b>Accommodation Details</b>
-                <ul>
-                  <li>20% off on food & soft beverages,Spa, Salon & laundry</li>
-                  <li>2 major meals ;pre-set Lunch & Dinner at Coffee Shop</li>
-                  <li>Wi-Fi</li>
-                </ul>
-                <p><a class="button-link" href = "{% url 'hotel:nac' %}"> Book Now </a></p>
-              </div>
+		      <div class="card card-width">
+            <img src = "{% static 'hotel/images/non-ac.jpeg' %}" alt="Room" class="room-photo">
+            <div class="container3">
+              <h2><b>Non AC</b></h2> 
+              <p>Situated in an exclusive block, these rooms with dark wood paneling, soft décor and spacious bathrooms with walk-in shower chambers, are ultimate in privacy and comfort.</p>
+              <b>Accommodation Details</b>
+              <ul>
+                <li>20% off on food & soft beverages,Spa, Salon & laundry</li>
+                <li>2 major meals ;pre-set Lunch & Dinner at Coffee Shop</li>
+                <li>Wi-Fi</li>
+              </ul>
+              <p><a class="submit" href = "{% url 'hotel:nac' %}"> Book Now </a></p>
             </div>
+          </div>
 			      <!--<table>
 				      <th>Non AC</th>
 				      <tr><td>bhhhdef</td></tr>
@@ -101,20 +129,20 @@
 			  {% endif %}
 			  
 			  {% if category == 'DEL' %}
-		      <div class="card">
-            <img src = "{% static 'hotel/images/deluxe.jpeg' %}" alt="Room">
-              <div class="container">
-                <h2><b>Deluxe</b></h2> 
-                <p>Situated in an exclusive block, these rooms with dark wood paneling, soft décor and spacious bathrooms with walk-in shower chambers, are ultimate in privacy and comfort.</p>
-                <b>Accommodation Details</b>
-                <ul>
-                  <li>20% off on food & soft beverages,Spa, Salon & laundry</li>
-                  <li>2 major meals ;pre-set Lunch & Dinner at Coffee Shop</li>
-                  <li>Wi-Fi</li>
-                </ul>
-                <p><a class="button-link" href = "{% url 'hotel:deluxe' %}"> Book Now </a></p>
-              </div>
+		      <div class="card card-width">
+            <img src = "{% static 'hotel/images/deluxe.jpeg' %}" alt="Room" class="room-photo">
+            <div class="container3">
+              <h2><b>Deluxe</b></h2> 
+              <p>Situated in an exclusive block, these rooms with dark wood paneling, soft décor and spacious bathrooms with walk-in shower chambers, are ultimate in privacy and comfort.</p>
+              <b>Accommodation Details</b>
+              <ul>
+                <li>20% off on food & soft beverages,Spa, Salon & laundry</li>
+                <li>2 major meals ;pre-set Lunch & Dinner at Coffee Shop</li>
+                <li>Wi-Fi</li>
+              </ul>
+              <p><a class="submit" href = "{% url 'hotel:deluxe' %}"> Book Now </a></p>
             </div>
+          </div>
 			      <!--<table>
 				      <th>Deluxe</th>
 				      <tr><td>kbhjgftr</td></tr>
@@ -123,20 +151,20 @@
 			  {% endif %}
 			  
 			  {% if category == 'KIN' %}
-		      <div class="card">
-            <img src = "{% static 'hotel/images/king.jpeg' %}" alt="Room">
-              <div class="container">
-                <h2><b>King</b></h2>
-                <p>Situated in an exclusive block, these rooms with dark wood paneling, soft décor and spacious bathrooms with walk-in shower chambers, are ultimate in privacy and comfort.</p>
-                <b>Accommodation Details</b>
-                <ul>
-                  <li>20% off on food & soft beverages,Spa, Salon & laundry</li>
-                  <li>2 major meals ;pre-set Lunch & Dinner at Coffee Shop</li>
-                  <li>Wi-Fi</li>
-                </ul>
-                <p><a class="button-link" href = "{% url 'hotel:king' %}"> Book Now </a></p>
-              </div>
+		      <div class="card card-width">
+            <img src = "{% static 'hotel/images/king.jpeg' %}" alt="Room" class="room-photo">
+            <div class="container3">
+              <h2><b>King</b></h2>
+              <p>Situated in an exclusive block, these rooms with dark wood paneling, soft décor and spacious bathrooms with walk-in shower chambers, are ultimate in privacy and comfort.</p>
+              <b>Accommodation Details</b>
+              <ul>
+                <li>20% off on food & soft beverages,Spa, Salon & laundry</li>
+                <li>2 major meals ;pre-set Lunch & Dinner at Coffee Shop</li>
+                <li>Wi-Fi</li>
+              </ul>
+              <p><a class="submit" href = "{% url 'hotel:king' %}"> Book Now </a></p>
             </div>
+          </div>
 			      <!--<table>
 				      <th>King</th>
 				      <tr><td>bghfrfgbx</td></tr>
@@ -145,20 +173,20 @@
 			  {% endif %}
 			  
 			  {% if category == 'QUE' %}
-	        <div class="card">
-            <img src = "{% static 'hotel/images/queen.jpeg' %}" alt="Room">
-              <div class="container">
-                <h2><b>Queen</b></h2> 
-                <p>Situated in an exclusive block, these rooms with dark wood paneling, soft décor and spacious bathrooms with walk-in shower chambers, are ultimate in privacy and comfort.</p>
-                <b>Accommodation Details</b>
-                <ul>
-                  <li>20% off on food & soft beverages,Spa, Salon & laundry</li>
-                  <li>2 major meals ;pre-set Lunch & Dinner at Coffee Shop</li>
-                  <li>Wi-Fi</li>
-                </ul>
-                <p><a class="button-link" href = "{% url 'hotel:queen' %}"> Book Now </a></p>
-              </div>
+	        <div class="card card-width">
+            <img src = "{% static 'hotel/images/queen.jpeg' %}" alt="Room" class="room-photo">
+            <div class="container3">
+              <h2><b>Queen</b></h2> 
+              <p>Situated in an exclusive block, these rooms with dark wood paneling, soft décor and spacious bathrooms with walk-in shower chambers, are ultimate in privacy and comfort.</p>
+              <b>Accommodation Details</b>
+              <ul>
+                <li>20% off on food & soft beverages,Spa, Salon & laundry</li>
+                <li>2 major meals ;pre-set Lunch & Dinner at Coffee Shop</li>
+                <li>Wi-Fi</li>
+              </ul>
+              <p><a class="submit" href = "{% url 'hotel:queen' %}"> Book Now </a></p>
             </div>
+          </div>
       			<!--<table>
 				      <th>Queen</th>
 				      <tr><td>rfvsf</td></tr>
@@ -169,6 +197,18 @@
 	  {% else %}
 		  <p> No rooms are available </p>
 	{% endif %}
+  <!-- Footer -->
+  <footer class="w3-padding-32 w3-black w3-center w3-margin-top" id="foott">
+    <h5>Find Us On</h5>
+    <div class="w3-xlarge w3-padding-16">
+      <a href="#" class="fa fa-facebook"></a>
+      <a href="#" class="fa fa-instagram"></a>
+      <a href="#" class="fa fa-twitter"></a>
+      <a href="#" class="fa fa-youtube"></a>
+      <a href="#" class="fa fa-linkedin-square"></a>
+    </div>
+    <p>Powered by <a href="https://www.w3schools.com/w3css/default.asp" target="_blank" class="w3-hover-text-green">w3.css</a></p>
+  </footer>
 	</body>
 </html>
 

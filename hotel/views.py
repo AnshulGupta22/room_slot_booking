@@ -9,18 +9,17 @@ from django.http import HttpResponse
 from rest_framework import status
 from rest_framework.decorators import (api_view, permission_classes)
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
-from .serializers import (RoomSerializer, CustomerSerializer,
-                            BookingSerializerBook,  BookingSerializerAdmin,
-                            BookingSerializerGet,
+from .serializers import (RoomSerializer, BookingSerializerBook,
+                            BookingSerializerAdmin, BookingSerializerGet,
                             BookingSerializerAdminWithoutid,
                             CustomerAPISerializer)
 
 
 from django.contrib.auth.models import User
 from hotel.forms import CustomerForm, SignInForm, BookingForm
-from .models import Customer, Room, Booking, CustomerAPI
+from .models import Room, Booking
 
 # Create your views here.
 
@@ -31,12 +30,22 @@ normal_book_date = None
 normal_check_in = None
 normal_check_out = None
 normal_capacity = None
+ac_rooms = None
+nac_rooms = None
+deluxe_rooms = None
+king_rooms = None
+queen_rooms = None
 
 api_username = None
 api_book_date = None
 api_check_in = None
 api_check_out = None
 api_capacity = None
+api_ac_rooms = None
+api_nac_rooms = None
+api_deluxe_rooms = None
+api_king_rooms = None
+api_queen_rooms = None
 
 """Function to convert string to date."""
 def convert_to_date(date_time):
@@ -131,6 +140,7 @@ def check_availability(normal):
         available_till__gte=check_out,
         capacity__gte=capacity
     )
+
     for room in room_list:
         # Calculating the maximum date to which a room can be
         # booked in advance.
@@ -153,6 +163,38 @@ def check_availability(normal):
                                            & Q(book_from_date=book_date))
             if not taken:
                 if room.category not in available_categories:
+
+                    
+                    # if (room.category == AC){
+                    #   ac_rooms = ac_rooms + 1
+                    # }
+                    # if (room.category == NAC){
+                    #   nac_rooms = nac_rooms + 1
+                    # }
+                    # if (room.category == KING){
+                    #   king_rooms = king_rooms + 1
+                    # }
+                    # if (room.category == DELUXE){
+                    #   deluxe_rooms = deluxe_rooms + 1
+                    # }
+                    # if (room.category == QUEEN){
+                    #   queen_rooms = queen_rooms + 1
+                    # }
+
+                    # asd = 0
+                    # if (room.category == KING){
+                    # asd = asd++
+                    # }
+                    # if yui< no_of_rooms
+                    # if no_of_rooms <= (select count * from room_list where category = AC)
+                    ''' room_list = Room.objects.filter(
+                            category=AC
+                        ) '''
+                    # select count * from room_list where category = NAC
+                    # select count * from room_list where category = KING
+                    # select count * from room_list where category = QUEEN
+                    # select count * from room_list where category = DELUXE
+
                     # Appending available category.
                     available_categories.append(room.category)
     return available_categories

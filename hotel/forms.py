@@ -23,5 +23,5 @@ class BookingForm(forms.ModelForm):
     class Meta:
         model = Booking
         fields = ['book_from_date', 'book_from_time', 'book_till_time', 
-                    'capacity']
+                    'no_of_rooms', 'capacity']
 

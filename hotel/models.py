@@ -72,4 +72,7 @@ class Booking(models.Model):
         ('4', '4'),
     )
     capacity = models.CharField(max_length=3, choices=ROOM_CAPACITY)
+    no_of_rooms = models.PositiveSmallIntegerField(
+        validators=[MaxValueValidator(1000), MinValueValidator(1)]
+        )
 

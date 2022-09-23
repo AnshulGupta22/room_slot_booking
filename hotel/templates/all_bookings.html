@@ -1,77 +1,110 @@
+{% load static %}
 <!DOCTYPE html>
-<html>
-    <head>
-        <style>
-            .card {
-              box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
-              transition: 0.3s;
-              width: 55%;
-              margin: 15px;
-              border-radius: 5px;
-            }
+<html lang="en">
+  <head>
+    <title>All Bookings</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="{% static 'hotel/css/base.css' %}">
+    <style>
+      *{
+        padding: 0;
+        margin: 0;
+      }
 
-            .card:hover {
-              box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
-            }
+      .card-width {
+        width: 55%;
+      }
 
-            img {
-              border-radius: 5px 5px 0 0;
-              /*float: left;*/
-            }
+      img {
+        border-radius: 5px 5px 0 0;
+        /*float: left;*/
+      }
 
-            .container {
-              padding: 2px 16px;
-            }
-        </style>
-    </head>
-	<body>
-	<p> <a href="{% url 'hotel:book' %}"> Back To Reservation Page </a> </p>
-	<p> <a href="{% url 'hotel:logout' %}"> Logout </a> </p>
-	{% if future_bookings or current_and_past_bookings %}
-	    {% if future_bookings %}
-	        <div class="card">
-                <div class="container">
-                    <h2><b> Future Bookings </b></h2>
-                    {% for future_booking in future_bookings %}
-                    <div class="card">
-                        <!--<img src = "sample-room.jpg" alt="Room" style="width:30%">-->
-                        <div class="container">
-                            <ul>
-                                <li><b>Booking Date</b> - {{ future_booking.book_from_date }}</li>
-                                <li><b>Booking From Time</b> - {{ future_booking.book_from_time }}</li>
-                                <li><b>Booking Till Time</b> - {{ future_booking.book_till_time }}</li>
-                                <li><b>Category</b> - {{ future_booking.category }}</li>
-                                <li><b>Capacity</b> - {{ future_booking.capacity }}</li>
-                                <li><a href='/hotel/all_bookings/{{future_booking.pk}}'> Delete </a></li>
-                            </ul>
-                        </div>
+      .container3 {
+        padding: 2px 16px;
+        line-height: 30px;
+      }
+
+      #foott {
+        margin-top: 40px;
+      }
+
+      h2 {
+        margin: 20px;
+      }
+
+      .inner-card {
+        padding: 12px 16px;
+      }
+    </style>
+  </head>
+  <body id="body-color">
+    <!-- Navigation Bar -->
+    <div class="w3-bar w3-white w3-large">
+      <div class="w3-bar-item w3-red w3-mobile"><i class="fa fa-bed w3-margin-right"></i>Logo</div>
+      <a href = "{% url 'hotel:logout' %}" class="w3-right ert"> Logout </a>
+      <a href = "{% url 'hotel:book' %}" class="w3-right ert"> Back To Reservation Page </a>
+    </div>
+    <div id="lef-hea">
+      <h1>Your Bookings</h1>
+    </div>
+    {% if future_bookings or current_and_past_bookings %}
+      {% if future_bookings %}
+        <div class="card card-width">
+          <div class="container3">
+            <h2><b> Future Bookings </b></h2>
+              {% for future_booking in future_bookings %}
+                <div class="card card-width">
+                    <!--<img src = "{% static 'hotel/images/hotel.jpg' %}" alt="Room" style="width:30%">-->
+                    <div class="container3 inner-card">
+                      <b>Booking Date</b> - {{ future_booking.book_from_date }}<br/>
+                      <b>Booking From Time</b> - {{ future_booking.book_from_time }}<br/>
+                      <b>Booking Till Time</b> - {{ future_booking.book_till_time }}<br/>
+                      <b>Category</b> - {{ future_booking.category }}<br/>
+                      <b>Capacity</b> - {{ future_booking.capacity }}<br/>
+                      <a href='/hotel/all_bookings/{{future_booking.pk}}' class="submit" style="padding: 2px 20px;"> Delete </a>                    
                     </div>
-                    {% endfor %}
                 </div>
-            </div>
-        {% endif %}
+              {% endfor %}
+          </div>
+        </div>
+      {% endif %}
                   
-        {% if current_and_past_bookings %}
+      {% if current_and_past_bookings %}
+        <div class="card card-width">
+          <div class="container3">
             <h2><b> Current and Past Bookings </b></h2>
-            {% for current_and_past_booking in current_and_past_bookings %}
-                <div class="card">
-                    <!--<img src = "sample-room.jpg" alt="Room" style="width:30%">-->
-                    <div class="container">
-                        <ul>
-                            <li><b>Booking Date</b> - {{ current_and_past_booking.book_from_date }}</li>
-                            <li><b>Booking From Time</b> - {{ current_and_past_booking.book_from_time }}</li>
-                            <li><b>Booking Till Time</b> - {{ current_and_past_booking.book_till_time }}</li>
-                            <li><b>Category</b> - {{ current_and_past_booking.category }}</li>
-                            <li><b>Capacity</b> - {{ current_and_past_booking.capacity }}</li>
-                        </ul>
-                    </div>
+              {% for current_and_past_booking in current_and_past_bookings %}
+                <div class="card card-width">
+                  <!--<img src = "sample-room.jpg" alt="Room" style="width:30%">-->
+                  <div class="container3 inner-card">
+                    <b>Booking Date</b> - {{ current_and_past_booking.book_from_date }}<br/>
+                    <b>Booking From Time</b> - {{ current_and_past_booking.book_from_time }}<br/>
+                    <b>Booking Till Time</b> - {{ current_and_past_booking.book_till_time }}<br/>
+                    <b>Category</b> - {{ current_and_past_booking.category }}<br/>
+                    <b>Capacity</b> - {{ current_and_past_booking.capacity }}
+                  </div>
                 </div>
-            {% endfor %}
-        {% endif %}
+              {% endfor %}
+          </div>
+        </div>
+      {% endif %}
 
-        {% else %}
-		    <p> No Bookings. </p>
-	    {% endif %}
+      {% else %}
+        <p> No Bookings. </p>
+    {% endif %}
+    <!-- Footer -->
+    <footer class="w3-padding-32 w3-black w3-center w3-margin-top" id="foott">
+      <h5>Find Us On</h5>
+      <div class="w3-xlarge w3-padding-16">
+        <a href="#" class="fa fa-facebook"></a>
+        <a href="#" class="fa fa-instagram"></a>
+        <a href="#" class="fa fa-twitter"></a>
+        <a href="#" class="fa fa-youtube"></a>
+        <a href="#" class="fa fa-linkedin-square"></a>
+      </div>
+      <p>Powered by <a href="https://www.w3schools.com/w3css/default.asp" target="_blank" class="w3-hover-text-green">w3.css</a></p>
+    </footer>
 	</body>
 </html>
-
