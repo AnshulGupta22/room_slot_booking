@@ -22,6 +22,6 @@ class SignInForm(forms.ModelForm):
 class BookingForm(forms.ModelForm):
     class Meta:
         model = Booking
-        fields = ['book_from_date', 'book_from_time', 'book_till_time', 
-                    'no_of_rooms', 'capacity']
+        fields = ['check_in_date', 'check_in_time', 'check_out_time', 
+                    'person', 'no_of_rooms']
 

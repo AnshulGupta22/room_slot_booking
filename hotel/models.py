@@ -30,20 +30,20 @@ class Room(models.Model):
         primary_key=True
         )
     ROOM_CATEGORIES = (
-        ('YAC', 'AC'),
-        ('NAC', 'NON-AC'),
-        ('DEL', 'DELUXE'),
-        ('KIN', 'KING'),
-        ('QUE', 'QUEEN'),
+        ('Regular', 'Regular'),
+        ('Executive', 'Executive'),
+        ('Deluxe', 'Deluxe'),
+        ('King', 'King'),
+        ('Queen', 'Queen'),
     )
-    category = models.CharField(max_length=3, choices=ROOM_CATEGORIES)
+    category = models.CharField(max_length=9, choices=ROOM_CATEGORIES)
     ROOM_CAPACITY = (
         ('1', '1'),
         ('2', '2'),
         ('3', '3'),
         ('4', '4'),
     )
-    capacity = models.CharField(max_length=3, choices=ROOM_CAPACITY)
+    capacity = models.CharField(max_length=1, choices=ROOM_CAPACITY)
     available_from = models.TimeField()
     available_till = models.TimeField()
     advance = models.PositiveSmallIntegerField()
@@ -51,28 +51,28 @@ class Room(models.Model):
 """class used when a user books a room slot."""
 class Booking(models.Model):
     customer_name = models.CharField(max_length=30)
-    book_from_date = models.DateField()
-    book_from_time = models.TimeField()
-    book_till_time = models.TimeField()
+    check_in_date = models.DateField()
+    check_in_time = models.TimeField()
+    check_out_time = models.TimeField()
     room_number =  models.PositiveSmallIntegerField(
         validators=[MaxValueValidator(100), MinValueValidator(1)]
         )
     ROOM_CATEGORIES = (
-        ('YAC', 'AC'),
-        ('NAC', 'NON-AC'),
-        ('DEL', 'DELUXE'),
-        ('KIN', 'KING'),
-        ('QUE', 'QUEEN'),
+        ('Regular', 'Regular'),
+        ('Executive', 'Executive'),
+        ('Deluxe', 'Deluxe'),
+        ('King', 'King'),
+        ('Queen', 'Queen'),
     )
-    category = models.CharField(max_length=3, choices=ROOM_CATEGORIES)
-    ROOM_CAPACITY = (
+    category = models.CharField(max_length=9, choices=ROOM_CATEGORIES)
+    PERSON = (
         ('1', '1'),
         ('2', '2'),
         ('3', '3'),
         ('4', '4'),
     )
-    capacity = models.CharField(max_length=3, choices=ROOM_CAPACITY)
+    person = models.CharField(max_length=1, choices=PERSON, default='1')
     no_of_rooms = models.PositiveSmallIntegerField(
-        validators=[MaxValueValidator(1000), MinValueValidator(1)]
+        validators=[MaxValueValidator(1000), MinValueValidator(1)], default=1
         )
 

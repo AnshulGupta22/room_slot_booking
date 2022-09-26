@@ -25,27 +25,27 @@ class CustomerAPISerializer(serializers.ModelSerializer):
 class BookingSerializerAdmin(serializers.ModelSerializer):
     class Meta:
         model = Booking
-        fields = ['id', 'customer_name', 'book_from_date', 'book_from_time',
-                    'book_till_time',  'room_number', 'category', 'capacity']
+        fields = ['id', 'customer_name', 'check_in_date', 'check_in_time',
+                    'check_out_time',  'room_number', 'category', 'person']
 
 """class for bookings without id for use by admin."""
 class BookingSerializerAdminWithoutid(serializers.ModelSerializer):
     class Meta:
         model = Booking
-        fields = ['customer_name', 'book_from_date', 'book_from_time',
-                    'book_till_time',  'room_number', 'category', 'capacity']
+        fields = ['customer_name', 'check_in_date', 'check_in_time',
+                    'check_out_time',  'room_number', 'category', 'person']
 
 """class to get bookings."""
 class BookingSerializerGet(serializers.ModelSerializer):
     class Meta:
         model = Booking
-        fields = ['id', 'book_from_date', 'book_from_time',
-                    'book_till_time', 'category', 'capacity']
+        fields = ['id', 'check_in_date', 'check_in_time',
+                    'check_out_time', 'category', 'person']
 
 """class to book booking."""
 class BookingSerializerBook(serializers.ModelSerializer):
     class Meta:
         model = Booking
-        fields = ['book_from_date', 'book_from_time',
-                    'book_till_time', 'capacity']
+        fields = ['check_in_date', 'check_in_time',
+                    'check_out_time', 'person']
 

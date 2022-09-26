@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Reservation</title>
+    <title>Booking</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="{% static 'hotel/css/base.css' %}">
@@ -84,7 +84,7 @@
       <form action="" method="POST">
 	      {% csrf_token %}
 	      {{ form.as_p }}
-	      <input type="submit" class= "submit submit-right" value="BOOK NOW" />
+	      <input type="submit" class= "submit submit-right" value="Search Availability" />
       </form>
       <br/>
     </div>
