@@ -58,11 +58,11 @@
                 <div class="card card-width">
                     <!--<img src = "{% static 'hotel/images/hotel.jpg' %}" alt="Room" style="width:30%">-->
                     <div class="container3 inner-card">
-                      <b>Booking Date</b> - {{ future_booking.book_from_date }}<br/>
-                      <b>Booking From Time</b> - {{ future_booking.book_from_time }}<br/>
-                      <b>Booking Till Time</b> - {{ future_booking.book_till_time }}<br/>
+                      <b>Booking Date</b> - {{ future_booking.check_in_date }}<br/>
+                      <b>Booking From Time</b> - {{ future_booking.check_in_time }}<br/>
+                      <b>Booking Till Time</b> - {{ future_booking.check_out_time }}<br/>
                       <b>Category</b> - {{ future_booking.category }}<br/>
-                      <b>Capacity</b> - {{ future_booking.capacity }}<br/>
+                      <b>Person</b> - {{ future_booking.person }}<br/>
                       <a href='/hotel/all_bookings/{{future_booking.pk}}' class="submit" style="padding: 2px 20px;"> Delete </a>                    
                     </div>
                 </div>
@@ -79,11 +79,11 @@
                 <div class="card card-width">
                   <!--<img src = "sample-room.jpg" alt="Room" style="width:30%">-->
                   <div class="container3 inner-card">
-                    <b>Booking Date</b> - {{ current_and_past_booking.book_from_date }}<br/>
-                    <b>Booking From Time</b> - {{ current_and_past_booking.book_from_time }}<br/>
-                    <b>Booking Till Time</b> - {{ current_and_past_booking.book_till_time }}<br/>
+                    <b>Booking Date</b> - {{ current_and_past_booking.check_in_date }}<br/>
+                    <b>Booking From Time</b> - {{ current_and_past_booking.check_in_time }}<br/>
+                    <b>Booking Till Time</b> - {{ current_and_past_booking.check_out_time }}<br/>
                     <b>Category</b> - {{ current_and_past_booking.category }}<br/>
-                    <b>Capacity</b> - {{ current_and_past_booking.capacity }}
+                    <b>Person</b> - {{ current_and_past_booking.person }}
                   </div>
                 </div>
               {% endfor %}

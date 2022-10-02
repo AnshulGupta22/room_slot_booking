@@ -38,15 +38,22 @@ class Room(models.Model):
     )
     category = models.CharField(max_length=9, choices=ROOM_CATEGORIES)
     ROOM_CAPACITY = (
-        ('1', '1'),
-        ('2', '2'),
-        ('3', '3'),
-        ('4', '4'),
+        (1, '1'),
+        (2, '2'),
+        (3, '3'),
+        (4, '4'),
     )
-    capacity = models.CharField(max_length=1, choices=ROOM_CAPACITY)
+    capacity = models.PositiveSmallIntegerField(choices=ROOM_CAPACITY, default=2)
     available_from = models.TimeField()
     available_till = models.TimeField()
     advance = models.PositiveSmallIntegerField()
+
+    def __str__(self):
+        #print(type('Room number: ', self.room_number,', category: ', self.category,', capacity: ',self.capacity,': available from ', self.available_from ,': available till ', self.available_till,', advance: ', self.advance))
+        #return 'Room number: ', self.room_number,', category: ', self.category,', capacity: ',self.capacity,': available from ', self.available_from ,': available till ', self.available_till,', advance: ', self.advance
+        #f-strings are used instead of the above method because return type of f-strings: string.
+        return f'Room number: {self.room_number}, category: {self.category}, capacity: {self.capacity}: available from {self.available_from}: available till {self.available_till}, advance: {self.advance}'
+        
 
 """class used when a user books a room slot."""
 class Booking(models.Model):
@@ -66,13 +73,16 @@ class Booking(models.Model):
     )
     category = models.CharField(max_length=9, choices=ROOM_CATEGORIES)
     PERSON = (
-        ('1', '1'),
-        ('2', '2'),
-        ('3', '3'),
-        ('4', '4'),
+        (1, '1'),
+        (2, '2'),
+        (3, '3'),
+        (4, '4'),
     )
-    person = models.CharField(max_length=1, choices=PERSON, default='1')
+    #person = models.CharField(max_length=1, choices=PERSON, default=1)
+    person = models.PositiveSmallIntegerField(choices=PERSON, default=1)
     no_of_rooms = models.PositiveSmallIntegerField(
         validators=[MaxValueValidator(1000), MinValueValidator(1)], default=1
         )
 
+    def __str__(self):
+        return f'Customer name: {self.customer_name}, check in date: {self.check_in_date}, check in time: {self.check_in_time}, check out time: {self.check_out_time}, room number: {self.room_number}, category: {self.category}, number of person: {self.person}'

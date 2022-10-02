@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 import datetime
 from django.db.models import Q
@@ -16,32 +17,34 @@ from .serializers import (RoomSerializer, BookingSerializerBook,
                             BookingSerializerAdminWithoutid,
                             CustomerAPISerializer)
 
-from django.contrib.auth.models import User
 from hotel.forms import CustomerForm, SignInForm, BookingForm
 from .models import Room, Booking
+
+
+#from django.contrib.auth import get_user_model
 
 # Create your views here.
 
 now = timezone.now()
 
-normal_username = ''
-normal_book_date = None
-normal_check_in = None
-normal_check_out = None
-normal_person = 1
-normal_no_of_rooms = 1
-normal_regular_rooms = 0
-normal_executive_rooms = 0
-normal_deluxe_rooms = 0
-normal_king_rooms = 0
-normal_queen_rooms = 0
+#normal_username = ''
+#normal_book_date = None
+#normal_check_in = None
+#normal_check_out = None
+#normal_person = 1
+#normal_no_of_rooms_required = 1
+#normal_regular_rooms = 0
+#normal_executive_rooms = 0
+#normal_deluxe_rooms = 0
+#normal_king_rooms = 0
+#normal_queen_rooms = 0
 
 api_username = ''
 api_book_date = None
 api_check_in = None
 api_check_out = None
 api_person = 1
-api_no_of_rooms = 1
+api_no_of_rooms_required = 1
 api_ac_rooms = 0
 api_nac_rooms = 0
 api_deluxe_rooms = 0
@@ -69,7 +72,9 @@ def sign_up(request):
     if request.method == 'POST':
         form = CustomerForm(request.POST)
         if (form.is_valid() and
-            request.POST['password'] == request.POST['confirm_password']):
+            request.POST['password'] == request.POST['confirm_password'] and
+            request.POST['email'] not in 
+            list(User.objects.values_list("email", flat=True))):
             try:
                 user = User.objects.create_user(
                     request.POST['desired_username'],
@@ -78,10 +83,11 @@ def sign_up(request):
                 user.first_name = request.POST['first_name']
                 user.last_name = request.POST['last_name']
                 user.save()
-            except:
+            except Exception:
                 return HttpResponse("Username already exist")
-            global normal_username
-            normal_username = request.POST['desired_username']
+            #global normal_username
+            #normal_username = request.POST['desired_username']
+            request.session['normal_username'] = request.POST['desired_username']
             login(request, user)
             return redirect('../book/')
 
@@ -101,8 +107,9 @@ def sign_in(request):
             user = authenticate(request, username=request.POST['username'],
                                 password=password)
             if user is not None:
-                global normal_username
-                normal_username = request.POST['username']
+                #global normal_username
+                #normal_username = request.POST['username']
+                request.session['normal_username'] = request.POST['username']
                 login(request, user)
                 return redirect('../book/')
 
@@ -119,19 +126,20 @@ def sign_in(request):
 """Function for log out."""
 def logout_view(request):
     logout(request)
-    return redirect('../sign_in/')
+    return redirect('../signin/')
 
 """Function that returns the list of available categories."""
-def search_availability(normal):
-    global normal_regular_rooms
-    #normal_regular_rooms = 0
-    global normal_executive_rooms
-    #normal_executive_rooms = 0
-    global normal_deluxe_rooms
-    #normal_deluxe_rooms = 0
-    global normal_king_rooms
-    #normal_king_rooms = 0
-    global normal_queen_rooms
+def search_availability(normal, normal_book_date, normal_check_in, normal_check_out, normal_person, normal_no_of_rooms_required):
+    #global normal_regular_rooms
+    normal_regular_rooms = 0
+    #global normal_executive_rooms
+    normal_executive_rooms = 0
+    #global normal_deluxe_rooms
+    normal_deluxe_rooms = 0
+    #global normal_king_rooms
+    normal_king_rooms = 0
+    #global normal_queen_rooms
+    normal_queen_rooms = 0
     if normal:
         book_date = normal_book_date
         check_in = normal_check_in
@@ -175,59 +183,57 @@ def search_availability(normal):
                 if (room.category == 'Regular'):
                     normal_regular_rooms = normal_regular_rooms + 1
 
-                if (room.category == 'Executive'):
+                elif (room.category == 'Executive'):
                     normal_executive_rooms = normal_executive_rooms + 1
 
-                if (room.category == 'Deluxe'):
+                elif (room.category == 'Deluxe'):
                     normal_deluxe_rooms = normal_deluxe_rooms + 1
 
-                if (room.category == 'King'):
+                elif (room.category == 'King'):
                     normal_king_rooms = normal_king_rooms + 1
 
-                if (room.category == 'Queen'):
+                elif (room.category == 'Queen'):
                     normal_queen_rooms = normal_queen_rooms + 1
-                
-    if (normal_regular_rooms <= normal_no_of_rooms):
+    if (normal_regular_rooms >= normal_no_of_rooms_required):
         available_categories.append('Regular')
 
-    if (normal_executive_rooms <= normal_no_of_rooms):
+    if (normal_executive_rooms >= normal_no_of_rooms_required):
         available_categories.append('Executive')
 
-    if (normal_deluxe_rooms <= normal_no_of_rooms):
+    if (normal_deluxe_rooms >= normal_no_of_rooms_required):
         available_categories.append('Deluxe')
 
-    if (normal_king_rooms <= normal_no_of_rooms):
+    if (normal_king_rooms >= normal_no_of_rooms_required):
         available_categories.append('King')
 
-    if (normal_queen_rooms <= normal_no_of_rooms):
+    if (normal_queen_rooms >= normal_no_of_rooms_required):
         available_categories.append('Queen')
 
     return available_categories
 
 """Function to return the available categories."""
-@login_required(login_url="/hotel/sign_in/")
+@login_required(login_url="/hotel/signin/")
 def booking(request):
     if request.method == 'POST':
         form = BookingForm(request.POST)
         if form.is_valid():
             check_out_time = request.POST['check_out_time']
-            global normal_book_date
-            normal_book_date = convert_to_date(request.POST['check_in_date'])
-            global normal_check_in
-            normal_check_in = convert_to_time(request.POST['check_in_time'])
+            #global normal_book_date
+            request.session['normal_book_date'] = convert_to_date(request.POST['check_in_date'])
+            #global normal_check_in
+            request.session['normal_check_in'] = convert_to_time(request.POST['check_in_time'])
             # now is the date and time on which the user is booking.
-            if (normal_book_date > now.date() or
-                (normal_book_date == now.date() and
-                normal_check_in >= now.time())):
-                global normal_person
-                normal_person = int(request.POST['person'])
-                global normal_no_of_rooms
-                normal_no_of_rooms = int(request.POST['no_of_rooms'])
-                print(type(normal_no_of_rooms))
-                global normal_check_out
-                normal_check_out = convert_to_time(check_out_time)
+            if (request.session['normal_book_date'] > now.date() or
+                (request.session['normal_book_date'] == now.date() and
+                request.session['normal_check_in'] >= now.time())):
+                #global normal_person
+                request.session['normal_person'] = int(request.POST['person'])
+                #global normal_no_of_rooms_required
+                request.session['normal_no_of_rooms_required'] = int(request.POST['no_of_rooms'])
+                #global normal_check_out
+                request.session['normal_check_out'] = convert_to_time(check_out_time)
                 response = list()
-                response = search_availability(True)
+                response = search_availability(True, request.session['normal_book_date'], request.session['normal_check_in'], request.session['normal_check_out'], request.session['normal_person'], request.session['normal_no_of_rooms_required'])
                 if response:
                     context = {'categories': response}
                     return render(request, 'categories.html', context)
@@ -244,8 +250,8 @@ def booking(request):
     context = {'form': BookingForm()}
     return render(request, 'book.html', context)
 
-def time_booking(room_numbers, room_type):
-    for i in range(len(room_numbers)):
+def time_booking(room_numbers, room_type, no_of_rooms_required, normal_username, normal_book_date, normal_check_in, normal_check_out, normal_person):
+    for i in range(no_of_rooms_required):
         room_no = room_numbers.pop()
         time_slot = Booking(
             customer_name=normal_username,
@@ -257,31 +263,34 @@ def time_booking(room_numbers, room_type):
         )
         time_slot.save()
 
-def room_category(room_type):
+def room_category(room_type, normal_username, normal_book_date, normal_check_in, normal_check_out, normal_person, normal_no_of_rooms_required):
     #global normal_book_date
     #global normal_check_in
     #global normal_check_out
     #global normal_person
     #global category
-    global normal_regular_rooms
-    #normal_regular_rooms = 0
-    global normal_executive_rooms
-    #normal_executive_rooms = 0
-    global normal_deluxe_rooms
-    #normal_deluxe_rooms = 0
-    global normal_king_rooms
-    #normal_king_rooms = 0
-    global normal_queen_rooms
-    #normal_queen_rooms = 0
-    #global normal_no_of_rooms
-    #normal_no_of_rooms = 1
+    #global normal_regular_rooms
+    normal_regular_rooms = 0
+    #global normal_executive_rooms
+    normal_executive_rooms = 0
+    #global normal_deluxe_rooms
+    normal_deluxe_rooms = 0
+    #global normal_king_rooms
+    normal_king_rooms = 0
+    #global normal_queen_rooms
+    normal_queen_rooms = 0
+    #global normal_no_of_rooms_required
+    #normal_no_of_rooms_required = 1
     room_numbers = list()
     # List of rooms for the given category.
-    room_list = Room.objects.filter(
-        available_from__lte=normal_check_in,
-        available_till__gte=normal_check_out,
-        capacity__gte=normal_person, category=room_type
-    )
+    try:
+        room_list = Room.objects.filter(
+            available_from__lte=normal_check_in,
+            available_till__gte=normal_check_out,
+            capacity__gte=normal_person, category=room_type
+        )
+    except Exception:
+        return 3
     for room in room_list:
         max_book = now + datetime.timedelta(days=room.advance)
         if (normal_book_date <= max_book.date()):
@@ -308,107 +317,114 @@ def room_category(room_type):
                 elif (room_type == 'Executive'):
                     normal_executive_rooms = normal_executive_rooms + 1
                     room_numbers.append(room.room_number)
-                    
+
                 elif (room_type == 'Deluxe'):
                     normal_deluxe_rooms = normal_deluxe_rooms + 1
                     room_numbers.append(room.room_number)
-                    
+
                 elif (room_type == 'King'):
                     normal_king_rooms = normal_king_rooms + 1
                     room_numbers.append(room.room_number)
-                    
+
                 elif (room_type == 'Queen'):
                     normal_queen_rooms = normal_queen_rooms + 1
                     room_numbers.append(room.room_number)
-                    
-    if (room_type == 'Regular' and normal_regular_rooms <= normal_no_of_rooms):
-        time_booking(room_numbers, room_type)
-        return True
 
-    elif (room_type == 'Executive' and normal_executive_rooms <= normal_no_of_rooms):
-        time_booking(room_numbers, room_type)
-        return True
+    if (room_type == 'Regular' and normal_regular_rooms >= normal_no_of_rooms_required):
+        time_booking(room_numbers, room_type, normal_no_of_rooms_required, normal_username, normal_book_date, normal_check_in, normal_check_out, normal_person)
+        return 1
 
-    elif (room_type == 'Deluxe' and normal_deluxe_rooms <= normal_no_of_rooms):
-        time_booking(room_numbers, room_type)
-        return True
+    elif (room_type == 'Executive' and normal_executive_rooms >= normal_no_of_rooms_required):
+        time_booking(room_numbers, room_type, normal_no_of_rooms_required, normal_username, normal_book_date, normal_check_in, normal_check_out, normal_person)
+        return 1
 
-    elif (room_type == 'King' and normal_king_rooms <= normal_no_of_rooms):
-        time_booking(room_numbers, room_type)
-        return True
+    elif (room_type == 'Deluxe' and normal_deluxe_rooms >= normal_no_of_rooms_required):
+        time_booking(room_numbers, room_type, normal_no_of_rooms_required, normal_username, normal_book_date, normal_check_in, normal_check_out, normal_person)
+        return 1
 
-    elif (room_type == 'Queen' and normal_queen_rooms <= normal_no_of_rooms):
-        time_booking(room_numbers, room_type)
-        return True
+    elif (room_type == 'King' and normal_king_rooms >= normal_no_of_rooms_required):
+        time_booking(room_numbers, room_type, normal_no_of_rooms_required, normal_username, normal_book_date, normal_check_in, normal_check_out, normal_person)
+        return 1
 
-    '''normal_book_date = None
-    normal_check_in = None
-    normal_check_out = None
-    category = ''
-    normal_person = 1
-    flag = True
-    return flag
-    normal_book_date = None
-    normal_check_in = None
-    normal_check_out = None
-    category = ''
-    normal_person = 1
-    normal_no_of_rooms = 1'''
-    return False
+    elif (room_type == 'Queen' and normal_queen_rooms >= normal_no_of_rooms_required):
+        time_booking(room_numbers, room_type, normal_no_of_rooms_required, normal_username, normal_book_date, normal_check_in, normal_check_out, normal_person)
+        return 1
+
+    return 2
 
 """Function to book room of this category if available."""
-@login_required(login_url="/hotel/sign_in/")
+@login_required(login_url="/hotel/signin/")
 def regular(request):
-    if room_category('Regular'):
+    room_status = room_category('Regular', request.session['normal_username'], request.session['normal_book_date'], request.session['normal_check_in'], request.session['normal_check_out'], request.session['normal_person'], request.session['normal_no_of_rooms_required'])
+    if room_status == 1:
         return render(request, 'booked.html')
-    return HttpResponse("Unavailable")
+    elif room_status == 2:
+        return HttpResponse("Unavailable")
+    else:
+        return redirect('../book/')
 
 """Function to book room of this category if available."""
-@login_required(login_url="/hotel/sign_in/")
+@login_required(login_url="/hotel/signin/")
 def executive(request):
-    if room_category('Executive'):
+    room_status = room_category('Executive', request.session['normal_username'], request.session['normal_book_date'], request.session['normal_check_in'], request.session['normal_check_out'], request.session['normal_person'], request.session['normal_no_of_rooms_required'])
+    if room_status == 1:
         return render(request, 'booked.html')
-    return HttpResponse("Unavailable")
+    elif room_status == 2:
+        return HttpResponse("Unavailable")
+    else:
+        return redirect('../book/')
 
 """Function to book room of this category if available."""
-@login_required(login_url="/hotel/sign_in/")
+@login_required(login_url="/hotel/signin/")
 def deluxe(request):
-    if room_category('Deluxe'):
+    room_status = room_category('Deluxe', request.session['normal_username'], request.session['normal_book_date'], request.session['normal_check_in'], request.session['normal_check_out'], request.session['normal_person'], request.session['normal_no_of_rooms_required'])
+    if room_status == 1:
         return render(request, 'booked.html')
-    return HttpResponse("Unavailable")
+    elif room_status == 2:
+        return HttpResponse("Unavailable")
+    else:
+        return redirect('../book/')
 
 """Function to book room of this category if available."""
-@login_required(login_url="/hotel/sign_in/")
+@login_required(login_url="/hotel/signin/")
 def king(request):
-    if room_category('King'):
+    room_status = room_category('King', request.session['normal_username'], request.session['normal_book_date'], request.session['normal_check_in'], request.session['normal_check_out'], request.session['normal_person'], request.session['normal_no_of_rooms_required'])
+    if room_status == 1:
         return render(request, 'booked.html')
-    return HttpResponse("Unavailable")
+    elif room_status == 2:
+        return HttpResponse("Unavailable")
+    else:
+        return redirect('../book/')
 
 """Function to book room of this category if available."""
-@login_required(login_url="/hotel/sign_in/")
+@login_required(login_url="/hotel/signin/")
 def queen(request):
-    if room_category('Queen'):
+    room_status = room_category('Queen', request.session['normal_username'], request.session['normal_book_date'], request.session['normal_check_in'], request.session['normal_check_out'], request.session['normal_person'], request.session['normal_no_of_rooms_required'])
+    if room_status == 1:
         return render(request, 'booked.html')
-    return HttpResponse("Unavailable")
+    elif room_status == 2:
+        return HttpResponse("Unavailable")
+    else:
+        return redirect('../book/')
 
 """Function to return all the bookings."""
-@login_required(login_url="/hotel/sign_in/")
+@login_required(login_url="/hotel/signin/")
 def all_bookings(request, pk=None):
     if pk:
         try:
             booking = Booking.objects.get(pk=pk)
             booking.delete()
-        except:
+        except Exception:
             return HttpResponse("This booking no longer exists.")
 
     # Future bookings.
     future_bookings = Booking.objects.filter(
-        customer_name=normal_username,
-        book_from_date__gt=now.date()
+        customer_name=request.session['normal_username'],
+        check_in_date__gt=now.date()
     )
     # Current and past bookings.
     current_and_past_bookings = Booking.objects.filter(
-        customer_name=normal_username, book_from_date__lte=now.date()
+        customer_name=request.session['normal_username'], check_in_date__lte=now.date()
     )
     context = {
         'future_bookings': future_bookings,
@@ -484,7 +500,7 @@ def user_list(request, format=None):
                     user.save()
                     return Response(serializer.data,
                                     status=status.HTTP_201_CREATED)
-                except:
+                except Exception:
                     return Response({'msg': 'Username already exist.'},
                                     status=
                                     status.HTTP_422_UNPROCESSABLE_ENTITY)
@@ -570,7 +586,7 @@ def booking_category(request, category, format=None):
             available_till__gte=api_check_out,
             capacity__gte=api_person, category=category
         )
-    except:
+    except Exception:
         return Response({'msg': 'Unavailable'},
                         status=status.HTTP_404_NOT_FOUND)
     for room in room_list:
