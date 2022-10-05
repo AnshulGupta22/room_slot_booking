@@ -3,12 +3,12 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 
 # Create your models here.
 
-"""class used when a user sign up."""
+"""class used when a user sign up. This class has to be deleted"""
 class Customer(models.Model):
     desired_username = models.CharField(max_length=30, primary_key=True)
     first_name = models.CharField(max_length=120)
     last_name = models.CharField(max_length=120)
-    email = models.EmailField()
+    email = models.EmailField(unique=True)
 
 """class used when a user sign up using API."""
 class CustomerAPI(models.Model):
@@ -17,9 +17,9 @@ class CustomerAPI(models.Model):
     last_name = models.CharField(max_length=120)
     email = models.EmailField()
     password = models.CharField(max_length=120)
-    confirm_password = models.CharField(max_length=120)
+    retype_password = models.CharField(max_length=120)
 
-"""class used when a user sign in."""
+"""class used when a user sign in. This class has to be deleted"""
 class SignIn(models.Model):
     username = models.CharField(max_length=30)
 
@@ -62,7 +62,7 @@ class Booking(models.Model):
     check_in_time = models.TimeField()
     check_out_time = models.TimeField()
     room_number =  models.PositiveSmallIntegerField(
-        validators=[MaxValueValidator(100), MinValueValidator(1)]
+        validators=[MaxValueValidator(100), MinValueValidator(1)], unique=True
         )
     ROOM_CATEGORIES = (
         ('Regular', 'Regular'),
