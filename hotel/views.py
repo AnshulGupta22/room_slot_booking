@@ -249,7 +249,7 @@ def booking(request):
             context = {'form': BookingForm()}
             return render(request, 'book.html', context)
 
-    context = {'form': BookingForm(), 'fvb': request.session['normal_username']}
+    context = {'form': BookingForm(), 'username': request.session['normal_username']}
     return render(request, 'book.html', context)
 
 def time_booking(room_numbers, room_type, no_of_rooms_required, normal_username, normal_book_date, normal_check_in, normal_check_out, normal_person):
