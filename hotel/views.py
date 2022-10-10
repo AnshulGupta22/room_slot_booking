@@ -19,8 +19,7 @@ from .serializers import (RoomSerializer, BookingSerializerBook,
 
 from hotel.forms import CustomerForm, SignInForm, BookingForm
 from .models import Room, Booking
-
-
+  
 #from django.contrib.auth import get_user_model
 
 # Create your views here.
@@ -71,26 +70,28 @@ def home(request):
 def sign_up(request):
     if request.method == 'POST':
         form = CustomerForm(request.POST)
-        if (form.is_valid() and
-            request.POST['password'] == request.POST['confirm_password'] and
+        '''if (form.is_valid() and
+            request.POST['password'] == request.POST['retype_password'] and
             request.POST['email'] not in 
-            list(User.objects.values_list("email", flat=True))):
+            list(User.objects.values_list("email", flat=True))):'''
+        '''if (form.is_valid() and
+            request.POST['password'] == request.POST['retype_password']):'''
+        if form.is_valid():
             try:
                 user = User.objects.create_user(
-                    request.POST['desired_username'],
-                    request.POST['email'], request.POST['password']
+                    request.POST['username'],
+                    request.POST['email'], request.POST['password1']
                 )
                 user.first_name = request.POST['first_name']
                 user.last_name = request.POST['last_name']
                 user.save()
+                request.session['normal_username'] = request.POST['username']
+                login(request, user)
+                return redirect('../book/')
             except Exception:
-                return HttpResponse("Username already exist")
+                return HttpResponse("Something went wrong. Please try again.")
             #global normal_username
             #normal_username = request.POST['desired_username']
-            request.session['normal_username'] = request.POST['desired_username']
-            login(request, user)
-            return redirect('../book/')
-
         else:
             context = {'form': form}
             return render(request, 'sign_up.html', context)
@@ -106,15 +107,14 @@ def sign_in(request):
             password = request.POST['password']
             user = authenticate(request, username=request.POST['username'],
                                 password=password)
-            if user is not None:
-                #global normal_username
-                #normal_username = request.POST['username']
-                request.session['normal_username'] = request.POST['username']
-                login(request, user)
-                return redirect('../book/')
+            #global normal_username
+            #normal_username = request.POST['username']
+            request.session['normal_username'] = request.POST['username']
+            login(request, user)
+            return redirect('../book/')
 
-            else:
-                return HttpResponse("Invalid credentials")
+            #else:
+            #    return HttpResponse("Invalid credentials")
 
         else:
             context = {'form': form}
@@ -217,23 +217,25 @@ def booking(request):
     if request.method == 'POST':
         form = BookingForm(request.POST)
         if form.is_valid():
-            check_out_time = request.POST['check_out_time']
             #global normal_book_date
-            request.session['normal_book_date'] = convert_to_date(request.POST['check_in_date'])
+            request.session['normal_book_date'] = request.POST['check_in_date']
+            normal_book_date = convert_to_date(request.session['normal_book_date'])
             #global normal_check_in
-            request.session['normal_check_in'] = convert_to_time(request.POST['check_in_time'])
+            request.session['normal_check_in'] = request.POST['check_in_time']
+            normal_check_in = convert_to_time(request.session['normal_check_in'])
+            request.session['normal_check_out'] = request.POST['check_out_time']
             # now is the date and time on which the user is booking.
-            if (request.session['normal_book_date'] > now.date() or
-                (request.session['normal_book_date'] == now.date() and
-                request.session['normal_check_in'] >= now.time())):
+            if (normal_book_date > now.date() or
+                (normal_book_date == now.date() and
+                normal_check_in >= now.time())):
                 #global normal_person
                 request.session['normal_person'] = int(request.POST['person'])
                 #global normal_no_of_rooms_required
                 request.session['normal_no_of_rooms_required'] = int(request.POST['no_of_rooms'])
                 #global normal_check_out
-                request.session['normal_check_out'] = convert_to_time(check_out_time)
+                normal_check_out = convert_to_time(request.session['normal_check_out'])
                 response = list()
-                response = search_availability(True, request.session['normal_book_date'], request.session['normal_check_in'], request.session['normal_check_out'], request.session['normal_person'], request.session['normal_no_of_rooms_required'])
+                response = search_availability(True, normal_book_date, normal_check_in, normal_check_out, request.session['normal_person'], request.session['normal_no_of_rooms_required'])
                 if response:
                     context = {'categories': response}
                     return render(request, 'categories.html', context)
@@ -247,7 +249,7 @@ def booking(request):
             context = {'form': BookingForm()}
             return render(request, 'book.html', context)
 
-    context = {'form': BookingForm()}
+    context = {'form': BookingForm(), 'username': request.session['normal_username']}
     return render(request, 'book.html', context)
 
 def time_booking(room_numbers, room_type, no_of_rooms_required, normal_username, normal_book_date, normal_check_in, normal_check_out, normal_person):
@@ -263,7 +265,10 @@ def time_booking(room_numbers, room_type, no_of_rooms_required, normal_username,
         )
         time_slot.save()
 
-def room_category(room_type, normal_username, normal_book_date, normal_check_in, normal_check_out, normal_person, normal_no_of_rooms_required):
+def room_category(room_type, normal_username, normal_book_date_str, normal_check_in_str, normal_check_out_str, normal_person, normal_no_of_rooms_required):
+    normal_book_date = convert_to_date(normal_book_date_str)
+    normal_check_in = convert_to_time(normal_check_in_str)
+    normal_check_out = convert_to_time(normal_check_out_str)
     #global normal_book_date
     #global normal_check_in
     #global normal_check_out
@@ -488,7 +493,7 @@ def user_list(request, format=None):
         serializer = CustomerAPISerializer(data=request.data)
         if serializer.is_valid():
             if(serializer.validated_data['password'] ==
-                serializer.validated_data['confirm_password']):
+                serializer.validated_data['retype_password']):
                 try:
                     user = User.objects.create_user(
                         serializer.validated_data['desired_username'],
