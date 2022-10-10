@@ -99,6 +99,32 @@ def sign_up(request):
     context = {'form': CustomerForm()}
     return render(request, 'sign_up.html', context)
 
+"""Function for viewing profile."""
+def view_profile(request):
+    #profile = User.objects.filter(username=request.session['normal_username']).values_list('username','email','first_name','last_name')
+    profile = User.objects.filter(username=request.session['normal_username']).values()
+    context = {'profile': profile}
+    return render(request, 'view_profile.html', context)
+
+
+"""Function for editing profile."""
+def edit_profile(request):
+    #profile = User.objects.filter(username=request.session['normal_username']).values_list('username','email','first_name','last_name')
+    profile = User.objects.get(username=request.session['normal_username'])
+
+    if request.method == 'POST':
+        form = CustomerForm(request.POST, instance=profile)
+        if form.is_valid():
+            form.save()
+            return redirect('../book/')
+        else:
+            context = {'form': form}
+            return render(request, 'sign_up.html', context)
+    context = {'form': CustomerForm()}
+    return render(request, 'sign_up.html', context)
+
+
+
 """Function for sign in."""
 def sign_in(request):
     if request.method == 'POST':

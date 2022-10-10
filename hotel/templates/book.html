@@ -70,14 +70,74 @@
       a.one:visited {color:#0000ff;}
       a.one:hover {color:#ffcc00;}
       */
-    </style>
+
+
+.dropdown {
+  overflow: hidden;
+}
+
+.dropdown .dropbtn { 
+  font-size: 16px;
+  border: none;
+  outline: none;
+  color: black;
+  padding: 14px 16px;
+  background-color: inherit;
+  font-family: inherit;
+  margin: 0;
+  margin-right: 53px;
+}
+
+.dropdown:hover .dropbtn {
+  background-color: red;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f9f9f9;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+.dropdown-content a {
+  font-size: 14px;
+  float: none;
+  color: blue;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+  text-align: left;
+}
+
+.dropdown-content a:hover {
+  background-color: #ddd;
+}
+
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+
+
+  </style>
   </head>
 	<body id="body-color">
     <!-- Navigation Bar -->
     <div class="w3-bar w3-white w3-large">
       <div class="w3-bar-item w3-red w3-mobile"><i class="fa fa-bed w3-margin-right"></i>Logo</div>
-      <a href = "{% url 'hotel:logout' %}" class="w3-right ert"> Logout </a>
-      <i class="w3-right ert"> {{ username }} </i>
+
+      <div class="dropdown w3-right ert">
+        <button class="dropbtn">{{ username }} 
+          <i class="fa fa-caret-down"></i>
+        </button>
+        <div class="dropdown-content">
+          <a href="#">Change Password</a>
+          <a href="{% url 'hotel:edit_profile' %}">Edit Profile</a>
+          <a href="{% url 'hotel:view_profile' %}">View Profile</a>
+          <a href="{% url 'hotel:logout' %}">Logout</a>
+        </div>
+      </div>
       <a href="{% url 'hotel:all_bookings' %}" class="w3-right ert"> Your Bookings </a>
     </div>
     <div class="container2" id="boxx">
