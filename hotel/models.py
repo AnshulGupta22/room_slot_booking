@@ -52,7 +52,7 @@ class Room(models.Model):
         #print(type('Room number: ', self.room_number,', category: ', self.category,', capacity: ',self.capacity,': available from ', self.available_from ,': available till ', self.available_till,', advance: ', self.advance))
         #return 'Room number: ', self.room_number,', category: ', self.category,', capacity: ',self.capacity,': available from ', self.available_from ,': available till ', self.available_till,', advance: ', self.advance
         #f-strings are used instead of the above method because return type of f-strings: string.
-        return f'Room number: {self.room_number}, category: {self.category}, capacity: {self.capacity}: available from {self.available_from}: available till {self.available_till}, advance: {self.advance}'
+        return f'Room number: {self.room_number}, category: {self.category}, capacity: {self.capacity}, from: {self.available_from}, till: {self.available_till}, advance: {self.advance}'
         
 
 """class used when a user books a room slot."""

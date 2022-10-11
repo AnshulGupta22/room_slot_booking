@@ -103,6 +103,7 @@ def sign_up(request):
 def view_profile(request):
     #profile = User.objects.filter(username=request.session['normal_username']).values_list('username','email','first_name','last_name')
     profile = User.objects.filter(username=request.session['normal_username']).values()
+    #print(profile)
     context = {'profile': profile}
     return render(request, 'view_profile.html', context)
 
@@ -120,7 +121,7 @@ def edit_profile(request):
         else:
             context = {'form': form}
             return render(request, 'sign_up.html', context)
-    context = {'form': CustomerForm()}
+    context = {'form': CustomerForm(instance=profile)}
     return render(request, 'sign_up.html', context)
 
 
