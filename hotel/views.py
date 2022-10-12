@@ -8,7 +8,7 @@ from django.utils import timezone
 from django.http import HttpResponse
 
 from rest_framework import status
-from rest_framework.decorators import (api_view, permission_classes)
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
@@ -264,16 +264,16 @@ def booking(request):
                 response = list()
                 response = search_availability(True, normal_book_date, normal_check_in, normal_check_out, request.session['normal_person'], request.session['normal_no_of_rooms_required'])
                 if response:
-                    context = {'categories': response}
+                    context = {'categories': response, 'username': request.session['normal_username']}
                     return render(request, 'categories.html', context)
                 return HttpResponse("Not Available")
 
             else:
-                context = {'form': BookingForm()}
+                context = {'form': BookingForm(), 'username': request.session['normal_username']}
                 return render(request, 'book.html', context)
 
         else:
-            context = {'form': BookingForm()}
+            context = {'form': BookingForm(), 'username': request.session['normal_username']}
             return render(request, 'book.html', context)
 
     context = {'form': BookingForm(), 'username': request.session['normal_username']}
@@ -389,7 +389,8 @@ def room_category(room_type, normal_username, normal_book_date_str, normal_check
 def regular(request):
     room_status = room_category('Regular', request.session['normal_username'], request.session['normal_book_date'], request.session['normal_check_in'], request.session['normal_check_out'], request.session['normal_person'], request.session['normal_no_of_rooms_required'])
     if room_status == 1:
-        return render(request, 'booked.html')
+        context = {'username': request.session['normal_username']}
+        return render(request, 'booked.html', context)
     elif room_status == 2:
         return HttpResponse("Unavailable")
     else:
@@ -400,7 +401,8 @@ def regular(request):
 def executive(request):
     room_status = room_category('Executive', request.session['normal_username'], request.session['normal_book_date'], request.session['normal_check_in'], request.session['normal_check_out'], request.session['normal_person'], request.session['normal_no_of_rooms_required'])
     if room_status == 1:
-        return render(request, 'booked.html')
+        context = {'username': request.session['normal_username']}
+        return render(request, 'booked.html', context)
     elif room_status == 2:
         return HttpResponse("Unavailable")
     else:
@@ -411,7 +413,8 @@ def executive(request):
 def deluxe(request):
     room_status = room_category('Deluxe', request.session['normal_username'], request.session['normal_book_date'], request.session['normal_check_in'], request.session['normal_check_out'], request.session['normal_person'], request.session['normal_no_of_rooms_required'])
     if room_status == 1:
-        return render(request, 'booked.html')
+        context = {'username': request.session['normal_username']}
+        return render(request, 'booked.html', context)
     elif room_status == 2:
         return HttpResponse("Unavailable")
     else:
@@ -422,7 +425,8 @@ def deluxe(request):
 def king(request):
     room_status = room_category('King', request.session['normal_username'], request.session['normal_book_date'], request.session['normal_check_in'], request.session['normal_check_out'], request.session['normal_person'], request.session['normal_no_of_rooms_required'])
     if room_status == 1:
-        return render(request, 'booked.html')
+        context = {'username': request.session['normal_username']}
+        return render(request, 'booked.html', context)
     elif room_status == 2:
         return HttpResponse("Unavailable")
     else:
@@ -433,7 +437,8 @@ def king(request):
 def queen(request):
     room_status = room_category('Queen', request.session['normal_username'], request.session['normal_book_date'], request.session['normal_check_in'], request.session['normal_check_out'], request.session['normal_person'], request.session['normal_no_of_rooms_required'])
     if room_status == 1:
-        return render(request, 'booked.html')
+        context = {'username': request.session['normal_username']}
+        return render(request, 'booked.html', context)
     elif room_status == 2:
         return HttpResponse("Unavailable")
     else:
@@ -460,7 +465,8 @@ def all_bookings(request, pk=None):
     )
     context = {
         'future_bookings': future_bookings,
-        'current_and_past_bookings': current_and_past_bookings
+        'current_and_past_bookings': current_and_past_bookings,
+        'username': request.session['normal_username']
     }
     return render(request, 'all_bookings.html', context)
 

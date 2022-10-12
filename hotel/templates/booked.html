@@ -67,11 +67,21 @@
     </style>
   </head>
 	<body id="body-color">
-    <!-- Navigation Bar -->
-    <div class="w3-bar w3-white w3-large">
-      <div class="w3-bar-item w3-red w3-mobile"><i class="fa fa-bed w3-margin-right"></i>Logo</div>
-      <a href = "{% url 'hotel:logout' %}" class="w3-right ert"> Logout </a>
+   <!-- Navigation Bar -->
+   <div class="w3-bar w3-white w3-large">
+    <div class="w3-bar-item w3-red w3-mobile"><i class="fa fa-bed w3-margin-right"></i>Logo</div>
+
+    <div class="dropdown w3-right ert">
+      <button class="dropbtn">{{ username }}
+        <i class="fa fa-caret-down"></i>
+      </button>
+      <div class="dropdown-content">
+        <a href="{% url 'hotel:view_profile' %}">View Profile</a>
+        <a href="{% url 'hotel:logout' %}">Logout</a>
+      </div>
     </div>
+    <a href="{% url 'hotel:all_bookings' %}" class="w3-right ert"> Your Bookings </a>
+  </div>
 	  <div class="container2" id="booke">
       <h1>Booked</h1>
       <br/><br/><br/>

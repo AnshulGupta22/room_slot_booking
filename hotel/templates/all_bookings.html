@@ -40,10 +40,21 @@
     </style>
   </head>
   <body id="body-color">
+
+
     <!-- Navigation Bar -->
     <div class="w3-bar w3-white w3-large">
       <div class="w3-bar-item w3-red w3-mobile"><i class="fa fa-bed w3-margin-right"></i>Logo</div>
-      <a href = "{% url 'hotel:logout' %}" class="w3-right ert"> Logout </a>
+
+      <div class="dropdown w3-right ert">
+        <button class="dropbtn">{{ username }} 
+          <i class="fa fa-caret-down"></i>
+        </button>
+        <div class="dropdown-content">
+          <a href="{% url 'hotel:view_profile' %}">View Profile</a>
+          <a href="{% url 'hotel:logout' %}">Logout</a>
+        </div>
+      </div>
       <a href = "{% url 'hotel:book' %}" class="w3-right ert"> Back To Reservation Page </a>
     </div>
     <div id="lef-hea">

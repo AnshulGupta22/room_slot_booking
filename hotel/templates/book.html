@@ -79,8 +79,6 @@
           <i class="fa fa-caret-down"></i>
         </button>
         <div class="dropdown-content">
-          <a href="#">Change Password</a>
-          <a href="{% url 'hotel:edit_profile' %}">Edit Profile</a>
           <a href="{% url 'hotel:view_profile' %}">View Profile</a>
           <a href="{% url 'hotel:logout' %}">Logout</a>
         </div>
@@ -89,7 +87,7 @@
     </div>
     <div class="container2" id="boxx">
       <h2 class="w3-center">Room Slot Booking</h2><br/>
-      <form action="" method="POST">
+      <form method="POST">
 	      {% csrf_token %}
 	      {{ form.as_p }}
 	      <input type="submit" class= "submit submit-right" value="Search Availability" />
