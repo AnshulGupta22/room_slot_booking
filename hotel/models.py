@@ -43,17 +43,15 @@ class Room(models.Model):
         (3, '3'),
         (4, '4'),
     )
-    capacity = models.PositiveSmallIntegerField(choices=ROOM_CAPACITY, default=2)
+    capacity = models.PositiveSmallIntegerField(
+        choices=ROOM_CAPACITY, default=2
+        )
     available_from = models.TimeField()
     available_till = models.TimeField()
     advance = models.PositiveSmallIntegerField()
 
     def __str__(self):
-        #print(type('Room number: ', self.room_number,', category: ', self.category,', capacity: ',self.capacity,': available from ', self.available_from ,': available till ', self.available_till,', advance: ', self.advance))
-        #return 'Room number: ', self.room_number,', category: ', self.category,', capacity: ',self.capacity,': available from ', self.available_from ,': available till ', self.available_till,', advance: ', self.advance
-        #f-strings are used instead of the above method because return type of f-strings: string.
         return f'Room number: {self.room_number}, category: {self.category}, capacity: {self.capacity}, from: {self.available_from}, till: {self.available_till}, advance: {self.advance}'
-        
 
 """class used when a user books a room slot."""
 class Booking(models.Model):
@@ -78,7 +76,6 @@ class Booking(models.Model):
         (3, '3'),
         (4, '4'),
     )
-    #person = models.CharField(max_length=1, choices=PERSON, default=1)
     person = models.PositiveSmallIntegerField(choices=PERSON, default=1)
     no_of_rooms = models.PositiveSmallIntegerField(
         validators=[MaxValueValidator(1000), MinValueValidator(1)], default=1
