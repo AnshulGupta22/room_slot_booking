@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from . models import Room, Customer, Booking, CustomerAPI
+from django.contrib.auth.models import User
 
 """class for rooms."""
 class RoomSerializer(serializers.ModelSerializer):
@@ -15,11 +16,49 @@ class CustomerSerializer(serializers.ModelSerializer):
         fields = ['desired_username', 'first_name', 'last_name', 'email']
 
 """class to register users."""
-class CustomerAPISerializer(serializers.ModelSerializer):
+'''class CustomerAPISerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomerAPI
         fields = ['desired_username', 'first_name', 'last_name', 'email',
-                    'password',  'confirm_password']
+                    'password',  'confirm_password']'''
+
+""""""""""""""""""""""""""""""""""""""""""
+
+class CustomerAPISerializer(serializers.Serializer):
+    desired_username = serializers.CharField(max_length=150)
+    first_name = serializers.CharField(max_length=150)
+    last_name = serializers.CharField(max_length=150)
+    your_email = serializers.EmailField()
+    password = serializers.CharField(min_length=8)
+    retype_password = serializers.CharField(min_length=8)
+
+    def validate(self, data):
+        """
+        Check if password and retyped password match or not.
+        """
+        if data['password'] != data['retype_password']:
+            raise serializers.ValidationError("Passwords do not match")
+        return data
+
+    def validate_desired_username(self, value):
+        """
+        Check if the username already exists or not.
+        """
+        new = User.objects.filter(username = value)
+        if new.count():
+            raise serializers.ValidationError(f'{value} already exists')
+        return value
+
+    def validate_your_email(self, value):
+        """
+        Check if the email already exists or not.
+        """
+        new = User.objects.filter(email = value)
+        if new.count():
+            raise serializers.ValidationError(f'{value} already exists')
+        return value
+
+""""""""""""""""""""""""""""""""""""""""""
 
 """class for bookings for use by admin."""
 class BookingSerializerAdmin(serializers.ModelSerializer):

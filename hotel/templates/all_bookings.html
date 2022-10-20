@@ -40,10 +40,21 @@
     </style>
   </head>
   <body id="body-color">
+
+
     <!-- Navigation Bar -->
     <div class="w3-bar w3-white w3-large">
       <div class="w3-bar-item w3-red w3-mobile"><i class="fa fa-bed w3-margin-right"></i>Logo</div>
-      <a href = "{% url 'hotel:logout' %}" class="w3-right ert"> Logout </a>
+
+      <div class="dropdown w3-right ert">
+        <button class="dropbtn">{{ username }} 
+          <i class="fa fa-caret-down"></i>
+        </button>
+        <div class="dropdown-content">
+          <a href="{% url 'hotel:view_profile' %}">View Profile</a>
+          <a href="{% url 'hotel:logout' %}">Logout</a>
+        </div>
+      </div>
       <a href = "{% url 'hotel:book' %}" class="w3-right ert"> Back To Reservation Page </a>
     </div>
     <div id="lef-hea">
@@ -63,6 +74,7 @@
                       <b>Booking Till Time</b> - {{ future_booking.check_out_time }}<br/>
                       <b>Category</b> - {{ future_booking.category }}<br/>
                       <b>Person</b> - {{ future_booking.person }}<br/>
+                      <b>Number of Rooms</b> - {{ future_booking.no_of_rooms }}<br/>
                       <a href='/hotel/all_bookings/{{future_booking.pk}}' class="submit" style="padding: 2px 20px;"> Delete </a>                    
                     </div>
                 </div>
@@ -83,7 +95,8 @@
                     <b>Booking From Time</b> - {{ current_and_past_booking.check_in_time }}<br/>
                     <b>Booking Till Time</b> - {{ current_and_past_booking.check_out_time }}<br/>
                     <b>Category</b> - {{ current_and_past_booking.category }}<br/>
-                    <b>Person</b> - {{ current_and_past_booking.person }}
+                    <b>Person</b> - {{ current_and_past_booking.person }}<br/>
+                    <b>Number of Rooms</b> - {{ current_and_past_booking.no_of_rooms }}
                   </div>
                 </div>
               {% endfor %}

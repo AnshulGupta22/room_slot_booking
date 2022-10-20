@@ -12,10 +12,6 @@
 	      margin: 0;
       }
 
-      #box {
-        height: 40%;
-      }
-
 /*
       body{
         background: url(http://wrbbradio.org/wp-content/uploads/2016/10/grey-background-07.jpg) no-repeat center fixed;
@@ -70,19 +66,28 @@
       a.one:visited {color:#0000ff;}
       a.one:hover {color:#ffcc00;}
       */
-    </style>
+
+  </style>
   </head>
 	<body id="body-color">
     <!-- Navigation Bar -->
     <div class="w3-bar w3-white w3-large">
       <div class="w3-bar-item w3-red w3-mobile"><i class="fa fa-bed w3-margin-right"></i>Logo</div>
-      <a href = "{% url 'hotel:logout' %}" class="w3-right ert"> Logout </a>
-      <i class="w3-right ert"> {{ username }} </i>
+
+      <div class="dropdown w3-right ert">
+        <button class="dropbtn">{{ username }} 
+          <i class="fa fa-caret-down"></i>
+        </button>
+        <div class="dropdown-content">
+          <a href="{% url 'hotel:view_profile' %}">View Profile</a>
+          <a href="{% url 'hotel:logout' %}">Logout</a>
+        </div>
+      </div>
       <a href="{% url 'hotel:all_bookings' %}" class="w3-right ert"> Your Bookings </a>
     </div>
     <div class="container2" id="boxx">
       <h2 class="w3-center">Room Slot Booking</h2><br/>
-      <form action="" method="POST">
+      <form method="POST">
 	      {% csrf_token %}
 	      {{ form.as_p }}
 	      <input type="submit" class= "submit submit-right" value="Search Availability" />
