@@ -547,18 +547,18 @@ def booking_list(request):
             status=status.HTTP_400_BAD_REQUEST)
         serializer = BookingSerializerBook(data=request.data)
         if serializer.is_valid():
-            request.session['api_book_date'] = serializer.validated_data['check_in_date']    
+            request.session['api_book_date'] = serializer.validated_data['check_in_date']
             request.session['api_check_in'] = serializer.validated_data['check_in_time']
             request.session['api_check_out'] = serializer.validated_data['check_out_time']
             request.session['api_person'] = serializer.validated_data['person']
             request.session['no_of_rooms'] = serializer.validated_data['no_of_rooms']
             response = search_availability(request.session['api_book_date'], request.session['api_check_in'], request.session['api_check_out'], request.session['api_person'], request.session['no_of_rooms'])
+            print(type(request.session['api_book_date']))
             if response:
                 context = {'categories': response}
 
             else:
                 context = dict()
-
             return Response(context)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
