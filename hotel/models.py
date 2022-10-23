@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.validators import validate_comma_separated_integer_list
 
 # Create your models here.
 
@@ -59,9 +60,10 @@ class Booking(models.Model):
     check_in_date = models.DateField()
     check_in_time = models.TimeField()
     check_out_time = models.TimeField()
-    room_number =  models.PositiveSmallIntegerField(
+    '''room_number =  models.PositiveSmallIntegerField(
         validators=[MaxValueValidator(100), MinValueValidator(1)], unique=True
-        )
+        )'''
+    room_number = models.CharField(validators=[validate_comma_separated_integer_list], max_length=9)
     ROOM_CATEGORIES = (
         ('Regular', 'Regular'),
         ('Executive', 'Executive'),

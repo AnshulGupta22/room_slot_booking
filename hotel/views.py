@@ -24,19 +24,29 @@ from .serializers import (
 # Create your views here.
 
 now = timezone.now()
-
+'''
 #request.session['api_username'] = ''
-api_book_date = None
-api_check_in = None
-api_check_out = None
-api_person = 1
-api_no_of_rooms_required = 1
-api_ac_rooms = 0
-api_nac_rooms = 0
-api_deluxe_rooms = 0
-api_king_rooms = 0
-api_queen_rooms = 0
+request.session['api_book_date'] = None
 
+request.session['api_check_in'] = None
+
+request.session['api_check_out'] = None
+
+request.session['api_person'] = 1
+
+request.session['api_username']
+api_no_of_rooms_required = 1
+request.session['api_username']
+api_ac_rooms = 0
+request.session['api_username']
+api_nac_rooms = 0
+request.session['api_username']
+api_deluxe_rooms = 0
+request.session['api_username']
+api_king_rooms = 0
+request.session['api_username']
+api_queen_rooms = 0
+'''
 """Function to convert string to date."""
 def convert_to_date(date_time):
     format = '%Y-%m-%d'
@@ -124,23 +134,13 @@ def logout_view(request):
 
 """Function that returns the list of available categories."""
 def search_availability(
-        normal, normal_book_date, normal_check_in, normal_check_out,
-        normal_person, normal_no_of_rooms_required):
+        book_date, check_in, check_out,
+        person, normal_no_of_rooms_required):
     normal_regular_rooms = 0
     normal_executive_rooms = 0
     normal_deluxe_rooms = 0
     normal_king_rooms = 0
     normal_queen_rooms = 0
-    if normal:
-        book_date = normal_book_date
-        check_in = normal_check_in
-        check_out = normal_check_out
-        person = normal_person
-    else:
-        book_date = api_book_date
-        check_in = api_check_in
-        check_out = api_check_out
-        person = api_person
     available_categories = list()
     room_list = Room.objects.filter(
         available_from__lte=check_in,
@@ -165,7 +165,7 @@ def search_availability(
             # Checking if the room is already booked.
             taken = Booking.objects.filter(Q(Q(check_in_time__lt=added_check_out)
                                              | Q(check_out_time__gt=subtracted_check_in))
-                                           & Q(room_number=room.room_number)
+                                           & Q(room_number__contains=room.room_number)
                                            & Q(check_in_date=book_date))
             if not taken:
                 if (room.category == 'Regular'):
@@ -201,38 +201,26 @@ def booking(request):
             request.session['normal_check_in'] = request.POST['check_in_time']
             normal_check_in = convert_to_time(request.session['normal_check_in'])
             request.session['normal_check_out'] = request.POST['check_out_time']
-            # now is the date and time on which the user is booking.
-            if (normal_book_date > now.date() or
-                (normal_book_date == now.date() and
-                normal_check_in >= now.time())):
-                request.session['normal_person'] = int(request.POST['person'])
-                request.session['normal_no_of_rooms_required'] = int(
-                    request.POST['no_of_rooms']
-                    )
-                normal_check_out = convert_to_time(request.session['normal_check_out'])
-                response = list()
-                response = search_availability(True,
-                                               normal_book_date,
-                                               normal_check_in,
-                                               normal_check_out,
-                                               request.session['normal_person'],
-                                               request.session['normal_no_of_rooms_required'])
-                if response:
-                    context = {
-                        'categories': response,
-                        'username': request.session['normal_username']
-                        }
-                    return render(request, 'categories.html', context)
-                return HttpResponse("Not Available")
-            else:
+            request.session['normal_person'] = int(request.POST['person'])
+            request.session['normal_no_of_rooms_required'] = int(
+                request.POST['no_of_rooms']
+                )
+            normal_check_out = convert_to_time(request.session['normal_check_out'])
+            response = search_availability(normal_book_date,
+                                           normal_check_in,
+                                           normal_check_out,
+                                           request.session['normal_person'],
+                                           request.session['normal_no_of_rooms_required'])
+            if response:
                 context = {
-                    'form': BookingForm(),
+                    'categories': response,
                     'username': request.session['normal_username']
                     }
-                return render(request, 'book.html', context)
+                return render(request, 'categories.html', context)
+            return HttpResponse("Not Available")
         else:
             context = {
-                'form': BookingForm(),
+                'form': form,
                 'username': request.session['normal_username']
                 }
             return render(request, 'book.html', context)
@@ -246,16 +234,17 @@ def booking(request):
 def time_booking(
         room_numbers, room_type, no_of_rooms_required, normal_username,
         normal_book_date, normal_check_in, normal_check_out, normal_person):
-    for i in range(no_of_rooms_required):
-        room_no = room_numbers.pop()
-        time_slot = Booking(customer_name=normal_username,
-                            check_in_date=normal_book_date,
-                            check_in_time=normal_check_in,
-                            check_out_time=normal_check_out,
-                            room_number=room_no,
-                            category=room_type, person=normal_person,
-                            no_of_rooms = no_of_rooms_required)
-        time_slot.save()
+    #for i in range(no_of_rooms_required):
+        #room_no = room_numbers.pop()
+        #print(room_numbers)
+    time_slot = Booking(customer_name=normal_username,
+                        check_in_date=normal_book_date,
+                        check_in_time=normal_check_in,
+                        check_out_time=normal_check_out,
+                        room_number=room_numbers,
+                        category=room_type, person=normal_person,
+                        no_of_rooms = no_of_rooms_required)
+    time_slot.save()
 
 """Function to check if the room(s) is/are available."""
 def room_category(
@@ -295,7 +284,7 @@ def room_category(
             taken = Booking.objects.filter(
                 Q(Q(check_in_time__lt=added_check_out)
                   | Q(check_out_time__gt=subtracted_check_in))
-                & Q(room_number=room.room_number)
+                & Q(room_number__contains=room.room_number)
                 & Q(check_in_date=normal_book_date))
             if not taken:
                 if (room_type == 'Regular'):
@@ -457,8 +446,8 @@ def all_bookings(request, pk=None):
     }
     return render(request, 'all_bookings.html', context)
 
-"""API endpoints for User management, Rooms, Time Slots, and corresponding
-Bookings.
+"""API endpoints for User management, Rooms, Time Slots, and
+corresponding Bookings.
 """
 
 @api_view(['GET', 'POST'])
@@ -524,7 +513,7 @@ def user_list(request):
                 return Response(serializer.data,
                                 status=status.HTTP_201_CREATED)
             except Exception:
-                return Response({'msg': 'Something went wrong. Please try again.'},
+                return Response(serializer.errors,
                                 status=
                                 status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -535,7 +524,6 @@ def booking_list(request):
     """
     List all bookings, or create a new booking.
     """
-    #global request.session['api_username']
     request.session['api_username'] = request.user.username
     if request.method == 'GET':
         if request.user.is_active and request.user.is_superuser:
@@ -559,100 +547,136 @@ def booking_list(request):
             status=status.HTTP_400_BAD_REQUEST)
         serializer = BookingSerializerBook(data=request.data)
         if serializer.is_valid():
-            global api_book_date
-            api_book_date = serializer.validated_data['check_in_date']
-            global api_check_in
-            api_check_in = serializer.validated_data['check_in_time']
-            # now is the date and time on which the user is booking.
-            # Ensuring that booking is not done for past.
-            if (api_book_date > now.date() or (api_book_date == now.date()
-                and api_check_in >= now.time())):
-                global api_check_out
-                api_check_out = serializer.validated_data['check_out_time']
-                global api_person
-                api_person = serializer.validated_data['capacity']
-                to_let = list()
-                to_let = search_availability(False)
-                if to_let:
-                    response = to_let
-                    context = {'categories': response}
+            request.session['api_book_date'] = serializer.validated_data['check_in_date']    
+            request.session['api_check_in'] = serializer.validated_data['check_in_time']
+            request.session['api_check_out'] = serializer.validated_data['check_out_time']
+            request.session['api_person'] = serializer.validated_data['person']
+            request.session['no_of_rooms'] = serializer.validated_data['no_of_rooms']
+            response = search_availability(request.session['api_book_date'], request.session['api_check_in'], request.session['api_check_out'], request.session['api_person'], request.session['no_of_rooms'])
+            if response:
+                context = {'categories': response}
 
-                else:
-                    context = dict()
+            else:
+                context = dict()
 
-                return Response(context)
-            return Response({'msg': 'Cannot book for past.'},
-                            status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+            return Response(context)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def booking_category(request, category, format=None):
+def booking_category(request, category):
     """
     To book a room for a given category.
     """
-    #global request.session['api_username']
-    global api_book_date
-    global api_check_in
-    global api_check_out
-    global api_person
-
+    normal_regular_rooms = 0
+    normal_executive_rooms = 0
+    normal_deluxe_rooms = 0
+    normal_king_rooms = 0
+    normal_queen_rooms = 0
+    room_numbers = list()
     # List of rooms for the given category.
     try:
         room_list = Room.objects.filter(
-            available_from__lte=api_check_in,
-            available_till__gte=api_check_out,
-            capacity__gte=api_person, category=category
+            available_from__lte=request.session['api_check_in'],
+            available_till__gte=request.session['api_check_out'],
+            capacity__gte=request.session['api_person'], category=category
         )
     except Exception:
-        return Response({'msg': 'Unavailable'},
-                        status=status.HTTP_404_NOT_FOUND)
+        return Response({'msg': 'No such category exist.'},
+                        status=status.HTTP_400_BAD_REQUEST)
     for room in room_list:
         max_book = now + datetime.timedelta(days=room.advance)
         # Ensuring that books are book before a room max advance
-        if (api_book_date <= max_book.date()):
+        if (request.session['api_book_date'] <= max_book.date()):
             # To ensure no rooms are booked within a gap of 1 hour
             # after checkout.
-            added_check_out = api_check_out.replace(
-                hour=(api_check_out.hour + 1) % 24
+            added_check_out = request.session['api_check_out'].replace(
+                hour=(request.session['api_check_out'].hour + 1) % 24
             )
             # To ensure no rooms are booked within a gap of 1 hour
             # before checkin.
-            subtracted_check_in = api_check_in.replace(
-                hour=(api_check_in.hour - 1) % 24
+            subtracted_check_in = request.session['api_check_in'].replace(
+                hour=(request.session['api_check_in'].hour - 1) % 24
             )
             taken = Booking.objects.filter(
                 Q(Q(check_in_time__lt=added_check_out)
                   | Q(check_out_time__gt=subtracted_check_in))
-                & Q(room_number=room.room_number)
-                & Q(check_in_date=api_book_date))
+                & Q(room_number__contains=room.room_number)
+                & Q(check_in_date=request.session['api_book_date']))
             if not taken:
-                time_slot = Booking(
+                if (category == 'Regular'):
+                    normal_regular_rooms = normal_regular_rooms + 1
+                    room_numbers.append(room.room_number)
+                elif (category == 'Executive'):
+                    normal_executive_rooms = normal_executive_rooms + 1
+                    room_numbers.append(room.room_number)
+                elif (category == 'Deluxe'):
+                    normal_deluxe_rooms = normal_deluxe_rooms + 1
+                    room_numbers.append(room.room_number)
+                elif (category == 'King'):
+                    normal_king_rooms = normal_king_rooms + 1
+                    room_numbers.append(room.room_number)
+                elif (category == 'Queen'):
+                    normal_queen_rooms = normal_queen_rooms + 1
+                    room_numbers.append(room.room_number)
+    if (category == 'Regular' and
+        normal_regular_rooms >= request.session['no_of_rooms']):
+        time_booking(room_numbers, category, request.session['no_of_rooms'],
+                        request.session['api_username'], request.session['api_book_date'], request.session['api_check_in'],
+                        request.session['api_check_out'], request.session['api_person'])
+        return Response({'msg': 'Booked'})
+    elif (category == 'Executive' and
+          normal_executive_rooms >= request.session['no_of_rooms']):
+        time_booking(room_numbers, category, request.session['no_of_rooms'],
+                        request.session['api_username'], request.session['api_book_date'], request.session['api_check_in'],
+                        request.session['api_check_out'], request.session['api_person'])
+        return Response({'msg': 'Booked'})
+    elif (category == 'Deluxe' and
+          normal_deluxe_rooms >= request.session['no_of_rooms']):
+        time_booking(room_numbers, category, request.session['no_of_rooms'],
+                        request.session['api_username'], request.session['api_book_date'], request.session['api_check_in'],
+                        request.session['api_check_out'], request.session['api_person'])
+        return Response({'msg': 'Booked'})
+    elif (category == 'King' and
+          normal_king_rooms >= request.session['no_of_rooms']):
+        time_booking(room_numbers, category, request.session['no_of_rooms'],
+                        request.session['api_username'], request.session['api_book_date'], request.session['api_check_in'],
+                        request.session['api_check_out'], request.session['api_person'])
+        return Response({'msg': 'Booked'})
+    elif (category == 'Queen' and
+          normal_queen_rooms >= request.session['no_of_rooms']):
+        time_booking(room_numbers, category, request.session['no_of_rooms'],
+                        request.session['api_username'], request.session['api_book_date'], request.session['api_check_in'],
+                        request.session['api_check_out'], request.session['api_person'])
+        return Response({'msg': 'Booked'})
+    return Response({'msg': 'Unavailable.'})
+
+    '''            time_slot = Booking(
                     customer_name=request.session['api_username'],
-                    check_in_date=api_book_date,
-                    check_in_time=api_check_in,
-                    check_out_time=api_check_out,
+                    check_in_date=request.session['api_book_date'],
+                    check_in_time=request.session['api_check_in'],
+                    check_out_time=request.session['api_check_out'],
                     room_number=room.room_number,
-                    category=category, capacity=api_person
+                    category=category, person=request.session['api_person'], no_of_rooms=request.session['no_of_rooms']
                 )
                 time_slot.save()
 
                 request.session['api_username'] = None
-                api_book_date = None
-                api_check_in = None
-                api_check_out = None
+                request.session['api_book_date'] = None
+                request.session['api_check_in'] = None
+                request.session['api_check_out'] = None
                 category = None
-                api_person = None
+                request.session['api_person'] = None
                 return Response({'msg': 'Booked'})
         return Response({'msg': 'Unavailable.'},
                         status=status.HTTP_404_NOT_FOUND)
     request.session['api_username'] = None
-    api_book_date = None
-    api_check_in = None
-    api_check_out = None
+    request.session['api_book_date'] = None
+    request.session['api_check_in'] = None
+    request.session['api_check_out'] = None
     category = None
-    api_person = None
-    return Response({'msg': 'Unavailable'}, status=status.HTTP_404_NOT_FOUND)
+    request.session['api_person'] = None
+    return Response({'msg': 'Unavailable'}, status=status.HTTP_404_NOT_FOUND)'''
 
 @api_view(['GET', 'PUT', 'DELETE'])
 @permission_classes([IsAuthenticated])
