@@ -55,7 +55,7 @@ def convert_to_date(date_time):
 
 """Function to convert string to time."""
 def convert_to_time(date_time):
-    format = '%H:%M'
+    format = '%H:%M:%S'
     datetime_str = datetime.datetime.strptime(date_time, format).time()
     return datetime_str
 
@@ -76,7 +76,6 @@ def sign_up(request):
                 user.first_name = request.POST['first_name']
                 user.last_name = request.POST['last_name']
                 user.save()
-                request.session['normal_username'] = request.POST['username']
                 login(request, user)
                 return redirect('../book/')
             except Exception:
@@ -91,7 +90,7 @@ def sign_up(request):
 @login_required(login_url="/hotel/signin/")
 def view_profile(request):
     profile = User.objects.filter(
-        username=request.session['normal_username']
+        username=request.user.username
         ).values()
     context = {'profile': profile}
     return render(request, 'view_profile.html', context)
@@ -99,7 +98,7 @@ def view_profile(request):
 """Function for editing profile."""
 @login_required(login_url="/hotel/signin/")
 def edit_profile(request):
-    profile = User.objects.get(username=request.session['normal_username'])
+    profile = User.objects.get(username=request.user.username)
     if request.method == 'POST':
         form = CustomerForm(request.POST, instance=profile)
         if form.is_valid():
@@ -120,7 +119,6 @@ def sign_in(request):
             user = authenticate(
                 request, username=request.POST['username'], password=password
                 )
-            request.session['normal_username'] = request.POST['username']
             login(request, user)
             return redirect('../book/')
         else:
@@ -136,8 +134,12 @@ def logout_view(request):
 
 """Function that returns the list of available categories."""
 def search_availability(
-        book_date, check_in, check_out,
+        book_date_str, check_in_str, check_out_str,
         person, normal_no_of_rooms_required):
+    book_date = convert_to_date(book_date_str)
+    check_in = convert_to_time(check_in_str)
+    print(check_in)
+    check_out = convert_to_time(check_out_str)
     normal_regular_rooms = 0
     normal_executive_rooms = 0
     normal_deluxe_rooms = 0
@@ -199,36 +201,33 @@ def booking(request):
         form = BookingForm(request.POST)
         if form.is_valid():
             request.session['normal_book_date'] = request.POST['check_in_date']
-            normal_book_date = convert_to_date(request.session['normal_book_date'])
             request.session['normal_check_in'] = request.POST['check_in_time']
-            normal_check_in = convert_to_time(request.session['normal_check_in'])
             request.session['normal_check_out'] = request.POST['check_out_time']
             request.session['normal_person'] = int(request.POST['person'])
             request.session['normal_no_of_rooms_required'] = int(
                 request.POST['no_of_rooms']
                 )
-            normal_check_out = convert_to_time(request.session['normal_check_out'])
-            response = search_availability(normal_book_date,
-                                           normal_check_in,
-                                           normal_check_out,
+            response = search_availability(request.session['normal_book_date'],
+                                           request.session['normal_check_in'],
+                                           request.session['normal_check_out'],
                                            request.session['normal_person'],
                                            request.session['normal_no_of_rooms_required'])
             if response:
                 context = {
                     'categories': response,
-                    'username': request.session['normal_username']
+                    'username': request.user.username
                     }
                 return render(request, 'categories.html', context)
             return HttpResponse("Not Available")
         else:
             context = {
                 'form': form,
-                'username': request.session['normal_username']
+                'username': request.user.username
                 }
             return render(request, 'book.html', context)
     context = {
         'form': BookingForm(),
-        'username': request.session['normal_username']
+        'username': request.user.username
         }
     return render(request, 'book.html', context)
 
@@ -339,14 +338,14 @@ def room_category(
 """Function to book room of this category if available."""
 @login_required(login_url="/hotel/signin/")
 def regular(request):
-    room_status = room_category('Regular', request.session['normal_username'],
+    room_status = room_category('Regular', request.user.username,
                                 request.session['normal_book_date'],
                                 request.session['normal_check_in'],
                                 request.session['normal_check_out'],
                                 request.session['normal_person'],
                                 request.session['normal_no_of_rooms_required'])
     if room_status == 1:
-        context = {'username': request.session['normal_username']}
+        context = {'username': request.user.username}
         return render(request, 'booked.html', context)
     elif room_status == 2:
         return HttpResponse("Unavailable")
@@ -357,14 +356,14 @@ def regular(request):
 @login_required(login_url="/hotel/signin/")
 def executive(request):
     room_status = room_category('Executive',
-                                request.session['normal_username'],
+                                request.user.username,
                                 request.session['normal_book_date'],
                                 request.session['normal_check_in'],
                                 request.session['normal_check_out'],
                                 request.session['normal_person'],
                                 request.session['normal_no_of_rooms_required'])
     if room_status == 1:
-        context = {'username': request.session['normal_username']}
+        context = {'username': request.user.username}
         return render(request, 'booked.html', context)
     elif room_status == 2:
         return HttpResponse("Unavailable")
@@ -374,14 +373,14 @@ def executive(request):
 """Function to book room of this category if available."""
 @login_required(login_url="/hotel/signin/")
 def deluxe(request):
-    room_status = room_category('Deluxe', request.session['normal_username'],
+    room_status = room_category('Deluxe', request.user.username,
                                 request.session['normal_book_date'],
                                 request.session['normal_check_in'],
                                 request.session['normal_check_out'],
                                 request.session['normal_person'],
                                 request.session['normal_no_of_rooms_required'])
     if room_status == 1:
-        context = {'username': request.session['normal_username']}
+        context = {'username': request.user.username}
         return render(request, 'booked.html', context)
     elif room_status == 2:
         return HttpResponse("Unavailable")
@@ -391,14 +390,14 @@ def deluxe(request):
 """Function to book room of this category if available."""
 @login_required(login_url="/hotel/signin/")
 def king(request):
-    room_status = room_category('King', request.session['normal_username'],
+    room_status = room_category('King', request.user.username,
                                 request.session['normal_book_date'],
                                 request.session['normal_check_in'],
                                 request.session['normal_check_out'],
                                 request.session['normal_person'],
                                 request.session['normal_no_of_rooms_required'])
     if room_status == 1:
-        context = {'username': request.session['normal_username']}
+        context = {'username': request.user.username}
         return render(request, 'booked.html', context)
     elif room_status == 2:
         return HttpResponse("Unavailable")
@@ -408,14 +407,14 @@ def king(request):
 """Function to book room of this category if available."""
 @login_required(login_url="/hotel/signin/")
 def queen(request):
-    room_status = room_category('Queen', request.session['normal_username'],
+    room_status = room_category('Queen', request.user.username,
                                 request.session['normal_book_date'],
                                 request.session['normal_check_in'],
                                 request.session['normal_check_out'],
                                 request.session['normal_person'],
                                 request.session['normal_no_of_rooms_required'])
     if room_status == 1:
-        context = {'username': request.session['normal_username']}
+        context = {'username': request.user.username}
         return render(request, 'booked.html', context)
     elif room_status == 2:
         return HttpResponse("Unavailable")
@@ -433,18 +432,18 @@ def all_bookings(request, pk=None):
             return HttpResponse("This booking no longer exists.")
     # Future bookings.
     future_bookings = Booking.objects.filter(
-        customer_name=request.session['normal_username'],
+        customer_name=request.user.username,
         check_in_date__gt=now.date()
     )
     # Current and past bookings.
     current_and_past_bookings = Booking.objects.filter(
-        customer_name=request.session['normal_username'],
+        customer_name=request.user.username,
         check_in_date__lte=now.date()
     )
     context = {
         'future_bookings': future_bookings,
         'current_and_past_bookings': current_and_past_bookings,
-        'username': request.session['normal_username']
+        'username': request.user.username
     }
     return render(request, 'all_bookings.html', context)
 
@@ -549,19 +548,18 @@ def booking_list(request):
             status=status.HTTP_400_BAD_REQUEST)
         serializer = BookingSerializerBook(data=request.data)
         if serializer.is_valid():
-            request.session['api_book_date'] = serializer.validated_data['check_in_date']
-            request.session['api_check_in'] = serializer.validated_data['check_in_time']
-            request.session['api_check_out'] = serializer.validated_data['check_out_time']
+            request.session['api_book_date'] = str(serializer.validated_data['check_in_date'])
+            request.session['api_check_in'] = str(serializer.validated_data['check_in_time'])
+            request.session['api_check_out'] = str(serializer.validated_data['check_out_time'])
             request.session['api_person'] = serializer.validated_data['person']
             request.session['no_of_rooms'] = serializer.validated_data['no_of_rooms']
+            print(request.session['api_check_in'])
             response = search_availability(request.session['api_book_date'], request.session['api_check_in'], request.session['api_check_out'], request.session['api_person'], request.session['no_of_rooms'])
-            
             if response:
                 context = {'categories': response}
 
             else:
                 context = dict()
-            print(context)
             return Response(context)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
