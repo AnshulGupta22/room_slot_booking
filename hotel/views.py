@@ -88,6 +88,7 @@ def sign_up(request):
     return render(request, 'sign_up.html', context)
 
 """Function for viewing profile."""
+@login_required(login_url="/hotel/signin/")
 def view_profile(request):
     profile = User.objects.filter(
         username=request.session['normal_username']
@@ -96,6 +97,7 @@ def view_profile(request):
     return render(request, 'view_profile.html', context)
 
 """Function for editing profile."""
+@login_required(login_url="/hotel/signin/")
 def edit_profile(request):
     profile = User.objects.get(username=request.session['normal_username'])
     if request.method == 'POST':
