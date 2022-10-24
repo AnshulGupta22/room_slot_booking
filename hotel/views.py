@@ -555,12 +555,13 @@ def booking_list(request):
             request.session['api_person'] = serializer.validated_data['person']
             request.session['no_of_rooms'] = serializer.validated_data['no_of_rooms']
             response = search_availability(request.session['api_book_date'], request.session['api_check_in'], request.session['api_check_out'], request.session['api_person'], request.session['no_of_rooms'])
-            print(type(request.session['api_book_date']))
+            
             if response:
                 context = {'categories': response}
 
             else:
                 context = dict()
+            print(context)
             return Response(context)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
