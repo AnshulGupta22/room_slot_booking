@@ -5,24 +5,24 @@ from django.core.validators import validate_comma_separated_integer_list
 # Create your models here.
 
 """class used when a user sign up. This class has to be deleted"""
-class Customer(models.Model):
+"""class Customer(models.Model):
     desired_username = models.CharField(max_length=30, primary_key=True)
     first_name = models.CharField(max_length=120)
     last_name = models.CharField(max_length=120)
-    email = models.EmailField(unique=True)
+    email = models.EmailField(unique=True)"""
 
 """class used when a user sign up using API."""
-class CustomerAPI(models.Model):
+"""class CustomerAPI(models.Model):
     desired_username = models.CharField(max_length=30, primary_key=True)
     first_name = models.CharField(max_length=120)
     last_name = models.CharField(max_length=120)
     email = models.EmailField()
     password = models.CharField(max_length=120)
-    retype_password = models.CharField(max_length=120)
+    retype_password = models.CharField(max_length=120)"""
 
 """class used when a user sign in. This class has to be deleted"""
-class SignIn(models.Model):
-    username = models.CharField(max_length=30)
+"""class SignIn(models.Model):
+    username = models.CharField(max_length=30)"""
 
 """class used to represent a room."""
 class Room(models.Model):

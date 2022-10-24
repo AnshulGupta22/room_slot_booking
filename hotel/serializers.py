@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from . models import Room, Customer, Booking, CustomerAPI
+from . models import Room, Booking
 from django.contrib.auth.models import User
 from django.utils import timezone
 
@@ -11,10 +11,10 @@ class RoomSerializer(serializers.ModelSerializer):
                     'available_till', 'advance']
 
 """class for users."""
-class CustomerSerializer(serializers.ModelSerializer):
+"""class CustomerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Customer
-        fields = ['desired_username', 'first_name', 'last_name', 'email']
+        fields = ['desired_username', 'first_name', 'last_name', 'email']"""
 
 """class to register users."""
 '''class CustomerAPISerializer(serializers.ModelSerializer):
@@ -113,6 +113,8 @@ class BookingSerializerGet(serializers.ModelSerializer):
         if (data['check_in_date']  < now.date() or (data['check_in_date'] == now.date() and
             data['check_in_time'] < now.time())):
             raise serializers.ValidationError("You can only book for future.")
+        if not data['check_out_time'] > data['check_in_time']:
+            raise serializers.ValidationError("Check out should be after check in.")
         return data
 
 """class to book booking."""
