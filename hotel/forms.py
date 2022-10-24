@@ -47,7 +47,8 @@ class CustomerForm(forms.Form):
         password2 = cleaned_data.get("password2")
         if password1 != password2:
             raise ValidationError(
-                "Passwords do not match"
+                _("Passwords do not match"),
+                code='Passwords do not match'
             )
 
 """class used when a user sign in."""
@@ -63,7 +64,8 @@ class SignInForm(forms.Form):
         user = authenticate(username=username, password=password)
         if user is None:
             raise ValidationError(
-                "Invalid username / password "
+                _("Invalid username / password"),
+                code='invalid'
             )
 
 """Function to convert string to date."""
@@ -73,20 +75,22 @@ def convert_to_date(date_time):
         datetime.datetime.strptime(date_time, format).date()
     except Exception:
         raise ValidationError(
-                "Wrong date format entered."
+                "Wrong date format entered.", code='Wrong date format'
             )
 
 """Function to convert string to time."""
-def convert_to_time(date_time):
+def convert_to_time(value):
     format = '%H:%M:%S'
     try:
         print("dsgji")
-        datetime.datetime.strptime(date_time, format).time()
+        datetime.datetime.strptime(value, format).time()
     except Exception:
         print("qkftio")
         raise ValidationError(
-                "Wrong time format entered."
-            )
+            _('%(value)s Wrong time format entered.'),
+            code='Wrong time format entered.',
+            params={'value': value},
+        )
 
 """Function to check if the email already exists or not."""
 def validate_check_in_time(value):
@@ -109,16 +113,15 @@ class BookingForm(forms.ModelForm):
         fields = ['check_in_date', 'check_in_time', 'check_out_time',
                     'person', 'no_of_rooms']
 
-    """Function to ensure that booking is done for future."""
+    """Function to ensure that booking is done for future and check out is after check in"""
     def clean(self):
         cleaned_data = super().clean()
         normal_book_date = cleaned_data.get("check_in_date")
-
         normal_check_in = cleaned_data.get("check_in_time")
+        normal_check_out_time = cleaned_data.get("check_out_time")
         #validate_check_in_time(str(normal_check_in))
         #ghj = str(normal_check_in)
 
-        
 
         # now is the date and time on which the user is booking.
         now = timezone.now()
@@ -126,7 +129,11 @@ class BookingForm(forms.ModelForm):
             (normal_book_date == now.date() and
             normal_check_in < now.time())):
             raise ValidationError(
-                "You can only book for future."
+                "You can only book for future.", code='only book for future'
+            )
+        if not normal_check_out_time > normal_check_in:
+            raise ValidationError(
+                "Check out should be after check in.", code='check out after check in'
             )
 
     def is_valid(self):
