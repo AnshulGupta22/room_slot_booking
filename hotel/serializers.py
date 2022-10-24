@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from . models import Room, Customer, Booking, CustomerAPI
 from django.contrib.auth.models import User
+from django.utils import timezone
 
 """class for rooms."""
 class RoomSerializer(serializers.ModelSerializer):
@@ -65,26 +66,69 @@ class BookingSerializerAdmin(serializers.ModelSerializer):
     class Meta:
         model = Booking
         fields = ['id', 'customer_name', 'check_in_date', 'check_in_time',
-                    'check_out_time',  'room_number', 'category', 'person']
+                    'check_out_time',  'room_number', 'category', 'person', 'no_of_rooms']
+
+    def validate(self, data):
+        """
+        Function to ensure that booking is done for future.
+        """
+        # now is the date and time on which the user is booking.
+        now = timezone.now()
+        if (data['check_in_date']  < now.date() or (data['check_in_date'] == now.date() and
+            data['check_in_time'] < now.time())):
+            raise serializers.ValidationError("You can only book for future.")
+        return data
 
 """class for bookings without id for use by admin."""
 class BookingSerializerAdminWithoutid(serializers.ModelSerializer):
     class Meta:
         model = Booking
         fields = ['customer_name', 'check_in_date', 'check_in_time',
-                    'check_out_time',  'room_number', 'category', 'person']
+                    'check_out_time',  'room_number', 'category', 'person', 'no_of_rooms']
+
+    def validate(self, data):
+        """
+        Function to ensure that booking is done for future.
+        """
+        # now is the date and time on which the user is booking.
+        now = timezone.now()
+        if (data['check_in_date']  < now.date() or (data['check_in_date'] == now.date() and
+            data['check_in_time'] < now.time())):
+            raise serializers.ValidationError("You can only book for future.")
+        return data
 
 """class to get bookings."""
 class BookingSerializerGet(serializers.ModelSerializer):
     class Meta:
         model = Booking
         fields = ['id', 'check_in_date', 'check_in_time',
-                    'check_out_time', 'category', 'person']
+                    'check_out_time', 'category', 'person', 'no_of_rooms']
+
+    def validate(self, data):
+        """
+        Function to ensure that booking is done for future.
+        """
+        # now is the date and time on which the user is booking.
+        now = timezone.now()
+        if (data['check_in_date']  < now.date() or (data['check_in_date'] == now.date() and
+            data['check_in_time'] < now.time())):
+            raise serializers.ValidationError("You can only book for future.")
+        return data
 
 """class to book booking."""
 class BookingSerializerBook(serializers.ModelSerializer):
     class Meta:
         model = Booking
         fields = ['check_in_date', 'check_in_time',
-                    'check_out_time', 'person']
+                    'check_out_time', 'person', 'no_of_rooms']
 
+    def validate(self, data):
+        """
+        Function to ensure that booking is done for future.
+        """
+        # now is the date and time on which the user is booking.
+        now = timezone.now()
+        if (data['check_in_date']  < now.date() or (data['check_in_date'] == now.date() and
+            data['check_in_time'] < now.time())):
+            raise serializers.ValidationError("You can only book for future.")
+        return data

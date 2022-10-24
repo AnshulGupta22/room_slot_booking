@@ -3,28 +3,30 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
+from django.utils import timezone
+import datetime
 
 from hotel.models import Booking
 
 """Function to check if the username already exists or not."""
 def validate_username(value):
-        new = User.objects.filter(username = value)
-        if new.count():
-            raise ValidationError(
-                _('%(value)s already exists'),
-                code='already exists',
-                params={'value': value},
-            )
+    new = User.objects.filter(username = value)
+    if new.count():
+        raise ValidationError(
+            _('%(value)s already exists'),
+            code='already exists',
+            params={'value': value},
+        )
 
 """Function to check if the email already exists or not."""
 def validate_email(value):
-        new = User.objects.filter(email = value)
-        if new.count():
-            raise ValidationError(
-                _('%(value)s already exists'),
-                code='already exists',
-                params={'value': value},
-            )
+    new = User.objects.filter(email = value)
+    if new.count():
+        raise ValidationError(
+            _('%(value)s already exists'),
+            code='already exists',
+            params={'value': value},
+        )
 
 """class used when a user sign up."""
 class CustomerForm(forms.Form):
@@ -64,22 +66,41 @@ class SignInForm(forms.Form):
                 "Invalid username / password "
             )
 
-import datetime
-from django.utils import timezone
-
 """Function to convert string to date."""
 def convert_to_date(date_time):
     format = '%Y-%m-%d'
-    datetime_str = datetime.datetime.strptime(date_time, format).date()
-    return datetime_str
+    try:
+        datetime.datetime.strptime(date_time, format).date()
+    except Exception:
+        raise ValidationError(
+                "Wrong date format entered."
+            )
 
 """Function to convert string to time."""
 def convert_to_time(date_time):
-    format = '%H:%M'
-    datetime_str = datetime.datetime.strptime(date_time, format).time()
-    return datetime_str
+    format = '%H:%M:%S'
+    try:
+        print("dsgji")
+        datetime.datetime.strptime(date_time, format).time()
+    except Exception:
+        print("qkftio")
+        raise ValidationError(
+                "Wrong time format entered."
+            )
 
-now = timezone.now()
+"""Function to check if the email already exists or not."""
+def validate_check_in_time(value):
+    format = '%H:%M:%S'
+    try:
+        print("bhjkkq")
+        datetime.datetime.strptime(value, format).time()
+    except Exception:
+        print("qkftio")
+        raise ValidationError(
+            _('%(value)s Wrong time format entered.'),
+            code='Wrong time format entered.',
+            params={'value': value},
+        )
 
 """class used for booking a time slot."""
 class BookingForm(forms.ModelForm):
@@ -88,46 +109,39 @@ class BookingForm(forms.ModelForm):
         fields = ['check_in_date', 'check_in_time', 'check_out_time',
                     'person', 'no_of_rooms']
 
-    """Function to check if username and password match or not."""
-    """def clean(self):
+    """Function to ensure that booking is done for future."""
+    def clean(self):
         cleaned_data = super().clean()
-
         normal_book_date = cleaned_data.get("check_in_date")
-        normal_check_in = cleaned_data.get("check_in_time")
 
+        normal_check_in = cleaned_data.get("check_in_time")
+        #validate_check_in_time(str(normal_check_in))
+        #ghj = str(normal_check_in)
+
+        
+
+        # now is the date and time on which the user is booking.
+        now = timezone.now()
         if (normal_book_date < now.date() or
             (normal_book_date == now.date() and
             normal_check_in < now.time())):
-
-            #self._errors['check_in_date'] = self.error_class([
-            #    'You can only book for future.])
             raise ValidationError(
                 "You can only book for future."
             )
-        return cleaned_data"""
-    """Function to check if username and password match or not."""
+
     def is_valid(self):
-        valid = super(BookingForm, self).is_valid()
-        # ^ valid is a Boolean
+            valid = super(BookingForm, self).is_valid()
+            # ^ Boolean value
 
-        # Note: added self to cleaned_data.get()
-        normal_book_date = self.cleaned_data.get("check_in_date")
-        normal_check_in = self.cleaned_data.get("check_in_time")
+            format = '%H:%M:%S'
+            try:
+                # Note: `self.cleaned_date.get()`
+                #print(type(self.cleaned_data.get('check_in_time')))
+                sdf = str(self.cleaned_data.get('check_in_time'))
+                datetime.datetime.strptime(sdf, format).time()
+            except Exception:
 
-        if (normal_book_date < now.date() or
-            (normal_book_date == now.date() and
-            normal_check_in < now.time())):
+                self.add_error('check_in_time', 'Wrong time format entered.')
+                valid = False
 
-            valid = False
-
-            # Not sure if this works, or is needed (the "raise" part mostly)
-            #   if it doesn't work just add the error to the field instead (see below)
-            '''raise ValidationError(
-                "You can only book for future."
-            )'''
-
-            # You could also add the error msg per field & it will render it
-            #   - extra tidbit
-            self.add_error('check_in_date', 'You can only book for future.')
-
-        return valid
+            return valid
