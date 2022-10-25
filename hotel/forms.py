@@ -120,8 +120,20 @@ class BookingForm(forms.ModelForm):
         normal_check_in = cleaned_data.get("check_in_time")
         normal_check_out_time = cleaned_data.get("check_out_time")
         #validate_check_in_time(str(normal_check_in))
-        #ghj = str(normal_check_in)
+        #print(type(normal_check_in))
+        str_check_in = str(normal_check_in)
 
+        format = '%H:%M:%S'
+        try:
+            print("vukwqa")
+            datetime.datetime.strptime(str_check_in, format).time()
+        except Exception:
+            print("srhni")
+            raise ValidationError(
+                _('%(value)s Wrong time format entered.'),
+                code='Wrong time format entered.',
+                params={'value': str_check_in},
+            )
 
         # now is the date and time on which the user is booking.
         now = timezone.now()
@@ -131,12 +143,12 @@ class BookingForm(forms.ModelForm):
             raise ValidationError(
                 "You can only book for future.", code='only book for future'
             )
-        if not normal_check_out_time > normal_check_in:
+        if normal_check_out_time <= normal_check_in:
             raise ValidationError(
                 "Check out should be after check in.", code='check out after check in'
             )
 
-    def is_valid(self):
+    """def is_valid(self):
             valid = super(BookingForm, self).is_valid()
             # ^ Boolean value
 
@@ -151,4 +163,4 @@ class BookingForm(forms.ModelForm):
                 self.add_error('check_in_time', 'Wrong time format entered.')
                 valid = False
 
-            return valid
+            return valid"""
