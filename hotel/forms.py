@@ -105,13 +105,22 @@ def validate_check_in_time(value):
             code='Wrong time format entered.',
             params={'value': value},
         )
-
+#import re
+class DateInput(forms.DateInput):
+    input_type = 'date'
+class TimeInput(forms.DateInput):
+    input_type = 'time'
 """class used for booking a time slot."""
 class BookingForm(forms.ModelForm):
     class Meta:
         model = Booking
         fields = ['check_in_date', 'check_in_time', 'check_out_time',
                     'person', 'no_of_rooms']
+
+        """widgets = {
+                    'check_in_date': DateInput(),
+                    'check_in_time': TimeInput(),
+                }"""
 
     """Function to ensure that booking is done for future and check out is after check in"""
     def clean(self):
@@ -120,21 +129,34 @@ class BookingForm(forms.ModelForm):
         normal_check_in = cleaned_data.get("check_in_time")
         normal_check_out_time = cleaned_data.get("check_out_time")
         #validate_check_in_time(str(normal_check_in))
-        #print(type(normal_check_in))
+        #print(normal_check_in)
         str_check_in = str(normal_check_in)
-
+        #print(str_check_in)
         format = '%H:%M:%S'
         try:
-            print("vukwqa")
+            #print("vukwqa")
             datetime.datetime.strptime(str_check_in, format).time()
         except Exception:
-            print("srhni")
+            #print("srhni")
+            raise ValidationError(
+                _('Wrong time entered.'),
+                code='Wrong time entered.',
+                #params={'value': str_check_in},
+            )
+
+        
+        """time_re = re.compile(r'^(([01]\d|2[0-3]):(([0-5]\d)|24:00):([0-5]\d)|24:00)$')
+        def is_time_format(s):
+            return bool(time_re.match(s))
+        #print(str_check_in)
+        if is_time_format(str_check_in):
+        #    print("jkhk")
             raise ValidationError(
                 _('%(value)s Wrong time format entered.'),
                 code='Wrong time format entered.',
                 params={'value': str_check_in},
-            )
-
+            )"""
+        #print("dsdf")
         # now is the date and time on which the user is booking.
         now = timezone.now()
         if (normal_book_date < now.date() or
