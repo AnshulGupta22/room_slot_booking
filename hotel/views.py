@@ -200,6 +200,7 @@ def booking(request):
     if request.method == 'POST':
         form = BookingForm(request.POST)
         if form.is_valid():
+            print(request.POST)
             request.session['normal_book_date'] = request.POST['check_in_date']
             request.session['normal_check_in'] = request.POST['check_in_time']
             request.session['normal_check_out'] = request.POST['check_out_time']
@@ -207,11 +208,13 @@ def booking(request):
             request.session['normal_no_of_rooms_required'] = int(
                 request.POST['no_of_rooms']
                 )
+            print(request.session['normal_check_in'])
             response = search_availability(request.session['normal_book_date'],
                                            request.session['normal_check_in'],
                                            request.session['normal_check_out'],
                                            request.session['normal_person'],
                                            request.session['normal_no_of_rooms_required'])
+            
             if response:
                 context = {
                     'categories': response,
