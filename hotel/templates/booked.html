@@ -84,6 +84,15 @@
   </div>
 	  <div class="container2" id="booke">
       <h1>Booked</h1>
+      <br/><br/><h2>Booking Details</h2><br/>
+      <ul style="line-height: 2em;">
+        <li><b>Book date:</b> {{ book_date }}</li>
+        <li><b>Check in:</b> {{ check_in }}</li>
+        <li><b>Check out:</b> {{ check_out }}</li>
+        <li><b>Person:</b> {{ person }}</li>
+        <li><b>Number of rooms required:</b> {{ no_of_rooms_required }}</li>
+        <li><b>Category:</b> {{ category }}</li>
+      </ul>
       <br/><br/><br/>
       <p> <a class="submit submit-center" href="{% url 'hotel:book' %}"> Another Booking </a> </p>
       <br/><br/>

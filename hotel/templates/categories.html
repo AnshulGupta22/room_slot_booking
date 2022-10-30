@@ -88,7 +88,17 @@
     </div>
   </div>
   <a href="{% url 'hotel:all_bookings' %}" class="w3-right ert"> Your Bookings </a>
-</div>
+  </div>
+  <div class="card card-width container3" style="float: right;">
+    <h2>Booking Details</h2>
+      <ul>
+        <li><b>Book date:</b> {{ book_date }}</li>
+        <li><b>Check in:</b> {{ check_in }}</li>
+        <li><b>Check out:</b> {{ check_out }}</li>
+        <li><b>Person:</b> {{ person }}</li>
+        <li><b>Number of rooms required:</b> {{ no_of_rooms_required }}</li>
+      </ul>
+  </div>
     <div id="lef-hea">
       <h1>Select a Category</h1>
     </div>
