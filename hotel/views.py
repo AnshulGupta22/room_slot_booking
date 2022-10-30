@@ -200,7 +200,6 @@ def booking(request):
     if request.method == 'POST':
         form = BookingForm(request.POST)
         if form.is_valid():
-            print(request.POST)
             request.session['normal_book_date'] = request.POST['check_in_date']
             request.session['normal_check_in'] = request.POST['check_in_time']
             request.session['normal_check_out'] = request.POST['check_out_time']
@@ -351,6 +350,7 @@ def regular(request):
                                 request.session['normal_person'],
                                 request.session['normal_no_of_rooms_required'])
     if room_status == 1:
+        # Implemented Post/Redirect/Get.
         return redirect('../booked/')
     elif room_status == 2:
         return HttpResponse("Unavailable")
@@ -368,6 +368,7 @@ def executive(request):
                                 request.session['normal_person'],
                                 request.session['normal_no_of_rooms_required'])
     if room_status == 1:
+        # Implemented Post/Redirect/Get.
         return redirect('../booked/')
     elif room_status == 2:
         return HttpResponse("Unavailable")
@@ -384,6 +385,7 @@ def deluxe(request):
                                 request.session['normal_person'],
                                 request.session['normal_no_of_rooms_required'])
     if room_status == 1:
+        # Implemented Post/Redirect/Get.
         return redirect('../booked/')
     elif room_status == 2:
         return HttpResponse("Unavailable")
@@ -400,6 +402,7 @@ def king(request):
                                 request.session['normal_person'],
                                 request.session['normal_no_of_rooms_required'])
     if room_status == 1:
+        # Implemented Post/Redirect/Get.
         return redirect('../booked/')
     elif room_status == 2:
         return HttpResponse("Unavailable")
@@ -416,6 +419,7 @@ def queen(request):
                                 request.session['normal_person'],
                                 request.session['normal_no_of_rooms_required'])
     if room_status == 1:
+        # Implemented Post/Redirect/Get.
         return redirect('../booked/')
     elif room_status == 2:
         return HttpResponse("Unavailable")
@@ -440,6 +444,8 @@ def all_bookings(request, pk=None):
         try:
             booking = Booking.objects.get(pk=pk)
             booking.delete()
+            # Implemented Post/Redirect/Get.
+            return redirect('../../all_bookings/')
         except Exception:
             return HttpResponse("This booking no longer exists.")
     # Future bookings.
