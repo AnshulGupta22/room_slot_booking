@@ -55,7 +55,7 @@ def convert_to_date(date_time):
 
 """Function to convert string to time."""
 def convert_to_time(date_time):
-    format = '%H:%M:%S'
+    format = '%H:%M'
     datetime_str = datetime.datetime.strptime(date_time, format).time()
     return datetime_str
 
@@ -200,7 +200,6 @@ def booking(request):
     if request.method == 'POST':
         form = BookingForm(request.POST)
         if form.is_valid():
-            print(request.POST)
             request.session['normal_book_date'] = request.POST['check_in_date']
             request.session['normal_check_in'] = request.POST['check_in_time']
             request.session['normal_check_out'] = request.POST['check_out_time']
@@ -208,15 +207,18 @@ def booking(request):
             request.session['normal_no_of_rooms_required'] = int(
                 request.POST['no_of_rooms']
                 )
-            print(request.session['normal_check_in'])
             response = search_availability(request.session['normal_book_date'],
                                            request.session['normal_check_in'],
                                            request.session['normal_check_out'],
                                            request.session['normal_person'],
                                            request.session['normal_no_of_rooms_required'])
-            
             if response:
                 context = {
+                    'book_date': request.session['normal_book_date'],
+                    'check_in': request.session['normal_check_in'],
+                    'check_out': request.session['normal_check_out'],
+                    'person': request.session['normal_person'],
+                    'no_of_rooms_required': request.session['normal_no_of_rooms_required'],
                     'categories': response,
                     'username': request.user.username
                     }
@@ -348,8 +350,8 @@ def regular(request):
                                 request.session['normal_person'],
                                 request.session['normal_no_of_rooms_required'])
     if room_status == 1:
-        context = {'username': request.user.username}
-        return render(request, 'booked.html', context)
+        # Implemented Post/Redirect/Get.
+        return redirect('../booked/')
     elif room_status == 2:
         return HttpResponse("Unavailable")
     else:
@@ -366,8 +368,8 @@ def executive(request):
                                 request.session['normal_person'],
                                 request.session['normal_no_of_rooms_required'])
     if room_status == 1:
-        context = {'username': request.user.username}
-        return render(request, 'booked.html', context)
+        # Implemented Post/Redirect/Get.
+        return redirect('../booked/')
     elif room_status == 2:
         return HttpResponse("Unavailable")
     else:
@@ -383,8 +385,8 @@ def deluxe(request):
                                 request.session['normal_person'],
                                 request.session['normal_no_of_rooms_required'])
     if room_status == 1:
-        context = {'username': request.user.username}
-        return render(request, 'booked.html', context)
+        # Implemented Post/Redirect/Get.
+        return redirect('../booked/')
     elif room_status == 2:
         return HttpResponse("Unavailable")
     else:
@@ -400,8 +402,8 @@ def king(request):
                                 request.session['normal_person'],
                                 request.session['normal_no_of_rooms_required'])
     if room_status == 1:
-        context = {'username': request.user.username}
-        return render(request, 'booked.html', context)
+        # Implemented Post/Redirect/Get.
+        return redirect('../booked/')
     elif room_status == 2:
         return HttpResponse("Unavailable")
     else:
@@ -417,12 +419,23 @@ def queen(request):
                                 request.session['normal_person'],
                                 request.session['normal_no_of_rooms_required'])
     if room_status == 1:
-        context = {'username': request.user.username}
-        return render(request, 'booked.html', context)
+        # Implemented Post/Redirect/Get.
+        return redirect('../booked/')
     elif room_status == 2:
         return HttpResponse("Unavailable")
     else:
         return redirect('../book/')
+
+@login_required(login_url="/hotel/signin/")
+def booked(request):
+    context = {'book_date': request.session['normal_book_date'],
+               'check_in': request.session['normal_check_in'],
+               'check_out': request.session['normal_check_out'],
+               'person': request.session['normal_person'],
+               'no_of_rooms_required': request.session['normal_no_of_rooms_required'],
+               'category': 'Regular',
+               'username': request.user.username}
+    return render(request, 'booked.html', context)
 
 """Function to return all the bookings."""
 @login_required(login_url="/hotel/signin/")
@@ -431,6 +444,8 @@ def all_bookings(request, pk=None):
         try:
             booking = Booking.objects.get(pk=pk)
             booking.delete()
+            # Implemented Post/Redirect/Get.
+            return redirect('../../all_bookings/')
         except Exception:
             return HttpResponse("This booking no longer exists.")
     # Future bookings.
@@ -537,6 +552,8 @@ def booking_list(request):
         bookings = Booking.objects.filter(
                                             customer_name=request.session['api_username']
                                          ).order_by('-check_in_date')
+        for boo in bookings:
+            print(boo.check_in_time)
         serializer = BookingSerializerGet(bookings, many=True)
         return Response(serializer.data)
 

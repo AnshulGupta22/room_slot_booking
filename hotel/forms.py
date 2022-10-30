@@ -82,10 +82,8 @@ def convert_to_date(date_time):
 def convert_to_time(value):
     format = '%H:%M:%S'
     try:
-        print("dsgji")
         datetime.datetime.strptime(value, format).time()
     except Exception:
-        print("qkftio")
         raise ValidationError(
             _('%(value)s Wrong time format entered.'),
             code='Wrong time format entered.',
@@ -96,20 +94,27 @@ def convert_to_time(value):
 def validate_check_in_time(value):
     format = '%H:%M:%S'
     try:
-        print("bhjkkq")
         datetime.datetime.strptime(value, format).time()
     except Exception:
-        print("qkftio")
         raise ValidationError(
             _('%(value)s Wrong time format entered.'),
             code='Wrong time format entered.',
             params={'value': value},
         )
-#import re
-class DateInput(forms.DateInput):
-    input_type = 'date'
-class TimeInput(forms.DateInput):
+
+class TimeInput(forms.TimeInput):
     input_type = 'time'
+
+from django.utils.timezone import now
+
+
+class FutureDateInput(forms.DateInput):
+    input_type = 'date'
+
+    def get_context(self, name, value, attrs):
+        attrs.setdefault('min', now().strftime('%Y-%m-%d'))
+        return super().get_context(name, value, attrs)
+
 """class used for booking a time slot."""
 class BookingForm(forms.ModelForm):
     class Meta:
@@ -117,10 +122,11 @@ class BookingForm(forms.ModelForm):
         fields = ['check_in_date', 'check_in_time', 'check_out_time',
                     'person', 'no_of_rooms']
 
-        """widgets = {
-                    'check_in_date': DateInput(),
+        widgets = {
+                    'check_in_date': FutureDateInput(),
                     'check_in_time': TimeInput(),
-                }"""
+                    'check_out_time': TimeInput(),
+                }
 
     """Function to ensure that booking is done for future and check out is after check in"""
     def clean(self):
@@ -128,35 +134,16 @@ class BookingForm(forms.ModelForm):
         normal_book_date = cleaned_data.get("check_in_date")
         normal_check_in = cleaned_data.get("check_in_time")
         normal_check_out_time = cleaned_data.get("check_out_time")
-        #validate_check_in_time(str(normal_check_in))
-        #print(normal_check_in)
         str_check_in = str(normal_check_in)
-        #print(str_check_in)
         format = '%H:%M:%S'
         try:
-            #print("vukwqa")
             datetime.datetime.strptime(str_check_in, format).time()
         except Exception:
-            #print("srhni")
             raise ValidationError(
                 _('Wrong time entered.'),
                 code='Wrong time entered.',
-                #params={'value': str_check_in},
             )
 
-        
-        """time_re = re.compile(r'^(([01]\d|2[0-3]):(([0-5]\d)|24:00):([0-5]\d)|24:00)$')
-        def is_time_format(s):
-            return bool(time_re.match(s))
-        #print(str_check_in)
-        if is_time_format(str_check_in):
-        #    print("jkhk")
-            raise ValidationError(
-                _('%(value)s Wrong time format entered.'),
-                code='Wrong time format entered.',
-                params={'value': str_check_in},
-            )"""
-        #print("dsdf")
         # now is the date and time on which the user is booking.
         now = timezone.now()
         if (normal_book_date < now.date() or
@@ -169,20 +156,3 @@ class BookingForm(forms.ModelForm):
             raise ValidationError(
                 "Check out should be after check in.", code='check out after check in'
             )
-
-    """def is_valid(self):
-            valid = super(BookingForm, self).is_valid()
-            # ^ Boolean value
-
-            format = '%H:%M:%S'
-            try:
-                # Note: `self.cleaned_date.get()`
-                #print(type(self.cleaned_data.get('check_in_time')))
-                sdf = str(self.cleaned_data.get('check_in_time'))
-                datetime.datetime.strptime(sdf, format).time()
-            except Exception:
-
-                self.add_error('check_in_time', 'Wrong time format entered.')
-                valid = False
-
-            return valid"""

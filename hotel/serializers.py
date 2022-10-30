@@ -130,6 +130,7 @@ class BookingSerializerBook(serializers.ModelSerializer):
         """
         # now is the date and time on which the user is booking.
         now = timezone.now()
+        print(data['check_in_time'])
         if (data['check_in_date']  < now.date() or (data['check_in_date'] == now.date() and
             data['check_in_time'] < now.time())):
             raise serializers.ValidationError("You can only book for future.")

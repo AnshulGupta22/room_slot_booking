@@ -16,6 +16,7 @@ urlpatterns = [
     path('deluxe/', views.deluxe, name='deluxe'),
     path('king/', views.king, name='king'),
     path('queen/', views.queen, name='queen'),
+    path('booked/', views.booked, name='booked'),
     path('all_bookings/', views.all_bookings, name='all_bookings'),
     path('all_bookings/<int:pk>/', views.all_bookings, name='delete_booking'),
     path('rooms/', views.room_list),
