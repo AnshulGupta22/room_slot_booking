@@ -120,12 +120,35 @@ def sign_in(request):
                 request, username=request.POST['username'], password=password
                 )
             login(request, user)
+            if user.is_superuser:
+                return redirect('../manage/')
             return redirect('../book/')
         else:
             context = {'form': form}
             return render(request, 'sign_in.html', context)
     context = {'form': SignInForm()}
     return render(request, 'sign_in.html', context)
+
+"""Function to book room of this category if available."""
+@login_required(login_url="/hotel/signin/")
+def manage(request):
+    return render(request, 'sign_in.html')
+
+"""Function to book room of this category if available."""
+@login_required(login_url="/hotel/signin/")
+def manage_users(request):
+    return render(request, 'sign_in.html')
+
+"""Function to book room of this category if available."""
+@login_required(login_url="/hotel/signin/")
+def manage_rooms(request):
+    rooms = Room.objects.all()
+    return render(request, 'sign_in.html')
+
+"""Function to book room of this category if available."""
+@login_required(login_url="/hotel/signin/")
+def manage_bookings(request):
+    return render(request, 'sign_in.html')
 
 """Function for log out."""
 def logout_view(request):
@@ -138,7 +161,6 @@ def search_availability(
         person, normal_no_of_rooms_required):
     book_date = convert_to_date(book_date_str)
     check_in = convert_to_time(check_in_str)
-    print(check_in)
     check_out = convert_to_time(check_out_str)
     normal_regular_rooms = 0
     normal_executive_rooms = 0
@@ -351,7 +373,7 @@ def regular(request):
                                 request.session['normal_no_of_rooms_required'])
     if room_status == 1:
         # Implemented Post/Redirect/Get.
-        return redirect('../booked/')
+        return redirect('../booked_regular/')
     elif room_status == 2:
         return HttpResponse("Unavailable")
     else:
@@ -369,7 +391,7 @@ def executive(request):
                                 request.session['normal_no_of_rooms_required'])
     if room_status == 1:
         # Implemented Post/Redirect/Get.
-        return redirect('../booked/')
+        return redirect('../booked_executive/')
     elif room_status == 2:
         return HttpResponse("Unavailable")
     else:
@@ -386,7 +408,7 @@ def deluxe(request):
                                 request.session['normal_no_of_rooms_required'])
     if room_status == 1:
         # Implemented Post/Redirect/Get.
-        return redirect('../booked/')
+        return redirect('../booked_deluxe/')
     elif room_status == 2:
         return HttpResponse("Unavailable")
     else:
@@ -403,7 +425,7 @@ def king(request):
                                 request.session['normal_no_of_rooms_required'])
     if room_status == 1:
         # Implemented Post/Redirect/Get.
-        return redirect('../booked/')
+        return redirect('../booked_king/')
     elif room_status == 2:
         return HttpResponse("Unavailable")
     else:
@@ -420,22 +442,91 @@ def queen(request):
                                 request.session['normal_no_of_rooms_required'])
     if room_status == 1:
         # Implemented Post/Redirect/Get.
-        return redirect('../booked/')
+        return redirect('../booked_queen/')
     elif room_status == 2:
         return HttpResponse("Unavailable")
     else:
         return redirect('../book/')
 
+"""Function to show the booking for regular category.
+Used for implementing Post/Redirect/Get."""
 @login_required(login_url="/hotel/signin/")
-def booked(request):
-    context = {'book_date': request.session['normal_book_date'],
-               'check_in': request.session['normal_check_in'],
-               'check_out': request.session['normal_check_out'],
-               'person': request.session['normal_person'],
-               'no_of_rooms_required': request.session['normal_no_of_rooms_required'],
-               'category': 'Regular',
-               'username': request.user.username}
-    return render(request, 'booked.html', context)
+def booked_regular(request):
+    try:
+        context = {'book_date': request.session['normal_book_date'],
+                'check_in': request.session['normal_check_in'],
+                'check_out': request.session['normal_check_out'],
+                'person': request.session['normal_person'],
+                'no_of_rooms_required': request.session['normal_no_of_rooms_required'],
+                'category': 'Regular',
+                'username': request.user.username}
+        return render(request, 'booked.html', context)
+    except Exception:
+        return redirect('../book/')
+
+"""Function to show the booking for regular category.
+Used for implementing Post/Redirect/Get."""
+@login_required(login_url="/hotel/signin/")
+def booked_executive(request):
+    try:
+        context = {'book_date': request.session['normal_book_date'],
+                'check_in': request.session['normal_check_in'],
+                'check_out': request.session['normal_check_out'],
+                'person': request.session['normal_person'],
+                'no_of_rooms_required': request.session['normal_no_of_rooms_required'],
+                'category': 'Executive',
+                'username': request.user.username}
+        return render(request, 'booked.html', context)
+    except Exception:
+        return redirect('../book/')
+
+"""Function to show the booking for regular category.
+Used for implementing Post/Redirect/Get."""
+@login_required(login_url="/hotel/signin/")
+def booked_deluxe(request):
+    try:
+        context = {'book_date': request.session['normal_book_date'],
+                'check_in': request.session['normal_check_in'],
+                'check_out': request.session['normal_check_out'],
+                'person': request.session['normal_person'],
+                'no_of_rooms_required': request.session['normal_no_of_rooms_required'],
+                'category': 'Deluxe',
+                'username': request.user.username}
+        return render(request, 'booked.html', context)
+    except Exception:
+        return redirect('../book/')
+
+"""Function to show the booking for regular category.
+Used for implementing Post/Redirect/Get."""
+@login_required(login_url="/hotel/signin/")
+def booked_king(request):
+    try:
+        context = {'book_date': request.session['normal_book_date'],
+                'check_in': request.session['normal_check_in'],
+                'check_out': request.session['normal_check_out'],
+                'person': request.session['normal_person'],
+                'no_of_rooms_required': request.session['normal_no_of_rooms_required'],
+                'category': 'King',
+                'username': request.user.username}
+        return render(request, 'booked.html', context)
+    except Exception:
+        return redirect('../book/')
+
+"""Function to show the booking for regular category.
+Used for implementing Post/Redirect/Get."""
+@login_required(login_url="/hotel/signin/")
+def booked_queen(request):
+    try:
+        context = {'book_date': request.session['normal_book_date'],
+                'check_in': request.session['normal_check_in'],
+                'check_out': request.session['normal_check_out'],
+                'person': request.session['normal_person'],
+                'no_of_rooms_required': request.session['normal_no_of_rooms_required'],
+                'category': 'Queen',
+                'username': request.user.username}
+        return render(request, 'booked.html', context)
+    except Exception:
+        return redirect('../book/')
 
 """Function to return all the bookings."""
 @login_required(login_url="/hotel/signin/")
@@ -443,11 +534,14 @@ def all_bookings(request, pk=None):
     if pk:
         try:
             booking = Booking.objects.get(pk=pk)
-            booking.delete()
-            # Implemented Post/Redirect/Get.
-            return redirect('../../all_bookings/')
+            if booking.customer_name == request.user.username:
+                booking.delete()
+                # Implemented Post/Redirect/Get.
+                return redirect('../../all_bookings/')
+            else:
+                return HttpResponse("Not allowed.")
         except Exception:
-            return HttpResponse("This booking no longer exists.")
+            return HttpResponse("Not found.")
     # Future bookings.
     future_bookings = Booking.objects.filter(
         customer_name=request.user.username,

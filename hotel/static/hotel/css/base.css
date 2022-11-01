@@ -8,6 +8,11 @@ a.fa {
   margin: 5px 2px;
 }
 
+.errorlist {
+  /*color: #FF4500;*/
+  color: rgb(0, 51, 102);
+}
+
 a.fa:hover {
   opacity: 0.7;
 }
