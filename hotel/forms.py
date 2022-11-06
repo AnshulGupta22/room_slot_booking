@@ -1,3 +1,4 @@
+from email.policy import default
 from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
@@ -5,8 +6,9 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.utils import timezone
 import datetime
+from django.core.validators import MaxValueValidator, MinValueValidator
 
-from hotel.models import Booking
+from hotel.models import Booking, Room
 
 """Function to check if the username already exists or not."""
 def validate_username(value):
@@ -132,12 +134,14 @@ class BookingForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
         normal_book_date = cleaned_data.get("check_in_date")
-        normal_check_in = cleaned_data.get("check_in_time")
+        normal_check_in_time = cleaned_data.get("check_in_time")
         normal_check_out_time = cleaned_data.get("check_out_time")
-        str_check_in = str(normal_check_in)
+        str_check_in_time = str(normal_check_in_time)
+        str_check_out_time = str(normal_check_out_time)
         format = '%H:%M:%S'
         try:
-            datetime.datetime.strptime(str_check_in, format).time()
+            datetime.datetime.strptime(str_check_in_time, format).time()
+            datetime.datetime.strptime(str_check_out_time, format).time()
         except Exception:
             raise ValidationError(
                 _('Wrong time entered.'),
@@ -148,11 +152,277 @@ class BookingForm(forms.ModelForm):
         now = timezone.now()
         if (normal_book_date < now.date() or
             (normal_book_date == now.date() and
-            normal_check_in < now.time())):
+            normal_check_in_time < now.time())):
             raise ValidationError(
                 "You can only book for future.", code='only book for future'
             )
-        if normal_check_out_time <= normal_check_in:
+        if normal_check_out_time <= normal_check_in_time:
             raise ValidationError(
                 "Check out should be after check in.", code='check out after check in'
+            )
+
+
+
+
+
+
+
+from datetime import time
+"""class used for booking a time slot."""
+class RoomForm(forms.Form):
+
+    room_number = forms.IntegerField(
+        required=False,
+        validators=[MaxValueValidator(1000), MinValueValidator(1)]
+    )
+
+    ROOM_CATEGORIES = (
+        #('', ''),
+        ('Regular', 'Regular'),
+        ('Executive', 'Executive'),
+        ('Deluxe', 'Deluxe'),
+        ('King', 'King'),
+        ('Queen', 'Queen'),
+    )
+    '''Regular = forms.BooleanField(required=False)
+    Executive = forms.BooleanField(required=False)
+    Deluxe = forms.BooleanField(required=False)
+    King = forms.BooleanField(required=False)
+    Queen = forms.BooleanField(required=False)
+
+    One = forms.BooleanField(required=False)
+    Two = forms.BooleanField(required=False)
+    Three = forms.BooleanField(required=False)
+    Four = forms.BooleanField(required=False)'''
+
+    category = forms.MultipleChoiceField(
+        required=False,
+        widget=forms.CheckboxSelectMultiple,
+        choices=ROOM_CATEGORIES,
+    )
+    '''category2 = forms.CharField(
+        max_length=9,
+        required=False,
+        widget=forms.Select(choices=ROOM_CATEGORIES),
+    )
+    category3 = forms.CharField(
+        max_length=9,
+        required=False,
+        widget=forms.Select(choices=ROOM_CATEGORIES),
+    )
+    category4 = forms.CharField(
+        max_length=9,
+        required=False,
+        widget=forms.Select(choices=ROOM_CATEGORIES),
+    )
+    category5 = forms.CharField(
+        max_length=9,
+        required=False,
+        widget=forms.Select(choices=ROOM_CATEGORIES),
+    )'''
+
+    ROOM_CAPACITY = (
+        #('', ''),
+        (1, '1'),
+        (2, '2'),
+        (3, '3'),
+        (4, '4'),
+    )
+    capacity = forms.MultipleChoiceField(
+        required=False,
+        widget=forms.CheckboxSelectMultiple,
+        choices=ROOM_CAPACITY,
+        )
+    '''capacity2 = forms.IntegerField(
+        required=False,
+        widget=forms.Select(choices=ROOM_CAPACITY),
+        )
+    capacity3 = forms.IntegerField(
+        required=False,
+        widget=forms.Select(choices=ROOM_CAPACITY),
+        )
+    capacity4 = forms.IntegerField(
+        required=False,
+        widget=forms.Select(choices=ROOM_CAPACITY),
+        )'''
+
+    class TimeInput(forms.TimeInput):
+        input_type = 'time'
+        default=datetime.time()
+
+    available_from = forms.TimeField(
+        required=False,
+        widget=TimeInput(),
+        #initial=time(0)
+        )
+
+    available_till = forms.TimeField(
+        required=False,
+        widget=TimeInput(),
+        #initial=time(23,59,59)
+        )
+
+    advance = forms.IntegerField(
+        required=False,
+    )
+
+    '''class Meta:
+        model = Room
+        fields = ['room_number','category', 'capacity', 'available_from',
+                    'available_till', 'advance']
+
+        widgets = {
+            'name': Textarea(attrs={'cols': 80, 'rows': 20}),
+        }
+
+        widgets = {
+                    #'room_number': forms.PositiveSmallIntegerField(attrs={'cols': 80, 'rows': 20}),
+                    'available_from': TimeInput(),
+                    'available_till': TimeInput(),
+                }'''
+
+    """Function to ensure that booking is done for future and check out is after check in"""
+    def clean(self):
+        cleaned_data = super().clean()
+        available_from = cleaned_data.get("available_from")
+        available_till = cleaned_data.get("available_till")
+        str_available_from = str(available_from)
+        str_available_till = str(available_till)
+        format = '%H:%M:%S'
+        if str_available_from != 'None':
+            try:
+                datetime.datetime.strptime(str_available_from, format).time()
+            except Exception:
+                raise ValidationError(
+                    _('Wrong time entered.'),
+                    code='Wrong time entered.',
+                )
+        if str_available_till != 'None':
+            try:
+                    datetime.datetime.strptime(str_available_till, format).time()
+            except Exception:
+                raise ValidationError(
+                    _('Wrong time entered.'),
+                    code='Wrong time entered.',
+                )
+        if available_till is not None and available_from is not None:
+            if available_till <= available_from:
+                raise ValidationError(
+                    "Available till should be after available from.", code='Available till after available from'
+                )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+from datetime import time
+"""class used for booking a time slot."""
+class RoomForm2(forms.ModelForm):
+
+    room_number = forms.IntegerField(
+        required=False,
+    )
+
+    ROOM_CATEGORIES = (
+        ('', ''),
+        ('Regular', 'Regular'),
+        ('Executive', 'Executive'),
+        ('Deluxe', 'Deluxe'),
+        ('King', 'King'),
+        ('Queen', 'Queen'),
+    )
+
+    category = forms.CharField(
+        max_length=9,
+        required=False,
+        widget=forms.Select(choices=ROOM_CATEGORIES),
+    )
+
+    ROOM_CAPACITY = (
+        ('', ''),
+        (1, '1'),
+        (2, '2'),
+        (3, '3'),
+        (4, '4'),
+    )
+    capacity = forms.IntegerField(
+        required=False,
+        widget=forms.Select(choices=ROOM_CAPACITY),
+        )
+    class TimeInput(forms.TimeInput):
+        input_type = 'time'
+        default=datetime.time()
+
+    available_from = forms.TimeField(
+        required=False,
+        widget=TimeInput(),
+        initial=time(0)
+        )
+
+    available_till = forms.TimeField(
+        required=False,
+        widget=TimeInput(),
+        initial=time(23,59,59)
+        )
+
+    advance = forms.IntegerField(
+        required=False,
+    )
+
+    class Meta:
+        model = Room
+        fields = ['room_number','category', 'capacity', 'available_from',
+                    'available_till', 'advance']
+
+        '''widgets = {
+            'name': Textarea(attrs={'cols': 80, 'rows': 20}),
+        }'''
+
+        """widgets = {
+                    #'room_number': forms.PositiveSmallIntegerField(attrs={'cols': 80, 'rows': 20}),
+                    'available_from': TimeInput(),
+                    'available_till': TimeInput(),
+                }"""
+
+    """Function to ensure that booking is done for future and check out is after check in"""
+    def clean(self):
+        cleaned_data = super().clean()
+        available_from = cleaned_data.get("available_from")
+        available_till = cleaned_data.get("available_till")
+        str_available_from = str(available_from)
+        str_available_till = str(available_till)
+        format = '%H:%M:%S'
+        try:
+            datetime.datetime.strptime(str_available_from, format).time()
+            datetime.datetime.strptime(str_available_till, format).time()
+        except Exception:
+            raise ValidationError(
+                _('Wrong time entered.'),
+                code='Wrong time entered.',
+            )
+
+        if available_till <= available_from:
+            raise ValidationError(
+                "Available till should be after available from.", code='Available till after available from'
             )
