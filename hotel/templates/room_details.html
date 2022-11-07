@@ -36,23 +36,17 @@
 				</div>
 			</div>
   	</div>
-    <form method="POST">
-      {% csrf_token %}
-      {{ form.as_p }}
-      <input type="submit" class= "submit submit-right" value="Search Availability" />
-    </form>
 		{% if rooms %}
 		  {% for room in rooms %}
-      <div class="card card-width">
-        <div class="container3">
-          <b>Room Number:</b> {{ room.room_number }}<br/>
-          <b>Category:</b> {{ room.category }}<br/>
-          <b>Capicity:</b> {{ room.capacity }}<br/>
-          <b>Available From:</b> {{ room.available_from }}<br/>
-          <b>Available Till:</b> {{ room.available_till }}<br/>
-          <b>Advance:</b> {{ room.advance }}<br/>
-        </div>
-      </div>
+            <div class="card card-width container3 inner-card">
+              <!--<img src = "{% static 'hotel/images/hotel.jpg' %}" alt="Room" style="width:30%">-->
+              <b>Booking Date</b> - {{ rooms.room_number }}<br/>
+              <b>Booking From Time</b> - {{ rooms.check_in_time }}<br/>
+              <b>Booking Till Time</b> - {{ rooms.check_out_time }}<br/>
+              <b>Category</b> - {{ rooms.category }}<br/>
+              <b>Person</b> - {{ rooms.person }}<br/>
+              <b>Number of Rooms</b> - {{ rooms.no_of_rooms }}<br/>
+            </div>
 		  {% endfor %}
 	  {% else %}
 		  <p> No rooms are available </p>
