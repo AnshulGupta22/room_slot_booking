@@ -66,17 +66,15 @@
           <div class="container3">
             <h2><b> Future Bookings </b></h2>
               {% for future_booking in future_bookings %}
-                <div class="card card-width">
-                    <!--<img src = "{% static 'hotel/images/hotel.jpg' %}" alt="Room" style="width:30%">-->
-                    <div class="container3 inner-card">
-                      <b>Booking Date</b> - {{ future_booking.check_in_date }}<br/>
-                      <b>Booking From Time</b> - {{ future_booking.check_in_time }}<br/>
-                      <b>Booking Till Time</b> - {{ future_booking.check_out_time }}<br/>
-                      <b>Category</b> - {{ future_booking.category }}<br/>
-                      <b>Person</b> - {{ future_booking.person }}<br/>
-                      <b>Number of Rooms</b> - {{ future_booking.no_of_rooms }}<br/>
-                      <a href='/hotel/all_bookings/{{future_booking.pk}}' class="submit" style="padding: 2px 20px;"> Delete </a>                    
-                    </div>
+                <div class="card card-width container3 inner-card">
+                  <!--<img src = "{% static 'hotel/images/hotel.jpg' %}" alt="Room" style="width:30%">-->
+                  <b>Booking Date</b> - {{ future_booking.check_in_date }}<br/>
+                  <b>Booking From Time</b> - {{ future_booking.check_in_time }}<br/>
+                  <b>Booking Till Time</b> - {{ future_booking.check_out_time }}<br/>
+                  <b>Category</b> - {{ future_booking.category }}<br/>
+                  <b>Person</b> - {{ future_booking.person }}<br/>
+                  <b>Number of Rooms</b> - {{ future_booking.no_of_rooms }}<br/>
+                  <a href='/hotel/all_bookings/{{future_booking.pk}}' class="submit" style="padding: 2px 20px;"> Delete </a>
                 </div>
               {% endfor %}
           </div>

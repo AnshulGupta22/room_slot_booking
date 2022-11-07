@@ -171,10 +171,10 @@ from datetime import time
 """class used for booking a time slot."""
 class RoomForm(forms.Form):
 
-    room_number = forms.IntegerField(
+    '''room_number = forms.IntegerField(
         required=False,
         validators=[MaxValueValidator(1000), MinValueValidator(1)]
-    )
+    )'''
 
     ROOM_CATEGORIES = (
         #('', ''),
