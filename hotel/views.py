@@ -12,7 +12,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
-from hotel.forms import CustomerForm, SignInForm, BookingForm, RoomForm
+from hotel.forms import CustomerForm, SignInForm, BookingForm, RoomForm, ManageBookingForm
 from .models import Room, Booking
 
 from .serializers import (
@@ -154,7 +154,7 @@ def manage(request):
 
 
 """Function that returns the list of available categories."""
-def manager_search(
+def manager_room_search(
         categories, capacities,
         str_available_from, str_available_till, advance):
     #print(room_number)
@@ -170,8 +170,8 @@ def manager_search(
         capacity__gte=capacities,
         advance__gte=advance
     )'''
-    print(categories)
-    if categories == []:
+    #print(categories)
+    '''if categories == []:
         categories = ['Regular', 'Executive', 'Deluxe', 'King', 'Queen']
     if capacities == []:
         capacities = [1, 2, 3, 4]
@@ -197,14 +197,27 @@ def manager_search(
         capacity__in=capacities,
         advance__gte=advance
     )
-    else:
-        room_list = Room.objects.filter(
-            category__in=categories,
-            available_from__lte=available_from,
-            available_till__gte=available_till,
-            capacity__in=capacities,
-            advance__gte=advance
-        )
+    else:'''
+
+    keys = ['category__in', 'available_from__lte', 'available_till__gte', 'capacity__in', 'advance__gte']
+    values = [categories, available_from, available_till, capacities, advance]
+    parameters = {}
+    #temp = {'category__in': categories, 'available_from__lte': available_from, 'available_till__gte': available_till, 'capacity__in': capacities, 'advance__gte': advance}
+    for key, value in zip(keys, values):
+        if value is not None and value !=[]:
+            parameters[key] = value
+    #for key, value in temp:
+    #    if value is not None and value !=[]:
+    #        parameters[key] = value
+    room_list = Room.objects.filter(**parameters)
+
+    '''room_list = Room.objects.filter(
+        category__in=categories,
+        available_from__lte=available_from,
+        available_till__gte=available_till,
+        capacity__in=capacities,
+        advance__gte=advance
+    )'''
     return room_list
         #select * from ROOM where db_room_number = room_number and db_category IN category and db_capacity IN capacity and db_available_from <= available_from and db_available_till >= available_till and db_advance >= advance
     """print(room_list)
@@ -288,7 +301,7 @@ def manage_rooms(request):
                 request.session['advance'] = int(request.POST['advance'])
             except Exception:
                 request.session['advance'] = None
-            response = manager_search(request.session['category'],
+            response = manager_room_search(request.session['category'],
                                       request.session['capacity'],
                                       request.session['available_from'],
                                       request.session['available_till'],
@@ -315,19 +328,118 @@ def manage_rooms(request):
                }
     return render(request, 'manage_rooms.html', context)
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+"""Function that returns the list of available categories."""
+def manager_book_search(
+        room_number, customer_name,
+        check_in_date, check_in_time, check_out_time, category, person, no_of_rooms):
+    available_from = convert_to_time(str_available_from)
+    available_till = convert_to_time(str_available_till)
+    keys = ['category__in', 'available_from__lte', 'available_till__gte', 'capacity__in', 'advance__gte']
+    values = [categories, available_from, available_till, capacities, advance]
+    parameters = {}
+    for key, value in zip(keys, values):
+        if value is not None and value !=[]:
+            parameters[key] = value
+    room_list = Room.objects.filter(**parameters)
+    return room_list
+
+
 """Function to book room of this category if available."""
 @login_required(login_url="/hotel/signin/")
 def manage_bookings(request):
     if not request.user.is_superuser:
         return redirect('../book/')
+    bookings = Booking.objects.all()
     if request.method == 'POST':
-        print("hbjhbkj")
+        form = ManageBookingForm(request.POST)
+        if form.is_valid():
+            #print(request.POST)
+            try:
+                request.session['room_number'] = request.POST['room_number']
+            except Exception:
+                request.session['room_number'] = None
+            try:
+                request.session['customer_name'] = request.POST['customer_name']
+            except Exception:
+                request.session['customer_name'] = None
+            try:
+                request.session['check_in_date_month'] = int(request.POST['check_in_date_month'])
+            except Exception:
+                request.session['check_in_date_month'] = None
+            try:
+                request.session['check_in_date_day'] = int(request.POST['check_in_date_day'])
+            except Exception:
+                request.session['check_in_date_day'] = None
+            try:
+                request.session['check_in_date_year'] = int(request.POST['check_in_date_year'])
+            except Exception:
+                request.session['check_in_date_year'] = None
+            #request.session['check_in_date'] = request.POST.get('check_in_date', None)
+            try:
+                request.session['check_in_time'] = request.POST['check_in_time']
+            except Exception:
+                request.session['check_in_time'] = None
+            try:
+                request.session['check_out_time'] = request.POST['check_out_time']
+            except Exception:
+                request.session['check_out_time'] = None
+            request.session['category'] = form.cleaned_data.get("category")
+            str_person = form.cleaned_data.get("person")
+            # using list comprehension to
+            # perform conversion
+            try:
+                request.session['person'] = [int(i) for i in str_person]
+            except Exception:
+                request.session['person'] = None
+            try:
+                request.session['no_of_rooms'] = int(request.POST['no_of_rooms'])
+            except Exception:
+                request.session['no_of_rooms'] = None
+            #print(request.session['check_in_date_day'])
+            response = manager_book_search(request.session['room_number'],
+                                      request.session['customer_name'],
+                                      request.session['check_in_date'],
+                                      request.session['check_in_time'],
+                                      request.session['check_out_time'],
+                                      request.session['category'],
+                                      request.session['person'],
+                                      request.session['no_of_rooms'])
+            #if response:
+            context = {
+                'form': form,
+                #'bookings': response,
+                'username': request.user.username
+                }
+            return render(request, 'manage_bookings.html', context)
+            #return HttpResponse("Not Available")
+        else:
+            context = {
+                'form': form,
+                'bookings': bookings,
+                'username': request.user.username
+                }
+            return render(request, 'manage_bookings.html', context)
     context = {
-            'form': RoomForm(),
-            'rooms': rooms,
+            'form': ManageBookingForm(),
+            'bookings': bookings,
             'username': request.user.username
             }
-    return render(request, 'manage_rooms.html', context)
+    return render(request, 'manage_bookings.html', context)
 
 """Function for log out."""
 def logout_view(request):
