@@ -41,19 +41,20 @@
       {{ form.as_p }}
       <input type="submit" class= "submit submit-right" value="Search Availability" />
     </form>
-		{% if rooms %}
-		  {% for room in rooms %}
+		{% if bookings %}
+		  {% for booking in bookings %}
       <div class="card card-width container3">
-          <b>Room Number:</b> {{ room.room_number }}<br/>
-          <b>Category:</b> {{ room.category }}<br/>
-          <b>Capicity:</b> {{ room.capacity }}<br/>
-          <b>Available From:</b> {{ room.available_from }}<br/>
-          <b>Available Till:</b> {{ room.available_till }}<br/>
-          <b>Advance:</b> {{ room.advance }}<br/>
+          <b>Customer name:</b> {{ booking.customer_name }}<br/>
+          <b>Check in date:</b> {{ booking.check_in_date }}<br/>
+          <b>Check out time:</b> {{ booking.check_out_time }}<br/>
+          <b>Room number:</b> {{ booking.room_number }}<br/>
+          <b>Category:</b> {{ booking.category }}<br/>
+          <b>Person:</b> {{ booking.person }}<br/>
+          <b>No of rooms:</b> {{ booking.no_of_rooms }}<br/>
       </div>
 		  {% endfor %}
 	  {% else %}
-		  <p> No rooms are available </p>
+		  <p> No bookings are available </p>
 	{% endif %}
     <!-- Footer -->
     <footer class="w3-padding-32 w3-black w3-center w3-margin-top">
@@ -69,4 +70,5 @@
     </footer>
 	</body>
 </html>
+
 

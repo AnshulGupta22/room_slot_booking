@@ -63,7 +63,7 @@ class Booking(models.Model):
     '''room_number =  models.PositiveSmallIntegerField(
         validators=[MaxValueValidator(100), MinValueValidator(1)], unique=True
         )'''
-    room_number = models.CharField(validators=[validate_comma_separated_integer_list], max_length=9)
+    room_number = models.CharField(validators=[validate_comma_separated_integer_list], max_length=4000)
     ROOM_CATEGORIES = (
         ('Regular', 'Regular'),
         ('Executive', 'Executive'),

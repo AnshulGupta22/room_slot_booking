@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.utils import timezone
 import datetime
-from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.validators import int_list_validator, MaxValueValidator, MinValueValidator
 
 from hotel.models import Booking, Room
 
@@ -165,6 +165,89 @@ class BookingForm(forms.ModelForm):
 
 
 
+
+
+
+
+
+
+class ManageBookingForm(forms.Form):
+
+    room_number = forms.CharField(validators=[int_list_validator], required=False, max_length=4000)
+    customer_name = forms.CharField(
+        max_length=30,
+        required=False,
+    )
+    check_in_date = forms.DateField(
+        required=False,
+        widget=forms.SelectDateWidget(),
+    )
+    check_in_time = forms.TimeField(
+        required=False,
+        widget=TimeInput(),
+    )
+    check_out_time = forms.TimeField(
+        required=False,
+        widget=TimeInput(),
+    )
+    ROOM_CATEGORIES = (
+        ('Regular', 'Regular'),
+        ('Executive', 'Executive'),
+        ('Deluxe', 'Deluxe'),
+        ('King', 'King'),
+        ('Queen', 'Queen'),
+    )
+    category = forms.MultipleChoiceField(
+        required=False,
+        widget=forms.CheckboxSelectMultiple,
+        choices=ROOM_CATEGORIES,
+    )
+    PERSON = (
+        (1, '1'),
+        (2, '2'),
+        (3, '3'),
+        (4, '4'),
+    )
+    person = forms.MultipleChoiceField(
+        required=False,
+        widget=forms.CheckboxSelectMultiple,
+        choices=PERSON,
+        )
+    no_of_rooms = forms.IntegerField(
+        required=False,
+        validators=[MaxValueValidator(1000), MinValueValidator(1)]
+        )
+
+    """Function to ensure that booking is done for future and check out is after check in"""
+    def clean(self):
+        cleaned_data = super().clean()
+        normal_check_in_time = cleaned_data.get("check_in_time")
+        normal_check_out_time = cleaned_data.get("check_out_time")
+        #print(cleaned_data.get("check_in_date"))
+        str_check_in_time = str(normal_check_in_time)
+        str_check_out_time = str(normal_check_out_time)
+        format = '%H:%M:%S'
+        if str_check_in_time != 'None':
+            try:
+                datetime.datetime.strptime(str_check_in_time, format).time()
+            except Exception:
+                raise ValidationError(
+                    _('Wrong time entered.'),
+                    code='Wrong time entered.',
+                )
+        if str_check_out_time != 'None':
+            try:
+                    datetime.datetime.strptime(str_check_out_time, format).time()
+            except Exception:
+                raise ValidationError(
+                    _('Wrong time entered.'),
+                    code='Wrong time entered.',
+                )
+        if normal_check_out_time is not None and normal_check_in_time is not None:
+            if normal_check_out_time <= normal_check_in_time:
+                raise ValidationError(
+                    "Check out should be after check in.", code='check out after check in'
+                )
 
 
 from datetime import time
