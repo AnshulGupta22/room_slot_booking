@@ -173,7 +173,7 @@ class BookingForm(forms.ModelForm):
 
 class ManageBookingForm(forms.Form):
 
-    room_number = forms.CharField(validators=[int_list_validator], required=False, max_length=4000)
+    room_numbers = forms.CharField(validators=[int_list_validator], required=False, max_length=4000)
     customer_name = forms.CharField(
         max_length=30,
         required=False,
