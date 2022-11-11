@@ -50,7 +50,10 @@ api_queen_rooms = 0
 """Function to convert string to date."""
 def convert_to_date(date_time):
     format = '%Y-%m-%d'
-    datetime_str = datetime.datetime.strptime(date_time, format).date()
+    try:
+        datetime_str = datetime.datetime.strptime(date_time, format).date()
+    except Exception:
+        datetime_str = None
     return datetime_str
 
 """Function to convert string to time."""
@@ -341,22 +344,39 @@ def manage_rooms(request):
 
 
 
-
+import re
 
 """Function that returns the list of available categories."""
 def manager_book_search(
-        room_number, customer_name,
-        check_in_date, check_in_time, check_out_time, category, person, no_of_rooms):
-    available_from = convert_to_time(str_available_from)
-    available_till = convert_to_time(str_available_till)
-    keys = ['category__in', 'available_from__lte', 'available_till__gte', 'capacity__in', 'advance__gte']
-    values = [categories, available_from, available_till, capacities, advance]
-    parameters = {}
-    for key, value in zip(keys, values):
-        if value is not None and value !=[]:
-            parameters[key] = value
-    room_list = Room.objects.filter(**parameters)
-    return room_list
+        str_room_numbers, customer_name, str_check_in_date, str_check_in_time, str_check_out_time, category, person, no_of_rooms):
+
+    spaces_room_numbers = list(str_room_numbers.split(","))
+    room_numbers = list()
+    for i in spaces_room_numbers:
+        room_numbers.append(i.strip())
+    print(str_check_in_date)
+    check_in_date = convert_to_date(str_check_in_date)
+    check_in_time = convert_to_time(str_check_in_time)
+    check_out_time = convert_to_time(str_check_out_time)
+    for room_number in room_numbers:
+        
+        #tyu = r"r'\b" + room_number + r"\b'"
+        #tyu = "r'\b" + room_number + "\b'"
+        #reg_expr = f"\b{re.escape(str(room_number))}\b"
+        #print(tyu)
+        #regex = r"\b" + str(room_number) + r"\b"
+        regex = rf"\b{room_number}\b"
+        keys = ['room_numbers__iregex', 'customer_name', 'check_in_date', 'check_in_time', 'check_out_time', 'category__in', 'person__in', 'no_of_rooms']
+        values = [regex, customer_name, check_in_date, check_in_time, check_out_time, category, person, no_of_rooms]
+        parameters = {}
+
+        for key, value in zip(keys, values):
+            if value is not None and value !=[] and value != '':
+                parameters[key] = value
+        print(parameters)
+        booking_list = Booking.objects.filter(**parameters)
+        print(booking_list)
+    return booking_list
 
 
 """Function to book room of this category if available."""
@@ -369,26 +389,16 @@ def manage_bookings(request):
         form = ManageBookingForm(request.POST)
         if form.is_valid():
             #print(request.POST)
+            
+            request.session['room_numbers'] = request.POST['room_numbers']
+            request.session['customer_name'] = request.POST['customer_name']
             try:
-                request.session['room_number'] = request.POST['room_number']
+                request.session['check_in_date_month'] = request.POST['check_in_date_month']
+                request.session['check_in_date_day'] = request.POST['check_in_date_day']
+                request.session['check_in_date_year'] = request.POST['check_in_date_year']
+                str_check_in_date = request.session['check_in_date_year'] + '-' + request.session['check_in_date_month'] + '-' + request.session['check_in_date_day']
             except Exception:
-                request.session['room_number'] = None
-            try:
-                request.session['customer_name'] = request.POST['customer_name']
-            except Exception:
-                request.session['customer_name'] = None
-            try:
-                request.session['check_in_date_month'] = int(request.POST['check_in_date_month'])
-            except Exception:
-                request.session['check_in_date_month'] = None
-            try:
-                request.session['check_in_date_day'] = int(request.POST['check_in_date_day'])
-            except Exception:
-                request.session['check_in_date_day'] = None
-            try:
-                request.session['check_in_date_year'] = int(request.POST['check_in_date_year'])
-            except Exception:
-                request.session['check_in_date_year'] = None
+                str_check_in_date = None
             #request.session['check_in_date'] = request.POST.get('check_in_date', None)
             try:
                 request.session['check_in_time'] = request.POST['check_in_time']
@@ -410,10 +420,10 @@ def manage_bookings(request):
                 request.session['no_of_rooms'] = int(request.POST['no_of_rooms'])
             except Exception:
                 request.session['no_of_rooms'] = None
-            #print(request.session['check_in_date_day'])
-            response = manager_book_search(request.session['room_number'],
+            #print(type(request.session['customer_name']))
+            response = manager_book_search(request.session['room_numbers'],
                                       request.session['customer_name'],
-                                      request.session['check_in_date'],
+                                      str_check_in_date,
                                       request.session['check_in_time'],
                                       request.session['check_out_time'],
                                       request.session['category'],
@@ -482,7 +492,7 @@ def search_availability(
             # Checking if the room is already booked.
             taken = Booking.objects.filter(Q(Q(check_in_time__lt=added_check_out)
                                              | Q(check_out_time__gt=subtracted_check_in))
-                                           & Q(room_number__contains=room.room_number)
+                                           & Q(room_numbers__contains=room.room_number)
                                            & Q(check_in_date=book_date))
             if not taken:
                 if (room.category == 'Regular'):
@@ -560,7 +570,7 @@ def time_booking(
                         check_in_date=normal_book_date,
                         check_in_time=normal_check_in,
                         check_out_time=normal_check_out,
-                        room_number=room_numbers,
+                        room_numbers=room_numbers,
                         category=room_type, person=normal_person,
                         no_of_rooms = no_of_rooms_required)
     time_slot.save()
@@ -603,7 +613,7 @@ def room_category(
             taken = Booking.objects.filter(
                 Q(Q(check_in_time__lt=added_check_out)
                   | Q(check_out_time__gt=subtracted_check_in))
-                & Q(room_number__contains=room.room_number)
+                & Q(room_numbers__contains=room.room_number)
                 & Q(check_in_date=normal_book_date))
             if not taken:
                 if (room_type == 'Regular'):
@@ -1007,7 +1017,7 @@ def booking_category(request, category):
             taken = Booking.objects.filter(
                 Q(Q(check_in_time__lt=added_check_out)
                   | Q(check_out_time__gt=subtracted_check_in))
-                & Q(room_number__contains=room.room_number)
+                & Q(room_numbers__contains=room.room_number)
                 & Q(check_in_date=request.session['api_book_date']))
             if not taken:
                 if (category == 'Regular'):

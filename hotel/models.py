@@ -63,7 +63,7 @@ class Booking(models.Model):
     '''room_number =  models.PositiveSmallIntegerField(
         validators=[MaxValueValidator(100), MinValueValidator(1)], unique=True
         )'''
-    room_number = models.CharField(validators=[validate_comma_separated_integer_list], max_length=4000)
+    room_numbers = models.CharField(validators=[validate_comma_separated_integer_list], max_length=4000)
     ROOM_CATEGORIES = (
         ('Regular', 'Regular'),
         ('Executive', 'Executive'),
@@ -84,4 +84,4 @@ class Booking(models.Model):
         )
 
     def __str__(self):
-        return f'Customer name: {self.customer_name}, check in date: {self.check_in_date}, check in time: {self.check_in_time}, check out time: {self.check_out_time}, room number: {self.room_number}, category: {self.category}, number of person: {self.person}'
+        return f'Customer name: {self.customer_name}, check in date: {self.check_in_date}, check in time: {self.check_in_time}, check out time: {self.check_out_time}, room number: {self.room_numbers}, category: {self.category}, number of person: {self.person}'
