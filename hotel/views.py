@@ -221,6 +221,7 @@ def manager_room_search(
         capacity__in=capacities,
         advance__gte=advance
     )'''
+    #print(room_list)
     return room_list
         #select * from ROOM where db_room_number = room_number and db_category IN category and db_capacity IN capacity and db_available_from <= available_from and db_available_till >= available_till and db_advance >= advance
     """print(room_list)
@@ -344,40 +345,32 @@ def manage_rooms(request):
 
 
 
-import re
+#import re
 
 """Function that returns the list of available categories."""
 def manager_book_search(
         str_room_numbers, customer_name, str_check_in_date, str_check_in_time, str_check_out_time, category, person, no_of_rooms):
 
+    booking_list = Booking.objects.none()
     spaces_room_numbers = list(str_room_numbers.split(","))
     room_numbers = list()
     for i in spaces_room_numbers:
         room_numbers.append(i.strip())
-    print(str_check_in_date)
     check_in_date = convert_to_date(str_check_in_date)
     check_in_time = convert_to_time(str_check_in_time)
     check_out_time = convert_to_time(str_check_out_time)
     for room_number in room_numbers:
-        
-        #tyu = r"r'\b" + room_number + r"\b'"
-        #tyu = "r'\b" + room_number + "\b'"
-        #reg_expr = f"\b{re.escape(str(room_number))}\b"
-        #print(tyu)
-        #regex = r"\b" + str(room_number) + r"\b"
-        regex = rf"\b{room_number}\b"
-        keys = ['room_numbers__iregex', 'customer_name', 'check_in_date', 'check_in_time', 'check_out_time', 'category__in', 'person__in', 'no_of_rooms']
-        values = [regex, customer_name, check_in_date, check_in_time, check_out_time, category, person, no_of_rooms]
+        room_number_regex = rf"\b{room_number}\b"
+        keys = ['room_numbers__iregex', 'customer_name', 'check_in_date', 'check_in_time__gte', 'check_out_time__lte', 'category__in', 'person__in', 'no_of_rooms']
+        values = [room_number_regex, customer_name, check_in_date, check_in_time, check_out_time, category, person, no_of_rooms]
         parameters = {}
-
         for key, value in zip(keys, values):
             if value is not None and value !=[] and value != '':
                 parameters[key] = value
-        print(parameters)
-        booking_list = Booking.objects.filter(**parameters)
-        print(booking_list)
+        booking_list = Booking.objects.filter(**parameters).union(booking_list)#.order_by('-check_in_date', 'check_in_time')
+    #print("msgit")
+    #print(booking_list)
     return booking_list
-
 
 """Function to book room of this category if available."""
 @login_required(login_url="/hotel/signin/")
@@ -388,8 +381,6 @@ def manage_bookings(request):
     if request.method == 'POST':
         form = ManageBookingForm(request.POST)
         if form.is_valid():
-            #print(request.POST)
-            
             request.session['room_numbers'] = request.POST['room_numbers']
             request.session['customer_name'] = request.POST['customer_name']
             try:
@@ -399,7 +390,6 @@ def manage_bookings(request):
                 str_check_in_date = request.session['check_in_date_year'] + '-' + request.session['check_in_date_month'] + '-' + request.session['check_in_date_day']
             except Exception:
                 str_check_in_date = None
-            #request.session['check_in_date'] = request.POST.get('check_in_date', None)
             try:
                 request.session['check_in_time'] = request.POST['check_in_time']
             except Exception:
@@ -420,7 +410,6 @@ def manage_bookings(request):
                 request.session['no_of_rooms'] = int(request.POST['no_of_rooms'])
             except Exception:
                 request.session['no_of_rooms'] = None
-            #print(type(request.session['customer_name']))
             response = manager_book_search(request.session['room_numbers'],
                                       request.session['customer_name'],
                                       str_check_in_date,
@@ -429,14 +418,12 @@ def manage_bookings(request):
                                       request.session['category'],
                                       request.session['person'],
                                       request.session['no_of_rooms'])
-            #if response:
             context = {
                 'form': form,
-                #'bookings': response,
+                'bookings': response,
                 'username': request.user.username
                 }
             return render(request, 'manage_bookings.html', context)
-            #return HttpResponse("Not Available")
         else:
             context = {
                 'form': form,
@@ -847,12 +834,12 @@ def all_bookings(request, pk=None):
     future_bookings = Booking.objects.filter(
         customer_name=request.user.username,
         check_in_date__gt=now.date()
-    )
+    ).order_by('-check_in_date', 'check_in_time')
     # Current and past bookings.
     current_and_past_bookings = Booking.objects.filter(
         customer_name=request.user.username,
         check_in_date__lte=now.date()
-    )
+    ).order_by('-check_in_date', 'check_in_time')
     context = {
         'future_bookings': future_bookings,
         'current_and_past_bookings': current_and_past_bookings,

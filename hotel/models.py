@@ -26,6 +26,8 @@ from django.core.validators import validate_comma_separated_integer_list
 
 """class used to represent a room."""
 class Room(models.Model):
+    class Meta:
+      ordering = ['room_number']
     room_number =  models.PositiveSmallIntegerField(
         validators=[MaxValueValidator(1000), MinValueValidator(1)],
         primary_key=True
@@ -56,6 +58,8 @@ class Room(models.Model):
 
 """class used when a user books a room slot."""
 class Booking(models.Model):
+    #class Meta:
+    #  ordering = ['-check_in_date', 'check_in_time']
     customer_name = models.CharField(max_length=30)
     check_in_date = models.DateField()
     check_in_time = models.TimeField()
