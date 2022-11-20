@@ -45,6 +45,7 @@
 		{% if bookings %}
 		  {% for booking in bookings %}
       <div class="card card-width container3">
+          <b>Room Number:</b> {{ booking.room_numbers }}<br/>
           <b>Customer name:</b> {{ booking.customer_name }}<br/>
           <b>Check in date:</b> {{ booking.check_in_date }}<br/>
           <b>Check in time:</b> {{ booking.check_in_time }}<br/>

@@ -367,7 +367,7 @@ def manager_book_search(
         for key, value in zip(keys, values):
             if value is not None and value !=[] and value != '':
                 parameters[key] = value
-        booking_list = Booking.objects.filter(**parameters).union(booking_list)#.order_by('-check_in_date', 'check_in_time')
+        booking_list = Booking.objects.filter(**parameters).union(booking_list).order_by('-check_in_date', 'check_in_time')
     #print("msgit")
     #print(booking_list)
     return booking_list
@@ -553,11 +553,16 @@ def time_booking(
     #for i in range(no_of_rooms_required):
         #room_no = room_numbers.pop()
         #print(room_numbers)
+
+
+    # getting the comma-separated string from the list
+    resultString = ", ".join([str(item) for item in room_numbers if item])
+
     time_slot = Booking(customer_name=normal_username,
                         check_in_date=normal_book_date,
                         check_in_time=normal_check_in,
                         check_out_time=normal_check_out,
-                        room_numbers=room_numbers,
+                        room_numbers=resultString,
                         category=room_type, person=normal_person,
                         no_of_rooms = no_of_rooms_required)
     time_slot.save()
@@ -928,12 +933,12 @@ def booking_list(request):
     request.session['api_username'] = request.user.username
     if request.method == 'GET':
         if request.user.is_active and request.user.is_superuser:
-            bookings = Booking.objects.all().order_by('-check_in_date')
+            bookings = Booking.objects.all().order_by('-check_in_date', 'check_in_time')
             serializer = BookingSerializerAdmin(bookings, many=True)
             return Response(serializer.data)
         bookings = Booking.objects.filter(
                                             customer_name=request.session['api_username']
-                                         ).order_by('-check_in_date')
+                                         ).order_by('-check_in_date', 'check_in_time')
         for boo in bookings:
             print(boo.check_in_time)
         serializer = BookingSerializerGet(bookings, many=True)
