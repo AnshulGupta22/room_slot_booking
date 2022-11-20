@@ -552,7 +552,7 @@ def time_booking(
         normal_book_date, normal_check_in, normal_check_out, normal_person):
     #for i in range(no_of_rooms_required):
         #room_no = room_numbers.pop()
-        #print(room_numbers)
+    #print(room_numbers)
 
 
     # getting the comma-separated string from the list
@@ -623,36 +623,36 @@ def room_category(
                 elif (room_type == 'Queen'):
                     normal_queen_rooms = normal_queen_rooms + 1
                     room_numbers.append(room.room_number)
-    if (room_type == 'Regular' and
-        normal_regular_rooms >= normal_no_of_rooms_required):
-        time_booking(room_numbers, room_type, normal_no_of_rooms_required,
-                        normal_username, normal_book_date, normal_check_in,
-                        normal_check_out, normal_person)
-        return 1
-    elif (room_type == 'Executive' and
-          normal_executive_rooms >= normal_no_of_rooms_required):
-        time_booking(room_numbers, room_type, normal_no_of_rooms_required,
-                        normal_username, normal_book_date, normal_check_in,
-                        normal_check_out, normal_person)
-        return 1
-    elif (room_type == 'Deluxe' and
-          normal_deluxe_rooms >= normal_no_of_rooms_required):
-        time_booking(room_numbers, room_type, normal_no_of_rooms_required,
-                        normal_username, normal_book_date, normal_check_in,
-                        normal_check_out, normal_person)
-        return 1
-    elif (room_type == 'King' and
-          normal_king_rooms >= normal_no_of_rooms_required):
-        time_booking(room_numbers, room_type, normal_no_of_rooms_required,
-                        normal_username, normal_book_date, normal_check_in,
-                        normal_check_out, normal_person)
-        return 1
-    elif (room_type == 'Queen' and
-          normal_queen_rooms >= normal_no_of_rooms_required):
-        time_booking(room_numbers, room_type, normal_no_of_rooms_required,
-                        normal_username, normal_book_date, normal_check_in,
-                        normal_check_out, normal_person)
-        return 1
+                if (room_type == 'Regular' and
+                    normal_regular_rooms == normal_no_of_rooms_required):
+                    time_booking(room_numbers, room_type, normal_no_of_rooms_required,
+                                    normal_username, normal_book_date, normal_check_in,
+                                    normal_check_out, normal_person)
+                    return 1
+                elif (room_type == 'Executive' and
+                    normal_executive_rooms == normal_no_of_rooms_required):
+                    time_booking(room_numbers, room_type, normal_no_of_rooms_required,
+                                    normal_username, normal_book_date, normal_check_in,
+                                    normal_check_out, normal_person)
+                    return 1
+                elif (room_type == 'Deluxe' and
+                    normal_deluxe_rooms == normal_no_of_rooms_required):
+                    time_booking(room_numbers, room_type, normal_no_of_rooms_required,
+                                    normal_username, normal_book_date, normal_check_in,
+                                    normal_check_out, normal_person)
+                    return 1
+                elif (room_type == 'King' and
+                    normal_king_rooms == normal_no_of_rooms_required):
+                    time_booking(room_numbers, room_type, normal_no_of_rooms_required,
+                                    normal_username, normal_book_date, normal_check_in,
+                                    normal_check_out, normal_person)
+                    return 1
+                elif (room_type == 'Queen' and
+                    normal_queen_rooms == normal_no_of_rooms_required):
+                    time_booking(room_numbers, room_type, normal_no_of_rooms_required,
+                                    normal_username, normal_book_date, normal_check_in,
+                                    normal_check_out, normal_person)
+                    return 1
     return 2
 
 """Function to book room of this category if available."""
