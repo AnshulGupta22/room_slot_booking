@@ -368,8 +368,6 @@ def manager_book_search(
             if value is not None and value !=[] and value != '':
                 parameters[key] = value
         booking_list = Booking.objects.filter(**parameters).union(booking_list).order_by('-check_in_date', 'check_in_time')
-    #print("msgit")
-    #print(booking_list)
     return booking_list
 
 """Function to book room of this category if available."""
