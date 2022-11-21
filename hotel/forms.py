@@ -12,7 +12,7 @@ from hotel.models import Booking, Room
 
 """Function to check if the username already exists or not."""
 def validate_username(value):
-    new = User.objects.filter(username = value)
+    new = User.objects.filter(username=value)
     if new.count():
         raise ValidationError(
             _('%(value)s already exists'),
@@ -22,7 +22,7 @@ def validate_username(value):
 
 """Function to check if the email already exists or not."""
 def validate_email(value):
-    new = User.objects.filter(email = value)
+    new = User.objects.filter(email=value)
     if new.count():
         raise ValidationError(
             _('%(value)s already exists'),
@@ -34,8 +34,8 @@ def validate_email(value):
 class CustomerForm(forms.Form):
     username = forms.CharField(label='Desired Username', max_length=150,
                                validators=[validate_slug, validate_username])
-    first_name  = forms.CharField(label='First Name', max_length=150)
-    last_name = forms.CharField(label='Last Name', max_length=150)
+    first_name  = forms.CharField(label='First Name', max_length=150, validators=[validate_slug])
+    last_name = forms.CharField(label='Last Name', max_length=150, validators=[validate_slug])
     email = forms.EmailField(label='Your Email', validators=[validate_email])
     password1 = forms.CharField(label='Enter Password',
                                 widget=forms.PasswordInput, min_length=8)
@@ -55,7 +55,7 @@ class CustomerForm(forms.Form):
 
 """class used when a user sign in."""
 class SignInForm(forms.Form):
-    username = forms.CharField(label='Username', max_length=150)
+    username = forms.CharField(label='Username', max_length=150, validators=[validate_slug])
     password = forms.CharField(label='Password', widget=forms.PasswordInput)
 
     """Function to check if username and password match or not."""
