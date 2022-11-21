@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
-from django.core.validators import validate_comma_separated_integer_list
+#from django.core.validators import validate_comma_separated_integer_list, int_list_validator
+from django.core.validators import int_list_validator
 
 # Create your models here.
 
@@ -67,7 +68,7 @@ class Booking(models.Model):
     '''room_number =  models.PositiveSmallIntegerField(
         validators=[MaxValueValidator(100), MinValueValidator(1)], unique=True
         )'''
-    room_numbers = models.CharField(validators=[validate_comma_separated_integer_list], max_length=4000)
+    room_numbers = models.CharField(validators=[int_list_validator(' ,')], max_length=4000)
     ROOM_CATEGORIES = (
         ('Regular', 'Regular'),
         ('Executive', 'Executive'),
@@ -88,4 +89,4 @@ class Booking(models.Model):
         )
 
     def __str__(self):
-        return f'Customer name: {self.customer_name}, check in date: {self.check_in_date}, check in time: {self.check_in_time}, check out time: {self.check_out_time}, room number: {self.room_numbers}, category: {self.category}, number of person: {self.person}'
+        return f'Customer name: {self.customer_name}; check in date: {self.check_in_date}; check in time: {self.check_in_time}; check out time: {self.check_out_time}; room number: {self.room_numbers}; category: {self.category}; number of person: {self.person}'

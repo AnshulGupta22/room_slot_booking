@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.utils import timezone
 import datetime
-from django.core.validators import int_list_validator, MaxValueValidator, MinValueValidator
+from django.core.validators import int_list_validator, MaxValueValidator, MinValueValidator, validate_slug
 
 from hotel.models import Booking, Room
 
@@ -33,7 +33,7 @@ def validate_email(value):
 """class used when a user sign up."""
 class CustomerForm(forms.Form):
     username = forms.CharField(label='Desired Username', max_length=150,
-                               validators=[validate_username])
+                               validators=[validate_slug, validate_username])
     first_name  = forms.CharField(label='First Name', max_length=150)
     last_name = forms.CharField(label='Last Name', max_length=150)
     email = forms.EmailField(label='Your Email', validators=[validate_email])

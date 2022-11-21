@@ -367,9 +367,7 @@ def manager_book_search(
         for key, value in zip(keys, values):
             if value is not None and value !=[] and value != '':
                 parameters[key] = value
-        booking_list = Booking.objects.filter(**parameters).union(booking_list)#.order_by('-check_in_date', 'check_in_time')
-    #print("msgit")
-    #print(booking_list)
+        booking_list = Booking.objects.filter(**parameters).union(booking_list).order_by('-check_in_date', 'check_in_time')
     return booking_list
 
 """Function to book room of this category if available."""
@@ -552,12 +550,17 @@ def time_booking(
         normal_book_date, normal_check_in, normal_check_out, normal_person):
     #for i in range(no_of_rooms_required):
         #room_no = room_numbers.pop()
-        #print(room_numbers)
+    #print(room_numbers)
+
+
+    # getting the comma-separated string from the list
+    resultString = ", ".join([str(item) for item in room_numbers if item])
+
     time_slot = Booking(customer_name=normal_username,
                         check_in_date=normal_book_date,
                         check_in_time=normal_check_in,
                         check_out_time=normal_check_out,
-                        room_numbers=room_numbers,
+                        room_numbers=resultString,
                         category=room_type, person=normal_person,
                         no_of_rooms = no_of_rooms_required)
     time_slot.save()
@@ -618,36 +621,36 @@ def room_category(
                 elif (room_type == 'Queen'):
                     normal_queen_rooms = normal_queen_rooms + 1
                     room_numbers.append(room.room_number)
-    if (room_type == 'Regular' and
-        normal_regular_rooms >= normal_no_of_rooms_required):
-        time_booking(room_numbers, room_type, normal_no_of_rooms_required,
-                        normal_username, normal_book_date, normal_check_in,
-                        normal_check_out, normal_person)
-        return 1
-    elif (room_type == 'Executive' and
-          normal_executive_rooms >= normal_no_of_rooms_required):
-        time_booking(room_numbers, room_type, normal_no_of_rooms_required,
-                        normal_username, normal_book_date, normal_check_in,
-                        normal_check_out, normal_person)
-        return 1
-    elif (room_type == 'Deluxe' and
-          normal_deluxe_rooms >= normal_no_of_rooms_required):
-        time_booking(room_numbers, room_type, normal_no_of_rooms_required,
-                        normal_username, normal_book_date, normal_check_in,
-                        normal_check_out, normal_person)
-        return 1
-    elif (room_type == 'King' and
-          normal_king_rooms >= normal_no_of_rooms_required):
-        time_booking(room_numbers, room_type, normal_no_of_rooms_required,
-                        normal_username, normal_book_date, normal_check_in,
-                        normal_check_out, normal_person)
-        return 1
-    elif (room_type == 'Queen' and
-          normal_queen_rooms >= normal_no_of_rooms_required):
-        time_booking(room_numbers, room_type, normal_no_of_rooms_required,
-                        normal_username, normal_book_date, normal_check_in,
-                        normal_check_out, normal_person)
-        return 1
+                if (room_type == 'Regular' and
+                    normal_regular_rooms == normal_no_of_rooms_required):
+                    time_booking(room_numbers, room_type, normal_no_of_rooms_required,
+                                    normal_username, normal_book_date, normal_check_in,
+                                    normal_check_out, normal_person)
+                    return 1
+                elif (room_type == 'Executive' and
+                    normal_executive_rooms == normal_no_of_rooms_required):
+                    time_booking(room_numbers, room_type, normal_no_of_rooms_required,
+                                    normal_username, normal_book_date, normal_check_in,
+                                    normal_check_out, normal_person)
+                    return 1
+                elif (room_type == 'Deluxe' and
+                    normal_deluxe_rooms == normal_no_of_rooms_required):
+                    time_booking(room_numbers, room_type, normal_no_of_rooms_required,
+                                    normal_username, normal_book_date, normal_check_in,
+                                    normal_check_out, normal_person)
+                    return 1
+                elif (room_type == 'King' and
+                    normal_king_rooms == normal_no_of_rooms_required):
+                    time_booking(room_numbers, room_type, normal_no_of_rooms_required,
+                                    normal_username, normal_book_date, normal_check_in,
+                                    normal_check_out, normal_person)
+                    return 1
+                elif (room_type == 'Queen' and
+                    normal_queen_rooms == normal_no_of_rooms_required):
+                    time_booking(room_numbers, room_type, normal_no_of_rooms_required,
+                                    normal_username, normal_book_date, normal_check_in,
+                                    normal_check_out, normal_person)
+                    return 1
     return 2
 
 """Function to book room of this category if available."""
@@ -928,12 +931,12 @@ def booking_list(request):
     request.session['api_username'] = request.user.username
     if request.method == 'GET':
         if request.user.is_active and request.user.is_superuser:
-            bookings = Booking.objects.all().order_by('-check_in_date')
+            bookings = Booking.objects.all().order_by('-check_in_date', 'check_in_time')
             serializer = BookingSerializerAdmin(bookings, many=True)
             return Response(serializer.data)
         bookings = Booking.objects.filter(
                                             customer_name=request.session['api_username']
-                                         ).order_by('-check_in_date')
+                                         ).order_by('-check_in_date', 'check_in_time')
         for boo in bookings:
             print(boo.check_in_time)
         serializer = BookingSerializerGet(bookings, many=True)
