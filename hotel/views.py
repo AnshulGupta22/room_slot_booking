@@ -18,7 +18,7 @@ from .models import Room, Booking
 from .serializers import (
     RoomSerializer, BookingSerializerBook, BookingSerializerAdmin,
     BookingSerializerGet, BookingSerializerAdminWithoutid,
-    CustomerAPISerializer
+    CustomerAPISerializer, CustomerSerializer
     )
 
 # Create your views here.
@@ -490,16 +490,16 @@ def search_availability(
                     normal_king_rooms = normal_king_rooms + 1
                 elif (room.category == 'Queen'):
                     normal_queen_rooms = normal_queen_rooms + 1
-    if (normal_regular_rooms >= normal_no_of_rooms_required):
-        available_categories.append('Regular')
-    if (normal_executive_rooms >= normal_no_of_rooms_required):
-        available_categories.append('Executive')
-    if (normal_deluxe_rooms >= normal_no_of_rooms_required):
-        available_categories.append('Deluxe')
-    if (normal_king_rooms >= normal_no_of_rooms_required):
-        available_categories.append('King')
-    if (normal_queen_rooms >= normal_no_of_rooms_required):
-        available_categories.append('Queen')
+                if (normal_regular_rooms == normal_no_of_rooms_required):
+                    available_categories.append('Regular')
+                if (normal_executive_rooms == normal_no_of_rooms_required):
+                    available_categories.append('Executive')
+                if (normal_deluxe_rooms == normal_no_of_rooms_required):
+                    available_categories.append('Deluxe')
+                if (normal_king_rooms == normal_no_of_rooms_required):
+                    available_categories.append('King')
+                if (normal_queen_rooms == normal_no_of_rooms_required):
+                    available_categories.append('Queen')
     return available_categories
 
 """Function to return the available categories."""
@@ -922,6 +922,16 @@ def user_list(request):
                                 status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+"""Function for viewing profile."""
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def profile_view(request):
+    profile = User.objects.filter(
+        username=request.user.username
+        ).values()
+    serializer = CustomerSerializer(profile, many=True)
+    return Response(serializer.data)
+
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
 def booking_list(request):
@@ -1025,36 +1035,36 @@ def booking_category(request, category):
                 elif (category == 'Queen'):
                     normal_queen_rooms = normal_queen_rooms + 1
                     room_numbers.append(room.room_number)
-    if (category == 'Regular' and
-        normal_regular_rooms >= request.session['no_of_rooms']):
-        time_booking(room_numbers, category, request.session['no_of_rooms'],
-                        request.session['api_username'], request.session['api_book_date'], request.session['api_check_in'],
-                        request.session['api_check_out'], request.session['api_person'])
-        return Response({'msg': 'Booked'})
-    elif (category == 'Executive' and
-          normal_executive_rooms >= request.session['no_of_rooms']):
-        time_booking(room_numbers, category, request.session['no_of_rooms'],
-                        request.session['api_username'], request.session['api_book_date'], request.session['api_check_in'],
-                        request.session['api_check_out'], request.session['api_person'])
-        return Response({'msg': 'Booked'})
-    elif (category == 'Deluxe' and
-          normal_deluxe_rooms >= request.session['no_of_rooms']):
-        time_booking(room_numbers, category, request.session['no_of_rooms'],
-                        request.session['api_username'], request.session['api_book_date'], request.session['api_check_in'],
-                        request.session['api_check_out'], request.session['api_person'])
-        return Response({'msg': 'Booked'})
-    elif (category == 'King' and
-          normal_king_rooms >= request.session['no_of_rooms']):
-        time_booking(room_numbers, category, request.session['no_of_rooms'],
-                        request.session['api_username'], request.session['api_book_date'], request.session['api_check_in'],
-                        request.session['api_check_out'], request.session['api_person'])
-        return Response({'msg': 'Booked'})
-    elif (category == 'Queen' and
-          normal_queen_rooms >= request.session['no_of_rooms']):
-        time_booking(room_numbers, category, request.session['no_of_rooms'],
-                        request.session['api_username'], request.session['api_book_date'], request.session['api_check_in'],
-                        request.session['api_check_out'], request.session['api_person'])
-        return Response({'msg': 'Booked'})
+                if (category == 'Regular' and
+                    normal_regular_rooms == request.session['no_of_rooms']):
+                    time_booking(room_numbers, category, request.session['no_of_rooms'],
+                                    request.session['api_username'], request.session['api_book_date'], request.session['api_check_in'],
+                                    request.session['api_check_out'], request.session['api_person'])
+                    return Response({'msg': 'Booked'})
+                elif (category == 'Executive' and
+                    normal_executive_rooms == request.session['no_of_rooms']):
+                    time_booking(room_numbers, category, request.session['no_of_rooms'],
+                                    request.session['api_username'], request.session['api_book_date'], request.session['api_check_in'],
+                                    request.session['api_check_out'], request.session['api_person'])
+                    return Response({'msg': 'Booked'})
+                elif (category == 'Deluxe' and
+                    normal_deluxe_rooms == request.session['no_of_rooms']):
+                    time_booking(room_numbers, category, request.session['no_of_rooms'],
+                                    request.session['api_username'], request.session['api_book_date'], request.session['api_check_in'],
+                                    request.session['api_check_out'], request.session['api_person'])
+                    return Response({'msg': 'Booked'})
+                elif (category == 'King' and
+                    normal_king_rooms == request.session['no_of_rooms']):
+                    time_booking(room_numbers, category, request.session['no_of_rooms'],
+                                    request.session['api_username'], request.session['api_book_date'], request.session['api_check_in'],
+                                    request.session['api_check_out'], request.session['api_person'])
+                    return Response({'msg': 'Booked'})
+                elif (category == 'Queen' and
+                    normal_queen_rooms == request.session['no_of_rooms']):
+                    time_booking(room_numbers, category, request.session['no_of_rooms'],
+                                    request.session['api_username'], request.session['api_book_date'], request.session['api_check_in'],
+                                    request.session['api_check_out'], request.session['api_person'])
+                    return Response({'msg': 'Booked'})
     return Response({'msg': 'Unavailable.'})
 
     '''            time_slot = Booking(

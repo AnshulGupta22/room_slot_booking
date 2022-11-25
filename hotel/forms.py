@@ -1,4 +1,3 @@
-from email.policy import default
 from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
@@ -6,7 +5,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.utils import timezone
 import datetime
-from django.core.validators import int_list_validator, MaxValueValidator, MinValueValidator, validate_slug
+from django.core.validators import int_list_validator, MaxValueValidator, MinValueValidator, RegexValidator
+from django.utils.regex_helper import _lazy_re_compile
 
 from hotel.models import Booking, Room
 
@@ -20,6 +20,15 @@ def validate_username(value):
             params={'value': value},
         )
 
+"""Function to check if the first name and last name contain only English letters."""
+def validate_name(value):
+    if not value.isalpha():
+        raise ValidationError(
+            _('Enter a valid value.This field may contain only English letters. Please do not copy paste here.'),
+            code='invalid',
+            params={'value': value},
+        )
+
 """Function to check if the email already exists or not."""
 def validate_email(value):
     new = User.objects.filter(email=value)
@@ -30,12 +39,21 @@ def validate_email(value):
             params={'value': value},
         )
 
+slug_re = _lazy_re_compile(r"^[-a-zA-Z0-9_]+\Z")
+# A RegexValidator instance that ensures a value consists of only
+# letters, numbers, underscores or hyphens.
+validate_slug2 = RegexValidator(
+    slug_re,
+    _("Enter a valid username consisting of letters, numbers, underscores or hyphens."),
+    "invalid",
+)
+
 """class used when a user sign up."""
 class CustomerForm(forms.Form):
     username = forms.CharField(label='Desired Username', max_length=150,
-                               validators=[validate_slug, validate_username])
-    first_name  = forms.CharField(label='First Name', max_length=150, validators=[validate_slug])
-    last_name = forms.CharField(label='Last Name', max_length=150, validators=[validate_slug])
+                               validators=[validate_slug2, validate_username])
+    first_name  = forms.CharField(label='First Name', max_length=150, validators=[validate_name])
+    last_name = forms.CharField(label='Last Name', max_length=150, validators=[validate_name])
     email = forms.EmailField(label='Your Email', validators=[validate_email])
     password1 = forms.CharField(label='Enter Password',
                                 widget=forms.PasswordInput, min_length=8)
@@ -55,7 +73,7 @@ class CustomerForm(forms.Form):
 
 """class used when a user sign in."""
 class SignInForm(forms.Form):
-    username = forms.CharField(label='Username', max_length=150, validators=[validate_slug])
+    username = forms.CharField(label='Username', max_length=150, validators=[validate_slug2])
     password = forms.CharField(label='Password', widget=forms.PasswordInput)
 
     """Function to check if username and password match or not."""
@@ -175,8 +193,9 @@ class ManageBookingForm(forms.Form):
 
     room_numbers = forms.CharField(validators=[int_list_validator], required=False, max_length=4000)
     customer_name = forms.CharField(
-        max_length=30,
+        max_length=150,
         required=False,
+        validators=[validate_slug2]
     )
     check_in_date = forms.DateField(
         required=False,
@@ -223,7 +242,6 @@ class ManageBookingForm(forms.Form):
         cleaned_data = super().clean()
         normal_check_in_time = cleaned_data.get("check_in_time")
         normal_check_out_time = cleaned_data.get("check_out_time")
-        #print(cleaned_data.get("check_in_date"))
         str_check_in_time = str(normal_check_in_time)
         str_check_out_time = str(normal_check_out_time)
         format = '%H:%M:%S'
