@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Manager</title>
+    <title>Add Room</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="{% static 'hotel/css/base.css' %}">
@@ -35,30 +35,13 @@
 					<a href="{% url 'hotel:logout' %}">Logout</a>
 				</div>
 			</div>
-      <a href="{% url 'hotel:add_rooms' %}" class="w3-right ert"> Add </a>
       <a href="{% url 'hotel:manage' %}" class="w3-right ert"> Manage </a>
   	</div>
     <form method="POST">
       {% csrf_token %}
       {{ form.as_p }}
-      <input type="submit" class= "submit submit-right" value="Search Availability" />
-    </form>
-		{% if rooms %}
-		  {% for room in rooms %}
-      <div class="card card-width container3">
-          <b>Room Number:</b> {{ room.room_number }}<br/>
-          <b>Category:</b> {{ room.category }}<br/>
-          <b>Capicity:</b> {{ room.capacity }}<br/>
-          <b>Available From:</b> {{ room.available_from }}<br/>
-          <b>Available Till:</b> {{ room.available_till }}<br/>
-          <b>Advance:</b> {{ room.advance }}<br/>
-          <a href='../../hotel/add_rooms/{{room.room_number}}'> [Edit]</a>
-          <a href='../../hotel/delete_rooms/{{room.room_number}}'> [Delete]</a>
-      </div>
-		  {% endfor %}
-	  {% else %}
-		  <p> No rooms are available </p>
-	{% endif %}
+      <input type="submit" class= "submit submit-right" value="Add/ Edit" />
+    </form><br/><br/>
     <!-- Footer -->
     <footer class="w3-padding-32 w3-black w3-center w3-margin-top">
       <h5>Find Us On</h5>
@@ -73,4 +56,5 @@
     </footer>
 	</body>
 </html>
+
 
