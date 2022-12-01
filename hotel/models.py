@@ -53,6 +53,7 @@ class Room(models.Model):
     available_from = models.TimeField()
     available_till = models.TimeField()
     advance = models.PositiveSmallIntegerField()
+    room_manager = models.CharField(max_length=30)
 
     def __str__(self):
         return f'Room number: {self.room_number}, category: {self.category}, capacity: {self.capacity}, from: {self.available_from}, till: {self.available_till}, advance: {self.advance}'
@@ -61,7 +62,7 @@ class Room(models.Model):
 class Booking(models.Model):
     #class Meta:
     #  ordering = ['-check_in_date', 'check_in_time']
-    customer_name = models.CharField(max_length=30)
+    customer_name = models.CharField(max_length=150)
     check_in_date = models.DateField()
     check_in_time = models.TimeField()
     check_out_time = models.TimeField()
@@ -87,6 +88,6 @@ class Booking(models.Model):
     no_of_rooms = models.PositiveSmallIntegerField(
         validators=[MaxValueValidator(1000), MinValueValidator(1)], default=1
         )
-
+    room_managers = models.CharField(validators=[int_list_validator(' ,')], max_length=4000)
     def __str__(self):
         return f'Customer name: {self.customer_name}; check in date: {self.check_in_date}; check in time: {self.check_in_time}; check out time: {self.check_out_time}; room number: {self.room_numbers}; category: {self.category}; number of person: {self.person}'

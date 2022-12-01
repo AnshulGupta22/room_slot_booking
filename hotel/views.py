@@ -158,9 +158,15 @@ def manage(request):
 
 """Function that returns the list of available categories."""
 def manager_room_search(
-        room_number, categories, capacities,
-        str_available_from, str_available_till, advance):
-    #print(room_number)
+        str_room_numbers, categories, capacities,
+        str_available_from, str_available_till, advance, username):
+    print(str_room_numbers)
+    spaces_room_numbers = list(str_room_numbers.split(","))
+    room_numbers = list()
+    for i in spaces_room_numbers:
+        room_numbers.append(i.strip())
+    print(room_numbers)
+
     available_from = convert_to_time(str_available_from)
     available_till = convert_to_time(str_available_till)
     #room_list = list()
@@ -202,8 +208,8 @@ def manager_room_search(
     )
     else:'''
 
-    keys = ['room_number', 'category__in', 'available_from__lte', 'available_till__gte', 'capacity__in', 'advance__gte']
-    values = [room_number, categories, available_from, available_till, capacities, advance]
+    keys = ['room_number__in', 'category__in', 'available_from__lte', 'available_till__gte', 'capacity__in', 'advance__gte', 'room_manager']
+    values = [room_numbers, categories, available_from, available_till, capacities, advance, username]
     parameters = {}
     #temp = {'category__in': categories, 'available_from__lte': available_from, 'available_till__gte': available_till, 'capacity__in': capacities, 'advance__gte': advance}
     for key, value in zip(keys, values):
@@ -282,14 +288,16 @@ def manager_room_search(
 @login_required(login_url="/hotel/signin/")
 def manage_rooms(request):
     if request.user.email.endswith("@anshul.com"):
-        rooms = Room.objects.all()
+        rooms = Room.objects.filter(room_manager=request.user.username)
         if request.method == 'POST':
             form = RoomForm(request.POST)
             if form.is_valid():
                 try:
-                    request.session['room_number'] = int(request.POST['room_number'])
+                    request.session['room_numbers'] = request.POST['room_numbers']
+                    #print(request.POST['room_numbers'])
+                    #request.session['room_number'] = int(request.POST['room_number'])
                 except Exception:
-                    request.session['room_number'] = None
+                    request.session['room_numbers'] = None
                 request.session['category'] = form.cleaned_data.get("category")
                 str_capacity = form.cleaned_data.get("capacity")
                 # using list comprehension to
@@ -304,12 +312,14 @@ def manage_rooms(request):
                     request.session['advance'] = int(request.POST['advance'])
                 except Exception:
                     request.session['advance'] = None
-                response = manager_room_search(request.session['room_number'],
+                #print(request.POST['room_numbers'])
+                response = manager_room_search(request.session['room_numbers'],
                                         request.session['category'],
                                         request.session['capacity'],
                                         request.session['available_from'],
                                         request.session['available_till'],
-                                        request.session['advance'])
+                                        request.session['advance'],
+                                        request.user.username)
                 #if response:
                 context = {
                     'form': form,
@@ -354,15 +364,16 @@ def add_rooms(request, room_number=None):
                         capacity=request.POST['capacity'],
                         available_from=request.POST['available_from'],
                         available_till=request.POST['available_till'],
-                        advance=request.POST['advance'])
+                        advance=request.POST['advance'],
+                        room_manager=request.user.username)
                 room.save()
 
-                form = RoomForm()
+                '''form = RoomForm()
                 context = {
                     'form': form,
-                    'rooms': Room.objects.all(),
+                    'rooms': Room.objects.filter(room_manager=request.user.username),
                     'username': request.user.username
-                    }
+                    }'''
                 # Implemented Post/Redirect/Get.
                 if room_number:
                     return redirect('../../manage_rooms/')
@@ -393,7 +404,7 @@ def delete_rooms(request, room_number=None):
     if request.user.email.endswith("@anshul.com"):
         if room_number:
             try:
-                room = Room.objects.get(room_number=room_number)
+                room = Room.objects.get(Q(room_number=room_number) & Q(room_manager=request.user.username))
             except Exception:
                 return HttpResponse("Not found.")
             room.delete()
@@ -415,7 +426,7 @@ def delete_rooms(request, room_number=None):
 
 """Function that returns the list of available categories."""
 def manager_book_search(
-        str_room_numbers, customer_name, str_check_in_date, str_check_in_time, str_check_out_time, category, person, no_of_rooms):
+        str_room_numbers, customer_name, str_check_in_date, str_check_in_time, str_check_out_time, category, person, no_of_rooms, room_manager):
 
     booking_list = Booking.objects.none()
     spaces_room_numbers = list(str_room_numbers.split(","))
@@ -427,8 +438,8 @@ def manager_book_search(
     check_out_time = convert_to_time(str_check_out_time)
     for room_number in room_numbers:
         room_number_regex = rf"\b{room_number}\b"
-        keys = ['room_numbers__iregex', 'customer_name', 'check_in_date', 'check_in_time__gte', 'check_out_time__lte', 'category__in', 'person__in', 'no_of_rooms']
-        values = [room_number_regex, customer_name, check_in_date, check_in_time, check_out_time, category, person, no_of_rooms]
+        keys = ['room_numbers__iregex', 'customer_name', 'check_in_date', 'check_in_time__gte', 'check_out_time__lte', 'category__in', 'person__in', 'no_of_rooms', 'room_managers__regex']
+        values = [room_number_regex, customer_name, check_in_date, check_in_time, check_out_time, category, person, no_of_rooms, room_manager_regex]
         parameters = {}
         for key, value in zip(keys, values):
             if value is not None and value !=[] and value != '':
@@ -480,7 +491,8 @@ def manage_bookings(request):
                                         request.session['check_out_time'],
                                         request.session['category'],
                                         request.session['person'],
-                                        request.session['no_of_rooms'])
+                                        request.session['no_of_rooms'],
+                                        request.user.username)
                 context = {
                     'form': form,
                     'bookings': response,
@@ -614,22 +626,24 @@ def booking(request):
 """Function to book the time slot."""
 def time_booking(
         room_numbers, room_type, no_of_rooms_required, normal_username,
-        normal_book_date, normal_check_in, normal_check_out, normal_person):
+        normal_book_date, normal_check_in, normal_check_out, normal_person, room_managers):
     #for i in range(no_of_rooms_required):
         #room_no = room_numbers.pop()
     #print(room_numbers)
 
 
     # getting the comma-separated string from the list
-    resultString = ", ".join([str(item) for item in room_numbers if item])
+    room_numbers_string = ", ".join([str(item) for item in room_numbers if item])
+    room_managers_string = ", ".join([str(item) for item in room_managers if item])
 
     time_slot = Booking(customer_name=normal_username,
                         check_in_date=normal_book_date,
                         check_in_time=normal_check_in,
                         check_out_time=normal_check_out,
-                        room_numbers=resultString,
+                        room_numbers=room_numbers_string,
                         category=room_type, person=normal_person,
-                        no_of_rooms = no_of_rooms_required)
+                        no_of_rooms = no_of_rooms_required,
+                        room_managers=room_managers_string)
     time_slot.save()
 
 """Function to check if the room(s) is/are available."""
@@ -645,6 +659,7 @@ def room_category(
     normal_king_rooms = 0
     normal_queen_rooms = 0
     room_numbers = list()
+    room_managers = list()
     # List of rooms for the given category.
     try:
         room_list = Room.objects.filter(
@@ -676,23 +691,28 @@ def room_category(
                 if (room_type == 'Regular'):
                     normal_regular_rooms = normal_regular_rooms + 1
                     room_numbers.append(room.room_number)
+                    room_managers.append(room.room_manager)
                 elif (room_type == 'Executive'):
                     normal_executive_rooms = normal_executive_rooms + 1
                     room_numbers.append(room.room_number)
+                    room_managers.append(room.room_manager)
                 elif (room_type == 'Deluxe'):
                     normal_deluxe_rooms = normal_deluxe_rooms + 1
                     room_numbers.append(room.room_number)
+                    room_managers.append(room.room_manager)
                 elif (room_type == 'King'):
                     normal_king_rooms = normal_king_rooms + 1
                     room_numbers.append(room.room_number)
+                    room_managers.append(room.room_manager)
                 elif (room_type == 'Queen'):
                     normal_queen_rooms = normal_queen_rooms + 1
                     room_numbers.append(room.room_number)
+                    room_managers.append(room.room_manager)
                 if (room_type == 'Regular' and
                     normal_regular_rooms == normal_no_of_rooms_required  and room.category == 'Regular'):
                     time_booking(room_numbers, room_type, normal_no_of_rooms_required,
                                     normal_username, normal_book_date, normal_check_in,
-                                    normal_check_out, normal_person)
+                                    normal_check_out, normal_person, room_managers)
                     return 1
                 elif (room_type == 'Executive' and
                     normal_executive_rooms == normal_no_of_rooms_required and room.category == 'Executive'):
