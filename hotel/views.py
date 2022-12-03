@@ -152,21 +152,19 @@ def manage(request):
     else:
         return redirect('../book/')
 
-
-
-
-
-"""Function that returns the list of available categories."""
+"""Function that returns the list of rooms based on the search criteria."""
 def manager_room_search(
         str_room_numbers, categories, capacities,
         str_available_from, str_available_till, advance, username):
-    print(str_room_numbers)
-    spaces_room_numbers = list(str_room_numbers.split(","))
-    room_numbers = list()
-    for i in spaces_room_numbers:
-        room_numbers.append(i.strip())
-    print(room_numbers)
-
+    #print(str_room_numbers)
+    if str_room_numbers != '':
+        spaces_room_numbers = list(str_room_numbers.split(","))
+        room_numbers = list()
+        for i in spaces_room_numbers:
+            room_numbers.append(i.strip())
+        #print(room_numbers)
+    else:
+        room_numbers = ''
     available_from = convert_to_time(str_available_from)
     available_till = convert_to_time(str_available_till)
     #room_list = list()
@@ -213,13 +211,14 @@ def manager_room_search(
     parameters = {}
     #temp = {'category__in': categories, 'available_from__lte': available_from, 'available_till__gte': available_till, 'capacity__in': capacities, 'advance__gte': advance}
     for key, value in zip(keys, values):
-        if value is not None and value !=[]:
+        if value is not None and value !=[] and value != '':
             parameters[key] = value
     #for key, value in temp:
     #    if value is not None and value !=[]:
     #        parameters[key] = value
+    #print(room_numbers)
     room_list = Room.objects.filter(**parameters)
-
+    #print("hwqaf")
     '''room_list = Room.objects.filter(
         category__in=categories,
         available_from__lte=available_from,
@@ -294,10 +293,10 @@ def manage_rooms(request):
             if form.is_valid():
                 try:
                     request.session['room_numbers'] = request.POST['room_numbers']
-                    #print(request.POST['room_numbers'])
+                    #print(request.session['room_numbers'])
                     #request.session['room_number'] = int(request.POST['room_number'])
                 except Exception:
-                    request.session['room_numbers'] = None
+                    request.session['room_numbers'] = ''
                 request.session['category'] = form.cleaned_data.get("category")
                 str_capacity = form.cleaned_data.get("capacity")
                 # using list comprehension to
@@ -344,9 +343,7 @@ def manage_rooms(request):
     else:
         return redirect('../book/')
 
-
-
-"""Function to add rooms."""
+"""Function to add/ edit room."""
 @login_required(login_url="/hotel/signin/")
 def add_rooms(request, room_number=None):
     if request.user.email.endswith("@anshul.com"):
@@ -398,7 +395,7 @@ def add_rooms(request, room_number=None):
         return redirect('../book/')
 
 
-"""Function to add rooms."""
+"""Function to delete room."""
 @login_required(login_url="/hotel/signin/")
 def delete_rooms(request, room_number=None):
     if request.user.email.endswith("@anshul.com"):
@@ -415,16 +412,7 @@ def delete_rooms(request, room_number=None):
     else:
         return redirect('../book/')
 
-            
-
-
-
-
-
-
-#import re
-
-"""Function that returns the list of available categories."""
+"""Function that returns the list of bookings based on the search criteria."""
 def manager_book_search(
         str_room_numbers, customer_name, str_check_in_date, str_check_in_time, str_check_out_time, category, person, no_of_rooms, room_manager):
 
@@ -438,8 +426,10 @@ def manager_book_search(
     check_out_time = convert_to_time(str_check_out_time)
     for room_number in room_numbers:
         room_number_regex = rf"\b{room_number}\b"
+        '''keys = ['room_numbers__iregex', 'customer_name', 'check_in_date', 'check_in_time__gte', 'check_out_time__lte', 'category__in', 'person__in', 'no_of_rooms', 'room_managers__regex']
+        values = [room_number_regex, customer_name, check_in_date, check_in_time, check_out_time, category, person, no_of_rooms, room_manager_regex]'''
         keys = ['room_numbers__iregex', 'customer_name', 'check_in_date', 'check_in_time__gte', 'check_out_time__lte', 'category__in', 'person__in', 'no_of_rooms', 'room_managers__regex']
-        values = [room_number_regex, customer_name, check_in_date, check_in_time, check_out_time, category, person, no_of_rooms, room_manager_regex]
+        values = [room_number_regex, customer_name, check_in_date, check_in_time, check_out_time, category, person, no_of_rooms]
         parameters = {}
         for key, value in zip(keys, values):
             if value is not None and value !=[] and value != '':
@@ -451,11 +441,12 @@ def manager_book_search(
 @login_required(login_url="/hotel/signin/")
 def manage_bookings(request):
     if request.user.email.endswith("@anshul.com"):
-        bookings = Booking.objects.all()
+        bookings = Booking.objects.filter(room_manager=request.user.username)
         if request.method == 'POST':
             form = ManageBookingForm(request.POST)
             if form.is_valid():
                 request.session['room_numbers'] = request.POST['room_numbers']
+                #print(request.session['room_numbers'])
                 request.session['customer_name'] = request.POST['customer_name']
                 try:
                     request.session['check_in_date_month'] = request.POST['check_in_date_month']
