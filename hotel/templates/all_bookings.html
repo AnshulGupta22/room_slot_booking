@@ -74,6 +74,7 @@
                   <b>Category</b> - {{ future_booking.category }}<br/>
                   <b>Person</b> - {{ future_booking.person }}<br/>
                   <b>Number of Rooms</b> - {{ future_booking.no_of_rooms }}<br/>
+                  <b>Room managers</b> - {{ future_booking.room_managers }}<br/>
                   <a href='/hotel/all_bookings/{{future_booking.pk}}' class="submit" style="padding: 2px 20px;"> Delete </a>
                 </div>
               {% endfor %}
@@ -94,7 +95,8 @@
                     <b>Booking Till Time</b> - {{ current_and_past_booking.check_out_time }}<br/>
                     <b>Category</b> - {{ current_and_past_booking.category }}<br/>
                     <b>Person</b> - {{ current_and_past_booking.person }}<br/>
-                    <b>Number of Rooms</b> - {{ current_and_past_booking.no_of_rooms }}
+                    <b>Number of Rooms</b> - {{ current_and_past_booking.no_of_rooms }}<br/>
+                    <b>Room managers</b> - {{ current_and_past_booking.room_managers }}
                   </div>
                 </div>
               {% endfor %}

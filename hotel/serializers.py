@@ -11,10 +11,11 @@ class RoomSerializer(serializers.ModelSerializer):
                     'available_till', 'advance']
 
 """class for users."""
-"""class CustomerSerializer(serializers.ModelSerializer):
+class CustomerSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Customer
-        fields = ['desired_username', 'first_name', 'last_name', 'email']"""
+        model = User
+        fields = ['first_name', 'last_name', 'email']
+
 
 """class to register users."""
 '''class CustomerAPISerializer(serializers.ModelSerializer):

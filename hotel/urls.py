@@ -9,9 +9,16 @@ urlpatterns = [
     path('signup/', views.sign_up, name='signup'),
     path('signin/', views.sign_in, name='signin'),
     path('view_profile/', views.view_profile, name='view_profile'),
+    path('edit_profile/', views.edit_profile, name='edit_profile'),
     path('book/', views.booking, name='book'),
     path('manage/', views.manage, name='manage'),
     path('manage_rooms/', views.manage_rooms, name='manage_rooms'),
+    path('manage_time_slots/', views.manage_time_slots, name='manage_time_slots'),
+    path('view_time_slots/<int:room_number>/', views.view_time_slots, name='view_time_slots'),
+    path('add_time_slots/<int:room_number>/', views.add_time_slots, name='add_time_slots'),
+    path('add_rooms/', views.add_rooms, name='add_rooms'),
+    path('add_rooms/<int:room_number>/', views.add_rooms, name='edit_rooms'),
+    path('delete_rooms/<int:room_number>/', views.delete_rooms, name='delete_rooms'),
     path('manage_bookings/', views.manage_bookings, name='manage_bookings'),
     path('logout/', views.logout_view, name='logout'),
     path('regular/', views.regular, name='regular'),
@@ -32,6 +39,7 @@ urlpatterns = [
     path('bookings/', views.booking_list),
     path('bookings/<int:pk>/', views.booking_detail),
     path('bookings/<category>/', views.booking_category),
+    path('profile_view/', views.profile_view),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
