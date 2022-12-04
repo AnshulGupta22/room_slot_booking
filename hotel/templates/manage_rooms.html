@@ -52,6 +52,8 @@
           <b>Available From:</b> {{ room.available_from }}<br/>
           <b>Available Till:</b> {{ room.available_till }}<br/>
           <b>Advance:</b> {{ room.advance }}<br/>
+          <a href='../../hotel/view_time_slots/{{room.room_number}}'> [View Time Slot]</a>
+          <a href='../../hotel/add_time_slots/{{room.room_number}}'> [Add Time Slot]</a>
           <a href='../../hotel/add_rooms/{{room.room_number}}'> [Edit]</a>
           <a href='../../hotel/delete_rooms/{{room.room_number}}'> [Delete]</a>
       </div>

@@ -8,7 +8,7 @@ import datetime
 from django.core.validators import int_list_validator, MaxValueValidator, MinValueValidator, RegexValidator
 from django.utils.regex_helper import _lazy_re_compile
 
-from hotel.models import Booking, Room
+from hotel.models import Booking, Room, TimeSlot
 
 """Function to check if the username already exists or not."""
 def validate_username(value):
@@ -348,7 +348,7 @@ class RoomForm(forms.Form):
         widget=forms.Select(choices=ROOM_CAPACITY),
         )'''
 
-    class TimeInput(forms.TimeInput):
+    '''class TimeInput(forms.TimeInput):
         input_type = 'time'
         default=datetime.time()
 
@@ -362,7 +362,7 @@ class RoomForm(forms.Form):
         required=False,
         widget=TimeInput(),
         #initial=time(23,59,59)
-        )
+        )'''
 
     advance = forms.IntegerField(
         required=False,
@@ -384,7 +384,7 @@ class RoomForm(forms.Form):
                 }'''
 
     """Function to ensure that booking is done for future and check out is after check in"""
-    def clean(self):
+    '''def clean(self):
         cleaned_data = super().clean()
         available_from = cleaned_data.get("available_from")
         available_till = cleaned_data.get("available_till")
@@ -411,7 +411,7 @@ class RoomForm(forms.Form):
             if available_till <= available_from:
                 raise ValidationError(
                     "Available till should be after available from.", code='Available till after available from'
-                )
+                )'''
 
 
 
@@ -425,15 +425,17 @@ class RoomForm(forms.Form):
 class AddRoomForm(forms.ModelForm):
     class Meta:
         model = Room
-        fields = ['room_number', 'category', 'capacity',
-                    'available_from', 'available_till', 'advance']
+        fields = ['room_number', 'category', 'capacity', 'advance']
 
-
+class AddTimeSlotForm(forms.ModelForm):
+    class Meta:
+        model = TimeSlot
+        fields = ['available_from', 'available_till']
         widgets = {
+                    #'room_number': PositiveSmallIntegerField(validators=[MaxValueValidator(1000), MinValueValidator(1)], attrs={'readonly': True}),
                     'available_from': TimeInput(attrs={'readonly': True}),
                     'available_till': TimeInput(),
                 }
-
 
     """Function to ensure that booking is done for future and check out is after check in"""
     def clean(self):
@@ -465,7 +467,85 @@ class AddRoomForm(forms.ModelForm):
                     "Available till should be after available from.", code='Available till after available from'
                 )
 
+class ViewTimeSlotForm(forms.ModelForm):
+    class Meta:
+        model = TimeSlot
+        fields = ['available_from', 'available_till']
+        widgets = {
+                    #'room_number': PositiveSmallIntegerField(validators=[MaxValueValidator(1000), MinValueValidator(1)], attrs={'readonly': True}),
+                    'available_from': TimeInput(attrs={'required': False}),
+                    'available_till': TimeInput(attrs={'required': False}),
+                }
 
+    """Function to ensure that booking is done for future and check out is after check in"""
+    def clean(self):
+        cleaned_data = super().clean()
+        available_from = cleaned_data.get("available_from")
+        available_till = cleaned_data.get("available_till")
+        str_available_from = str(available_from)
+        str_available_till = str(available_till)
+        format = '%H:%M:%S'
+        if str_available_from != 'None':
+            try:
+                datetime.datetime.strptime(str_available_from, format).time()
+            except Exception:
+                raise ValidationError(
+                    _('Wrong time entered.'),
+                    code='Wrong time entered.',
+                )
+        if str_available_till != 'None':
+            try:
+                    datetime.datetime.strptime(str_available_till, format).time()
+            except Exception:
+                raise ValidationError(
+                    _('Wrong time entered.'),
+                    code='Wrong time entered.',
+                )
+        if available_till is not None and available_from is not None:
+            if available_till <= available_from:
+                raise ValidationError(
+                    "Available till should be after available from.", code='Available till after available from'
+                )
+
+class ManageViewTimeSlotForm(forms.ModelForm):
+    class Meta:
+        model = TimeSlot
+        fields = ['room_number', 'available_from', 'available_till']
+        widgets = {
+                    'room_number': forms.IntegerField(validators=[MaxValueValidator(1000), MinValueValidator(1)]),
+                    'available_from': TimeInput(attrs={'required': False}),
+                    'available_till': TimeInput(attrs={'required': False}),
+                }
+
+    """Function to ensure that booking is done for future and check out is after check in"""
+    def clean(self):
+        cleaned_data = super().clean()
+        available_from = cleaned_data.get("available_from")
+        available_till = cleaned_data.get("available_till")
+        str_available_from = str(available_from)
+        str_available_till = str(available_till)
+        format = '%H:%M:%S'
+        if str_available_from != 'None':
+            try:
+                datetime.datetime.strptime(str_available_from, format).time()
+            except Exception:
+                raise ValidationError(
+                    _('Wrong time entered.'),
+                    code='Wrong time entered.',
+                )
+        if str_available_till != 'None':
+            try:
+                    datetime.datetime.strptime(str_available_till, format).time()
+            except Exception:
+                raise ValidationError(
+                    _('Wrong time entered.'),
+                    code='Wrong time entered.',
+                )
+        if available_till is not None and available_from is not None:
+            if available_till <= available_from:
+                raise ValidationError(
+                    "Available till should be after available from.", code='Available till after available from'
+                )
 
 
 

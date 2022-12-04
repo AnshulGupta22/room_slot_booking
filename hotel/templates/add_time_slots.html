@@ -36,9 +36,12 @@
 				</div>
 			</div>
   	</div>
-		<a href="{% url 'hotel:manage_rooms' %}">Rooms</a>
-    <a href="{% url 'hotel:manage_time_slots' %}">Time Slots</a>
-		<a href="{% url 'hotel:manage_bookings' %}">Bookings</a>
+  	{{ room_number }}
+  	<form method="POST">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <input type="submit" class= "submit submit-right" value="Add" />
+    </form>
     <!-- Footer -->
     <footer class="w3-padding-32 w3-black w3-center w3-margin-top">
       <h5>Find Us On</h5>
@@ -53,3 +56,4 @@
     </footer>
 	</body>
 </html>
+
