@@ -191,7 +191,7 @@ class BookingForm(forms.ModelForm):
 
 class ManageBookingForm(forms.Form):
 
-    room_numbers = forms.CharField(validators=[int_list_validator], required=False, max_length=4000)
+    room_numbers = forms.CharField(validators=[int_list_validator()], required=False, max_length=4000)
     customer_name = forms.CharField(
         max_length=150,
         required=False,
@@ -276,7 +276,7 @@ class RoomForm(forms.Form):
         required=False,
         validators=[MaxValueValidator(1000), MinValueValidator(1)]
     )'''
-    room_numbers = forms.CharField(validators=[int_list_validator], required=False, max_length=4000)
+    room_numbers = forms.CharField(validators=[int_list_validator()], required=False, max_length=4000)
 
     ROOM_CATEGORIES = (
         #('', ''),
@@ -433,7 +433,8 @@ class AddTimeSlotForm(forms.ModelForm):
         fields = ['available_from', 'available_till']
         widgets = {
                     #'room_number': PositiveSmallIntegerField(validators=[MaxValueValidator(1000), MinValueValidator(1)], attrs={'readonly': True}),
-                    'available_from': TimeInput(attrs={'readonly': True}),
+                    #'available_from': TimeInput(attrs={'readonly': True}),
+                    'available_from': TimeInput(),
                     'available_till': TimeInput(),
                 }
 
@@ -510,9 +511,9 @@ class ViewTimeSlotForm(forms.ModelForm):
 class ManageViewTimeSlotForm(forms.ModelForm):
     class Meta:
         model = TimeSlot
-        fields = ['room_number', 'available_from', 'available_till']
+        fields = ['room', 'available_from', 'available_till']
         widgets = {
-                    'room_number': forms.IntegerField(validators=[MaxValueValidator(1000), MinValueValidator(1)]),
+                    'room': forms.IntegerField(validators=[MaxValueValidator(1000), MinValueValidator(1)]),
                     'available_from': TimeInput(attrs={'required': False}),
                     'available_till': TimeInput(attrs={'required': False}),
                 }

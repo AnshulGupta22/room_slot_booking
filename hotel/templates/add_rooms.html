@@ -37,6 +37,7 @@
 			</div>
       <a href="{% url 'hotel:manage' %}" class="w3-right ert"> Manage </a>
   	</div>
+    <h3> Add/ Edit rooms</h3>
     <form method="POST">
       {% csrf_token %}
       {{ form.as_p }}
