@@ -55,15 +55,15 @@ class Room(models.Model):
     room_manager = models.CharField(max_length=30)
 
     def __str__(self):
-        return f'Room number: {self.room_number}, category: {self.category}, capacity: {self.capacity}, advance: {self.advance}'
+        return f'Room number: {self.room_number}, category: {self.category}, capacity: {self.capacity}, advance: {self.advance}, room manager: {self.room_manager}'
 
 class TimeSlot(models.Model):
-    room_number = models.ForeignKey(Room, on_delete=models.CASCADE)
+    room = models.ForeignKey(Room, on_delete=models.CASCADE)
     available_from = models.TimeField()
     available_till = models.TimeField()
 
     def __str__(self):
-        return f'Room number: {self.room_number}, from: {self.available_from}, till: {self.available_till}'
+        return f'Room number: {self.room}, from: {self.available_from}, till: {self.available_till}'
 
 """class used when a user books a room slot."""
 class Booking(models.Model):

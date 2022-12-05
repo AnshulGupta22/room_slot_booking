@@ -36,10 +36,11 @@
 				</div>
 			</div>
   	</div>
+    <h3>All time slots</h3>
 	<form method="POST">
       {% csrf_token %}
       {{ form.as_p }}
-      <input type="submit" class= "submit submit-right" value="Add/ Edit" />
+      <input type="submit" class= "submit submit-right" value="Search" />
     </form><br/><br/>
     {% if time_slots %}
 		  {% for time_slot in time_slots %}
