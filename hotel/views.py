@@ -436,6 +436,156 @@ def add_time_slots(request, room_number):
     else:
         return redirect('../book/')
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+"""Function that returns the list of rooms based on the search criteria."""
+def manager_time_slot_search(
+        room_number, str_available_from, str_available_till):
+    room_obj = Room.objects.get(room_number=room_number)
+    #print(str_room_numbers)
+    '''if str_room_numbers != '':
+        spaces_room_numbers = list(str_room_numbers.split(","))
+        room_numbers = list()
+        for i in spaces_room_numbers:
+            room_numbers.append(i.strip())
+        #print(room_numbers)
+    else:
+        room_numbers = '''''
+    available_from = convert_to_time(str_available_from)
+    available_till = convert_to_time(str_available_till)
+    #room_list = list()
+    #for category in categories:
+    '''room_list = Room.objects.filter(
+        room_number=room_number,
+        category=categories,
+        available_from__lte=available_from,
+        available_till__gte=available_till,
+        capacity__gte=capacities,
+        advance__gte=advance
+    )'''
+    #print(categories)
+    '''if categories == []:
+        categories = ['Regular', 'Executive', 'Deluxe', 'King', 'Queen']
+    if capacities == []:
+        capacities = [1, 2, 3, 4]
+    if advance is None:
+        advance = 0
+    if available_from is None and available_till is None:
+        room_list = Room.objects.filter(
+        category__in=categories,
+        capacity__in=capacities,
+        advance__gte=advance
+    )
+    elif available_from is None:
+        room_list = Room.objects.filter(
+        category__in=categories,
+        available_till__gte=available_till,
+        capacity__in=capacities,
+        advance__gte=advance
+    )
+    elif available_till is None:
+        room_list = Room.objects.filter(
+        category__in=categories,
+        available_from__lte=available_from,
+        capacity__in=capacities,
+        advance__gte=advance
+    )
+    else:'''
+
+    '''keys = ['room_number__in', 'category__in', 'available_from__lte', 'available_till__gte', 'capacity__in', 'advance__gte', 'room_manager']
+    values = [room_numbers, categories, available_from, available_till, capacities, advance, username]'''
+    keys = ['room', 'available_from_gte', 'available_till_lte']
+    values = [room_obj, available_from, available_till]
+    parameters = {}
+    #temp = {'category__in': categories, 'available_from__lte': available_from, 'available_till__gte': available_till, 'capacity__in': capacities, 'advance__gte': advance}
+    for key, value in zip(keys, values):
+        if value is not None and value !=[] and value != '':
+            parameters[key] = value
+    #for key, value in temp:
+    #    if value is not None and value !=[]:
+    #        parameters[key] = value
+    #print(room_numbers)
+    time_slots_list = TimeSlot.objects.filter(**parameters)
+    #print("hwqaf")
+    '''room_list = Room.objects.filter(
+        category__in=categories,
+        available_from__lte=available_from,
+        available_till__gte=available_till,
+        capacity__in=capacities,
+        advance__gte=advance
+    )'''
+    #print(room_list)
+    return time_slots_list
+        #select * from ROOM where db_room_number = room_number and db_category IN category and db_capacity IN capacity and db_available_from <= available_from and db_available_till >= available_till and db_advance >= advance
+    """print(room_list)
+    for capacity in capacities:
+        room_list += Room.objects.filter(
+            room_number=room_number,
+            category=category,
+            available_from__lte=available_from,
+            available_till__gte=available_till,
+            #capacity__gte=capacity,
+            advance=advance
+        )
+    
+    for room in room_list:
+        # Calculating the maximum date to which a room can be
+        # booked in advance.
+        max_book = now + datetime.timedelta(days=room.advance)
+        if (book_date <= max_book.date()):
+            # To ensure no rooms are booked within a gap of 1 hour
+            # after checkout.
+            added_check_out = check_out.replace(
+                hour=(check_out.hour + 1) % 24
+            )
+            # To ensure no rooms are booked within a gap of 1 hour
+            # before checkin.
+            subtracted_check_in = check_in.replace(
+                hour=(check_in.hour - 1) % 24
+            )
+            # Checking if the room is already booked.
+            taken = Booking.objects.filter(Q(Q(check_in_time__lt=added_check_out)
+                                             | Q(check_out_time__gt=subtracted_check_in))
+                                           & Q(room_number__contains=room.room_number)
+                                           & Q(check_in_date=book_date))
+            if not taken:
+                if (room.category == 'Regular'):
+                    normal_regular_rooms = normal_regular_rooms + 1
+                elif (room.category == 'Executive'):
+                    normal_executive_rooms = normal_executive_rooms + 1
+                elif (room.category == 'Deluxe'):
+                    normal_deluxe_rooms = normal_deluxe_rooms + 1
+                elif (room.category == 'King'):
+                    normal_king_rooms = normal_king_rooms + 1
+                elif (room.category == 'Queen'):
+                    normal_queen_rooms = normal_queen_rooms + 1
+    if (normal_regular_rooms >= normal_no_of_rooms_required):
+        available_categories.append('Regular')
+    if (normal_executive_rooms >= normal_no_of_rooms_required):
+        available_categories.append('Executive')
+    if (normal_deluxe_rooms >= normal_no_of_rooms_required):
+        available_categories.append('Deluxe')
+    if (normal_king_rooms >= normal_no_of_rooms_required):
+        available_categories.append('King')
+    if (normal_queen_rooms >= normal_no_of_rooms_required):
+        available_categories.append('Queen')
+    return available_categories"""
+
+
+
+
+
 """Function to add/ edit time_slot."""
 @login_required(login_url="/hotel/signin/")
 def view_time_slots(request, room_number):
@@ -471,14 +621,10 @@ def view_time_slots(request, room_number):
                     request.session['advance'] = int(request.POST['advance'])
                 except Exception:
                     request.session['advance'] = None'''
-                #print(request.POST['room_numbers'])
-                response = manager_time_slot_search(request.session['room_numbers'],
-                                        request.session['category'],
-                                        request.session['capacity'],
+                response = manager_time_slot_search(room_number,
                                         request.session['available_from'],
-                                        request.session['available_till'],
-                                        request.session['advance'],
-                                        request.user.username)
+                                        request.session['available_till']
+                                        )
                 #if response:
                 context = {
                     'form': form,

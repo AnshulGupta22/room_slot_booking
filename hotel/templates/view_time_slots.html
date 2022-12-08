@@ -36,12 +36,12 @@
 				</div>
 			</div>
   	</div>
-    <h3>All time slots</h3>
+    <h3>Search Time Slots</h3>
 	<form method="POST">
       {% csrf_token %}
       {{ form.as_p }}
       <input type="submit" class= "submit submit-right" value="Search" />
-    </form><br/><br/>
+    </form><br/><h3>All time slots</h3><br/>
     {% if time_slots %}
 		  {% for time_slot in time_slots %}
       <div class="card card-width container3">
