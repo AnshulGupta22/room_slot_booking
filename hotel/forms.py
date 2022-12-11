@@ -203,11 +203,11 @@ class ManageBookingForm(forms.Form):
     )
     check_in_time = forms.TimeField(
         required=False,
-        widget=TimeInput(),
+        widget=TimeInput()
     )
     check_out_time = forms.TimeField(
         required=False,
-        widget=TimeInput(),
+        widget=TimeInput()
     )
     ROOM_CATEGORIES = (
         ('Regular', 'Regular'),
@@ -421,12 +421,25 @@ class RoomForm(forms.Form):
 
 
 
+
 """class used for booking a time slot."""
 class AddRoomForm(forms.ModelForm):
     class Meta:
         model = Room
         fields = ['room_number', 'category', 'capacity', 'advance']
 
+class NumberInput(forms.NumberInput):
+    input_type = 'number'
+
+"""class used for booking a time slot."""
+class EditRoomForm(forms.ModelForm):
+    class Meta:
+        model = Room
+        fields = ['room_number', 'category', 'capacity', 'advance']
+
+        widgets = {
+                    'room_number': NumberInput(attrs={'readonly': True})
+                }
 class AddTimeSlotForm(forms.ModelForm):
     class Meta:
         model = TimeSlot
@@ -435,7 +448,7 @@ class AddTimeSlotForm(forms.ModelForm):
                     #'room_number': PositiveSmallIntegerField(validators=[MaxValueValidator(1000), MinValueValidator(1)], attrs={'readonly': True}),
                     #'available_from': TimeInput(attrs={'readonly': True}),
                     'available_from': TimeInput(),
-                    'available_till': TimeInput(),
+                    'available_till': TimeInput()
                 }
 
     """Function to ensure that booking is done for future and check out is after check in"""
@@ -468,7 +481,59 @@ class AddTimeSlotForm(forms.ModelForm):
                     "Available till should be after available from.", code='Available till after available from'
                 )
 
-class ViewTimeSlotForm(forms.ModelForm):
+
+
+
+
+
+
+
+
+
+
+
+"""class used when a user sign in."""
+class ViewTimeSlotForm(forms.Form):
+    available_from = forms.TimeField(required=False, widget=TimeInput())
+    available_till = forms.TimeField(required=False, widget=TimeInput())
+
+    """Function to ensure that booking is done for future and check out is after check in"""
+    def clean(self):
+        cleaned_data = super().clean()
+        available_from = cleaned_data.get("available_from")
+        available_till = cleaned_data.get("available_till")
+        str_available_from = str(available_from)
+        str_available_till = str(available_till)
+        format = '%H:%M:%S'
+        if str_available_from != 'None':
+            try:
+                datetime.datetime.strptime(str_available_from, format).time()
+            except Exception:
+                raise ValidationError(
+                    _('Wrong time entered.'),
+                    code='Wrong time entered.',
+                )
+        if str_available_till != 'None':
+            try:
+                    datetime.datetime.strptime(str_available_till, format).time()
+            except Exception:
+                raise ValidationError(
+                    _('Wrong time entered.'),
+                    code='Wrong time entered.',
+                )
+        if available_till is not None and available_from is not None:
+            if available_till <= available_from:
+                raise ValidationError(
+                    "Available till should be after available from.", code='Available till after available from'
+                )
+
+
+
+
+
+
+
+'''class ViewTimeSlotForm(forms.ModelForm):
     class Meta:
         model = TimeSlot
         fields = ['available_from', 'available_till']
@@ -476,37 +541,9 @@ class ViewTimeSlotForm(forms.ModelForm):
                     #'room_number': PositiveSmallIntegerField(validators=[MaxValueValidator(1000), MinValueValidator(1)], attrs={'readonly': True}),
                     'available_from': TimeInput(attrs={'required': False}),
                     'available_till': TimeInput(attrs={'required': False}),
-                }
+                }'''
 
-    """Function to ensure that booking is done for future and check out is after check in"""
-    def clean(self):
-        cleaned_data = super().clean()
-        available_from = cleaned_data.get("available_from")
-        available_till = cleaned_data.get("available_till")
-        str_available_from = str(available_from)
-        str_available_till = str(available_till)
-        format = '%H:%M:%S'
-        if str_available_from != 'None':
-            try:
-                datetime.datetime.strptime(str_available_from, format).time()
-            except Exception:
-                raise ValidationError(
-                    _('Wrong time entered.'),
-                    code='Wrong time entered.',
-                )
-        if str_available_till != 'None':
-            try:
-                    datetime.datetime.strptime(str_available_till, format).time()
-            except Exception:
-                raise ValidationError(
-                    _('Wrong time entered.'),
-                    code='Wrong time entered.',
-                )
-        if available_till is not None and available_from is not None:
-            if available_till <= available_from:
-                raise ValidationError(
-                    "Available till should be after available from.", code='Available till after available from'
-                )
+    
 
 class ManageViewTimeSlotForm(forms.ModelForm):
     class Meta:
