@@ -12,7 +12,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
-from hotel.forms import CustomerForm, SignInForm, BookingForm, RoomForm, ManageBookingForm, AddRoomForm, ManageViewTimeSlotForm, ViewTimeSlotForm, AddTimeSlotForm
+from hotel.forms import CustomerForm, SignInForm, BookingForm, RoomForm, ManageBookingForm, AddRoomForm, ManageViewTimeSlotForm, ViewTimeSlotForm, AddTimeSlotForm, EditRoomForm
 from .models import Room, Booking, TimeSlot
 
 from .serializers import (
@@ -345,6 +345,7 @@ def manage_rooms(request):
         return redirect('../book/')
 
 """Function to add/ edit room."""
+'''
 @login_required(login_url="/hotel/signin/")
 def add_rooms(request, room_number=None):
     if request.user.email.endswith("@anshul.com"):
@@ -354,6 +355,63 @@ def add_rooms(request, room_number=None):
             room = Room()
 
         if request.method == 'POST':
+
+            if room_number:
+                form = EditRoomForm(request.POST, instance=room)
+            else:
+                form = AddRoomForm(request.POST, instance=room)
+            
+            if form.is_valid():
+                room = Room(room_number=request.POST['room_number'],
+                        category=request.POST['category'],
+                        capacity=request.POST['capacity'],
+                        #available_from=request.POST['available_from'],
+                        #available_till=request.POST['available_till'],
+                        advance=request.POST['advance'],
+                        room_manager=request.user.username)
+                room.save()
+                # Implemented Post/Redirect/Get.
+                if room_number:
+                    return redirect('../../manage_rooms/')
+                return redirect('../manage_rooms/')
+                #return render(request, 'manage_rooms.html', context)
+            else:
+                context = {
+                    'form': form,
+                    'username': request.user.username
+                    }
+                return render(request, 'add_rooms.html', context)
+        context = {
+                'form': AddRoomForm(instance=room),
+                'username': request.user.username
+                }
+        return render(request, 'add_rooms.html', context)
+    else:
+        return redirect('../book/')
+'''
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+"""Function to add/ edit room."""
+@login_required(login_url="/hotel/signin/")
+def add_rooms(request):
+    if request.user.email.endswith("@anshul.com"):
+
+        room = Room()
+
+        if request.method == 'POST':
+
             form = AddRoomForm(request.POST, instance=room)
             
             if form.is_valid():
@@ -373,8 +431,6 @@ def add_rooms(request, room_number=None):
                     'username': request.user.username
                     }'''
                 # Implemented Post/Redirect/Get.
-                if room_number:
-                    return redirect('../../manage_rooms/')
                 return redirect('../manage_rooms/')
                 #return render(request, 'manage_rooms.html', context)
             else:
@@ -394,6 +450,62 @@ def add_rooms(request, room_number=None):
         return render(request, 'add_rooms.html', context)
     else:
         return redirect('../book/')
+
+
+
+
+
+
+
+
+
+"""Function to add/ edit room."""
+@login_required(login_url="/hotel/signin/")
+def edit_rooms(request, room_number=None):
+    if request.user.email.endswith("@anshul.com"):
+        if room_number:
+            try:
+                room = Room.objects.get(room_number=room_number, room_manager=request.user.username)
+            except Exception:
+                return HttpResponse("Bad request.")
+        else:
+            return HttpResponse("Bad request.")
+
+        if request.method == 'POST':
+
+            form = EditRoomForm(request.POST, instance=room)
+            
+            if form.is_valid():
+                room = Room(room_number=request.POST['room_number'],
+                        category=request.POST['category'],
+                        capacity=request.POST['capacity'],
+                        advance=request.POST['advance'],
+                        room_manager=request.user.username)
+                room.save()
+
+                # Implemented Post/Redirect/Get.
+                if room_number:
+                    return redirect('../../manage_rooms/')
+            else:
+                context = {
+                    'form': form,
+                    'username': request.user.username
+                    }
+                return render(request, 'edit_rooms.html', context)
+        context = {
+                'form': EditRoomForm(instance=room),
+                'username': request.user.username
+                }
+        return render(request, 'edit_rooms.html', context)
+    else:
+        return redirect('../book/')
+
+
+
+
+
+
+
 
 """Function to add/ edit time_slot."""
 @login_required(login_url="/hotel/signin/")
@@ -434,23 +546,27 @@ def add_time_slots(request, room_number):
 def edit_time_slots(request, pk):
     if request.user.email.endswith("@anshul.com"):
         if pk:
-            time_slot_obj = TimeSlot.objects.get(pk=pk)
+            try:
+                time_slot_obj = TimeSlot.objects.get(pk=pk)
+            except Exception:
+                return HttpResponse("Bad request.")
         else:
             return HttpResponse("Bad request.")
-        #print(time_slot.room.room_number)
+        print(time_slot_obj.room)
         if request.method == 'POST':
             form = AddTimeSlotForm(request.POST, instance=time_slot_obj)
             if form.is_valid():
                 try:
-                    room_obj = Room.objects.get(room_number=time_slot_obj.room.room_number, room_manager=request.user.username)
+                    Room.objects.get(room_number=time_slot_obj.room.room_number, room_manager=request.user.username)
                 except Exception:
                     return HttpResponse("Bad request.")
-                time_slot = TimeSlot(room=room_obj,
+                time_slot = TimeSlot(room=time_slot_obj.room,
                         available_from=request.POST['available_from'],
                         available_till=request.POST['available_till'])
                 time_slot.save()
                 # Implemented Post/Redirect/Get.
-                return redirect('../../manage_rooms/')
+                return redirect(f'../../view_time_slots/{time_slot_obj.room.room_number}/')
+
             else:
                 context = {
                     'form': form,

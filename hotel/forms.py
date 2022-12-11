@@ -428,6 +428,18 @@ class AddRoomForm(forms.ModelForm):
         model = Room
         fields = ['room_number', 'category', 'capacity', 'advance']
 
+class NumberInput(forms.NumberInput):
+    input_type = 'number'
+
+"""class used for booking a time slot."""
+class EditRoomForm(forms.ModelForm):
+    class Meta:
+        model = Room
+        fields = ['room_number', 'category', 'capacity', 'advance']
+
+        widgets = {
+                    'room_number': NumberInput(attrs={'readonly': True})
+                }
 class AddTimeSlotForm(forms.ModelForm):
     class Meta:
         model = TimeSlot
@@ -436,7 +448,7 @@ class AddTimeSlotForm(forms.ModelForm):
                     #'room_number': PositiveSmallIntegerField(validators=[MaxValueValidator(1000), MinValueValidator(1)], attrs={'readonly': True}),
                     #'available_from': TimeInput(attrs={'readonly': True}),
                     'available_from': TimeInput(),
-                    'available_till': TimeInput(),
+                    'available_till': TimeInput()
                 }
 
     """Function to ensure that booking is done for future and check out is after check in"""
