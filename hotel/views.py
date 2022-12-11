@@ -331,7 +331,7 @@ def manage_rooms(request):
             else:
                 context = {
                     'form': form,
-                    'rooms': rooms,
+                    'rooms': None,
                     'username': request.user.username
                     }
                 return render(request, 'manage_rooms.html', context)
@@ -395,14 +395,6 @@ def add_rooms(request, room_number=None):
     else:
         return redirect('../book/')
 
-
-
-
-
-
-
-
-
 """Function to add/ edit time_slot."""
 @login_required(login_url="/hotel/signin/")
 def add_time_slots(request, room_number):
@@ -437,7 +429,41 @@ def add_time_slots(request, room_number):
         return redirect('../book/')
 
 
-
+"""Function to add/ edit time_slot."""
+@login_required(login_url="/hotel/signin/")
+def edit_time_slots(request, pk):
+    if request.user.email.endswith("@anshul.com"):
+        if pk:
+            time_slot_obj = TimeSlot.objects.get(pk=pk)
+        else:
+            return HttpResponse("Bad request.")
+        #print(time_slot.room.room_number)
+        if request.method == 'POST':
+            form = AddTimeSlotForm(request.POST, instance=time_slot_obj)
+            if form.is_valid():
+                try:
+                    room_obj = Room.objects.get(room_number=time_slot_obj.room.room_number, room_manager=request.user.username)
+                except Exception:
+                    return HttpResponse("Bad request.")
+                time_slot = TimeSlot(room=room_obj,
+                        available_from=request.POST['available_from'],
+                        available_till=request.POST['available_till'])
+                time_slot.save()
+                # Implemented Post/Redirect/Get.
+                return redirect('../../manage_rooms/')
+            else:
+                context = {
+                    'form': form,
+                    'username': request.user.username
+                    }
+                return render(request, 'add_time_slots.html', context)
+        context = {
+                'form': AddTimeSlotForm(instance=time_slot_obj),
+                'username': request.user.username
+                }
+        return render(request, 'edit_time_slots.html', context)
+    else:
+        return redirect('../book/')
 
 
 
@@ -502,10 +528,10 @@ def manager_time_slot_search(
         advance__gte=advance
     )
     else:'''
-
+    #print(available_from)
     '''keys = ['room_number__in', 'category__in', 'available_from__lte', 'available_till__gte', 'capacity__in', 'advance__gte', 'room_manager']
     values = [room_numbers, categories, available_from, available_till, capacities, advance, username]'''
-    keys = ['room', 'available_from_gte', 'available_till_lte']
+    keys = ['room', 'available_from__lte', 'available_till__gte']
     values = [room_obj, available_from, available_till]
     parameters = {}
     #temp = {'category__in': categories, 'available_from__lte': available_from, 'available_till__gte': available_till, 'capacity__in': capacities, 'advance__gte': advance}
@@ -525,7 +551,7 @@ def manager_time_slot_search(
         capacity__in=capacities,
         advance__gte=advance
     )'''
-    #print(room_list)
+    #print(time_slots_list)
     return time_slots_list
         #select * from ROOM where db_room_number = room_number and db_category IN category and db_capacity IN capacity and db_available_from <= available_from and db_available_till >= available_till and db_advance >= advance
     """print(room_list)
@@ -595,7 +621,7 @@ def view_time_slots(request, room_number):
         else:
             time_slot = TimeSlot()'''
         try:
-            Room.objects.get(room_number=room_number, room_manager=request.user.username)
+            room = Room.objects.get(room_number=room_number, room_manager=request.user.username)
         except Exception:
             return HttpResponse("Bad request.")
         if request.method == 'POST':
@@ -621,27 +647,31 @@ def view_time_slots(request, room_number):
                     request.session['advance'] = int(request.POST['advance'])
                 except Exception:
                     request.session['advance'] = None'''
-                response = manager_time_slot_search(room_number,
+                time_slots = manager_time_slot_search(room_number,
                                         request.session['available_from'],
                                         request.session['available_till']
                                         )
                 #if response:
+                #print(time_slots)
                 context = {
                     'form': form,
-                    'rooms': response,
+                    'room': room,
+                    'time_slots': time_slots,
                     'username': request.user.username
                     }
-                return render(request, 'manage_rooms.html', context)
+                return render(request, 'view_time_slots.html', context)
                 #return HttpResponse("Not Available")
             else:
                 context = {
                     'form': form,
-                    'time_slots': TimeSlot.objects.filter(room_id=room_number),
+                    'room': room,
+                    'time_slots': None,
                     'username': request.user.username
                     }
-                return render(request, 'manage_rooms.html', context)
+                return render(request, 'view_time_slots.html', context)
         context = {
                 'form': ViewTimeSlotForm(),
+                'room': room,
                 #'room_number': room_number,
                 #'time_slots': TimeSlot.objects.filter(room=room_number, room_manager=request.user.username),
                 'time_slots': TimeSlot.objects.filter(room_id=room_number),

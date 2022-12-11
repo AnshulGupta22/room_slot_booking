@@ -203,11 +203,11 @@ class ManageBookingForm(forms.Form):
     )
     check_in_time = forms.TimeField(
         required=False,
-        widget=TimeInput(),
+        widget=TimeInput()
     )
     check_out_time = forms.TimeField(
         required=False,
-        widget=TimeInput(),
+        widget=TimeInput()
     )
     ROOM_CATEGORIES = (
         ('Regular', 'Regular'),
@@ -421,6 +421,7 @@ class RoomForm(forms.Form):
 
 
 
+
 """class used for booking a time slot."""
 class AddRoomForm(forms.ModelForm):
     class Meta:
@@ -468,15 +469,21 @@ class AddTimeSlotForm(forms.ModelForm):
                     "Available till should be after available from.", code='Available till after available from'
                 )
 
-class ViewTimeSlotForm(forms.ModelForm):
-    class Meta:
-        model = TimeSlot
-        fields = ['available_from', 'available_till']
-        widgets = {
-                    #'room_number': PositiveSmallIntegerField(validators=[MaxValueValidator(1000), MinValueValidator(1)], attrs={'readonly': True}),
-                    'available_from': TimeInput(attrs={'required': False}),
-                    'available_till': TimeInput(attrs={'required': False}),
-                }
+
+
+
+
+
+
+
+
+
+
+
+"""class used when a user sign in."""
+class ViewTimeSlotForm(forms.Form):
+    available_from = forms.TimeField(required=False, widget=TimeInput())
+    available_till = forms.TimeField(required=False, widget=TimeInput())
 
     """Function to ensure that booking is done for future and check out is after check in"""
     def clean(self):
@@ -507,6 +514,24 @@ class ViewTimeSlotForm(forms.ModelForm):
                 raise ValidationError(
                     "Available till should be after available from.", code='Available till after available from'
                 )
+
+
+
+
+
+
+
+'''class ViewTimeSlotForm(forms.ModelForm):
+    class Meta:
+        model = TimeSlot
+        fields = ['available_from', 'available_till']
+        widgets = {
+                    #'room_number': PositiveSmallIntegerField(validators=[MaxValueValidator(1000), MinValueValidator(1)], attrs={'readonly': True}),
+                    'available_from': TimeInput(attrs={'required': False}),
+                    'available_till': TimeInput(attrs={'required': False}),
+                }'''
+
+    
 
 class ManageViewTimeSlotForm(forms.ModelForm):
     class Meta:
