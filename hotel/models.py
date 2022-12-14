@@ -50,7 +50,6 @@ class Room(models.Model):
     capacity = models.PositiveSmallIntegerField(
         choices=ROOM_CAPACITY, default=2
         )
-    
     advance = models.PositiveSmallIntegerField()
     room_manager = models.CharField(max_length=30)
 
@@ -61,9 +60,10 @@ class TimeSlot(models.Model):
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
     available_from = models.TimeField()
     available_till = models.TimeField()
+    booked = models.BooleanField(default=False)
 
     def __str__(self):
-        return f'Room number: {self.room}, from: {self.available_from}, till: {self.available_till}'
+        return f'Room number: {self.room}, from: {self.available_from}, till: {self.available_till}, booked: {self.booked}'
 
 """class used when a user books a room slot."""
 class Booking(models.Model):

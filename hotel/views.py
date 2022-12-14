@@ -58,7 +58,7 @@ def convert_to_date(date_time):
 
 """Function to convert string to time."""
 def convert_to_time(date_time):
-    format = '%H:%M'
+    format = '%H:%M:%S'
     try:
         datetime_str = datetime.datetime.strptime(date_time, format).time()
     except Exception:
@@ -407,13 +407,9 @@ def add_rooms(request, room_number=None):
 @login_required(login_url="/hotel/signin/")
 def add_rooms(request):
     if request.user.email.endswith("@anshul.com"):
-
         room = Room()
-
         if request.method == 'POST':
-
             form = AddRoomForm(request.POST, instance=room)
-            
             if form.is_valid():
                 room = Room(room_number=request.POST['room_number'],
                         category=request.POST['category'],
@@ -500,13 +496,6 @@ def edit_rooms(request, room_number=None):
     else:
         return redirect('../book/')
 
-
-
-
-
-
-
-
 """Function to add/ edit time_slot."""
 @login_required(login_url="/hotel/signin/")
 def add_time_slots(request, room_number):
@@ -518,12 +507,38 @@ def add_time_slots(request, room_number):
                     room_obj = Room.objects.get(room_number=room_number, room_manager=request.user.username)
                 except Exception:
                     return HttpResponse("Bad request.")
-                time_slot = TimeSlot(room=room_obj,
-                        available_from=request.POST['available_from'],
-                        available_till=request.POST['available_till'])
-                time_slot.save()
-                # Implemented Post/Redirect/Get.
-                return redirect('../../manage_rooms/')
+
+                available_till = convert_to_time(request.POST['available_till'])
+                available_from = convert_to_time(request.POST['available_from'])
+
+                # To ensure no rooms are booked within a gap of 1 hour
+                # after checkout.
+                added_available_till = available_till.replace(
+                    hour=(available_till.hour + 1) % 24
+                )
+                
+                # To ensure no rooms are booked within a gap of 1 hour
+                # before checkin.
+                subtracted_available_from = available_from.replace(
+                    hour=(available_from.hour - 1) % 24
+                )
+
+                taken = TimeSlot.objects.filter(Q(room=room_obj)
+                                             & (Q(Q(available_till__gt=subtracted_available_from)
+                                             & Q(available_from__lte=subtracted_available_from))
+                                             | Q(Q(available_from__lt=added_available_till)
+                                             & Q(available_till__gte=added_available_till))
+                                             | Q(Q(available_from__gte=subtracted_available_from)
+                                             & Q(available_till__lte=added_available_till))))
+                if not taken:
+                    time_slot = TimeSlot(room=room_obj,
+                            available_from=available_from,
+                            available_till=available_till)
+                    time_slot.save()
+                    # Implemented Post/Redirect/Get.
+                    return redirect(f'../../view_time_slots/{room_obj.room_number}/')
+                else:
+                    return HttpResponse("Time slot not available.")
             else:
                 context = {
                     'form': form,
@@ -540,7 +555,6 @@ def add_time_slots(request, room_number):
     else:
         return redirect('../book/')
 
-
 """Function to add/ edit time_slot."""
 @login_required(login_url="/hotel/signin/")
 def edit_time_slots(request, pk):
@@ -552,7 +566,7 @@ def edit_time_slots(request, pk):
                 return HttpResponse("Bad request.")
         else:
             return HttpResponse("Bad request.")
-        print(time_slot_obj.room)
+
         if request.method == 'POST':
             form = AddTimeSlotForm(request.POST, instance=time_slot_obj)
             if form.is_valid():
@@ -560,40 +574,58 @@ def edit_time_slots(request, pk):
                     Room.objects.get(room_number=time_slot_obj.room.room_number, room_manager=request.user.username)
                 except Exception:
                     return HttpResponse("Bad request.")
-                time_slot = TimeSlot(room=time_slot_obj.room,
-                        available_from=request.POST['available_from'],
-                        available_till=request.POST['available_till'])
-                time_slot.save()
-                # Implemented Post/Redirect/Get.
-                return redirect(f'../../view_time_slots/{time_slot_obj.room.room_number}/')
+                #print(type(request.POST['available_from']))
+                #print(request.POST['available_till'])
+                available_till = convert_to_time(request.POST['available_till'])
+                available_from = convert_to_time(request.POST['available_from'])
+                #print(available_till)
+                #print(available_from)
+                # To ensure no rooms are booked within a gap of 1 hour
+                # after checkout.
+                added_available_till = available_till.replace(
+                    hour=(available_till.hour + 1) % 24
+                )
+                
+                # To ensure no rooms are booked within a gap of 1 hour
+                # before checkin.
+                subtracted_available_from = available_from.replace(
+                    hour=(available_from.hour - 1) % 24
+                )
 
+                taken = TimeSlot.objects.filter(Q(room=time_slot_obj.room)
+                                             & (Q(Q(available_till__gt=subtracted_available_from)
+                                             & Q(available_from__lte=subtracted_available_from))
+                                             | Q(Q(available_from__lt=added_available_till)
+                                             & Q(available_till__gte=added_available_till))
+                                             | Q(Q(available_from__gte=subtracted_available_from)
+                                             & Q(available_till__lte=added_available_till))))
+                if not taken:
+                    time_slot_obj.available_from = available_from
+                    time_slot_obj.available_till = available_till
+                    time_slot_obj.save()
+                    # Implemented Post/Redirect/Get.
+                    return redirect(f'../../view_time_slots/{time_slot_obj.room.room_number}/')
+                else:
+                    return HttpResponse("Time slot not available.")
             else:
                 context = {
                     'form': form,
-                    'username': request.user.username
+                    'username': request.user.username,
+                    'room_number': time_slot_obj.room.room_number
                     }
                 return render(request, 'add_time_slots.html', context)
         context = {
                 'form': AddTimeSlotForm(instance=time_slot_obj),
-                'username': request.user.username
+                'username': request.user.username,
+                'room_number': time_slot_obj.room.room_number
                 }
         return render(request, 'edit_time_slots.html', context)
     else:
         return redirect('../book/')
 
-
-
-
-
-
-
-
-
-
-
 """Function that returns the list of rooms based on the search criteria."""
 def manager_time_slot_search(
-        room_number, str_available_from, str_available_till):
+        room_number, str_available_from, str_available_till, booked):
     room_obj = Room.objects.get(room_number=room_number)
     #print(str_room_numbers)
     '''if str_room_numbers != '':
@@ -647,8 +679,8 @@ def manager_time_slot_search(
     #print(available_from)
     '''keys = ['room_number__in', 'category__in', 'available_from__lte', 'available_till__gte', 'capacity__in', 'advance__gte', 'room_manager']
     values = [room_numbers, categories, available_from, available_till, capacities, advance, username]'''
-    keys = ['room', 'available_from__lte', 'available_till__gte']
-    values = [room_obj, available_from, available_till]
+    keys = ['room', 'available_from__lte', 'available_till__gte', 'booked']
+    values = [room_obj, available_from, available_till, booked]
     parameters = {}
     #temp = {'category__in': categories, 'available_from__lte': available_from, 'available_till__gte': available_till, 'capacity__in': capacities, 'advance__gte': advance}
     for key, value in zip(keys, values):
@@ -724,10 +756,6 @@ def manager_time_slot_search(
         available_categories.append('Queen')
     return available_categories"""
 
-
-
-
-
 """Function to add/ edit time_slot."""
 @login_required(login_url="/hotel/signin/")
 def view_time_slots(request, room_number):
@@ -743,6 +771,11 @@ def view_time_slots(request, room_number):
         if request.method == 'POST':
             form = ViewTimeSlotForm(request.POST)
             if form.is_valid():
+                booked = True
+                try:
+                    request.POST['booked']
+                except Exception:
+                    booked = False
                 '''try:
                     request.session['room_numbers'] = request.POST['room_numbers']
                     #print(request.session['room_numbers'])
@@ -765,7 +798,7 @@ def view_time_slots(request, room_number):
                     request.session['advance'] = None'''
                 time_slots = manager_time_slot_search(room_number,
                                         request.session['available_from'],
-                                        request.session['available_till']
+                                        request.session['available_till'], booked
                                         )
                 #if response:
                 #print(time_slots)
@@ -865,7 +898,6 @@ def manage_time_slots(request):
         return render(request, 'view_time_slots.html', context)
     else:
         return redirect('../book/')
-
 
 """Function to delete room."""
 @login_required(login_url="/hotel/signin/")

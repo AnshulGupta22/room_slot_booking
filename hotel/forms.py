@@ -496,6 +496,7 @@ class AddTimeSlotForm(forms.ModelForm):
 class ViewTimeSlotForm(forms.Form):
     available_from = forms.TimeField(required=False, widget=TimeInput())
     available_till = forms.TimeField(required=False, widget=TimeInput())
+    booked = forms.BooleanField(required=False)
 
     """Function to ensure that booking is done for future and check out is after check in"""
     def clean(self):
