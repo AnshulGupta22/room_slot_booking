@@ -481,22 +481,20 @@ class AddTimeSlotForm(forms.ModelForm):
                     "Available till should be after available from.", code='Available till after available from'
                 )
 
-
-
-
-
-
-
-
-
-
-
-
 """class used when a user sign in."""
 class ViewTimeSlotForm(forms.Form):
     available_from = forms.TimeField(required=False, widget=TimeInput())
     available_till = forms.TimeField(required=False, widget=TimeInput())
-    booked = forms.BooleanField(required=False)
+    STATUS = (
+        (None, '--'),
+        ('Vacant', 'Vacant'),
+        ('Booked', 'Booked'),
+    )
+    occupancy = forms.ChoiceField(
+        required=False,
+        #widget=forms.CheckboxSelectMultiple,
+        choices=STATUS,
+    )
 
     """Function to ensure that booking is done for future and check out is after check in"""
     def clean(self):
