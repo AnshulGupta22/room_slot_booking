@@ -48,6 +48,13 @@ validate_slug2 = RegexValidator(
     "invalid",
 )
 
+"""class used for booking a time slot."""
+class EditForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name',
+                    'email']
+
 """class used when a user sign up."""
 class CustomerForm(forms.Form):
     username = forms.CharField(label='Desired Username', max_length=150,

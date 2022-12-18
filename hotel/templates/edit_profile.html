@@ -164,27 +164,31 @@
 	  <!-- Navigation Bar -->
     <div class="w3-bar w3-white w3-large">
       <div class="w3-bar-item w3-red w3-mobile"><i class="fa fa-bed w3-margin-right"></i>Logo</div>
-      <a href = "{% url 'hotel:signup' %}" class="w3-right ert"> Sign Up </a>
-      <a href = "{% url 'hotel:signin' %}" class="w3-right ert"> Sign In </a>
+      <div class="dropdown w3-right ert">
+        <button class="dropbtn">{{ username }} 
+          <i class="fa fa-caret-down"></i>
+        </button>
+        <div class="dropdown-content">
+          <a href="{% url 'hotel:view_profile' %}">View Profile</a>
+          <a href="{% url 'hotel:edit_profile' %}">Edit Profile</a>
+          <a href="{% url 'hotel:logout' %}">Logout</a>
+        </div>
+      </div>
+      <!--<a href="{% url 'hotel:all_bookings' %}" class="w3-right ert"> Your Bookings </a>-->
     </div>
-
     <div class="grid">
       <div class="col-8-12">
         <!-- content for large column here -->
         <div class="container2">
           <div class="w3-center">
-            <h1>Sign Up</h1>
-            <div id="sub-heading">(as General User)</div>
+            <h1>Edit Profile</h1>
           </div>
           <form method="POST">
             {% csrf_token %}
             {{ form.as_p }}
-            <!--<label for="picture"> <b> Choose a Picture: </b> </label> <br/>
-			      <input type="file" name="picture"> <br/><br/><br/>-->
             <br/>
-            <input type="submit" class= "submit submit-right" value="Sign Up" />
+            <input type="submit" class= "submit submit-right" value="Submit" />
           </form>
-          <div class="login">Already Registered? <a class="one" href = "{% url 'hotel:signin' %}"> Sign in here </a></div>
         </div>
       </div>
     </div>

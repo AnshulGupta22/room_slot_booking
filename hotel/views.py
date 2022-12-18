@@ -12,7 +12,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
-from hotel.forms import CustomerForm, SignInForm, BookingForm, RoomForm, ManageBookingForm, AddRoomForm, ManageViewTimeSlotForm, ViewTimeSlotForm, AddTimeSlotForm, EditRoomForm
+from hotel.forms import CustomerForm, SignInForm, BookingForm, RoomForm, ManageBookingForm, AddRoomForm, ManageViewTimeSlotForm, ViewTimeSlotForm, AddTimeSlotForm, EditRoomForm, EditForm
 from .models import Room, Booking, TimeSlot
 
 from .serializers import (
@@ -117,15 +117,15 @@ def view_profile(request):
 def edit_profile(request):
     profile = User.objects.get(username=request.user.username)
     if request.method == 'POST':
-        form = CustomerForm(request.POST, instance=profile)
+        form = EditForm(request.POST, instance=profile)
         if form.is_valid():
             form.save()
             return redirect('../book/')
         else:
             context = {'form': form}
-            return render(request, 'sign_up.html', context)
-    context = {'form': CustomerForm(instance=profile)}
-    return render(request, 'sign_up.html', context)
+            return render(request, 'edit_profile.html', context)
+    context = {'form': EditForm(instance=profile), 'username': request.user.username}
+    return render(request, 'edit_profile.html', context)
 
 """Function for sign in."""
 def sign_in(request):
