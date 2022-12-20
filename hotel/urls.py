@@ -17,6 +17,7 @@ urlpatterns = [
     path('view_time_slots/<int:room_number>/', views.view_time_slots, name='view_time_slots'),
     path('add_time_slots/<int:room_number>/', views.add_time_slots, name='add_time_slots'),
     path('edit_time_slots/<int:pk>/', views.edit_time_slots, name='edit_time_slots'),
+    path('delete_time_slot/<int:pk>/', views.delete_time_slot, name='delete_time_slot'),
     path('add_rooms/', views.add_rooms, name='add_rooms'),
     path('edit_rooms/<int:room_number>/', views.edit_rooms, name='edit_rooms'),
     path('delete_rooms/<int:room_number>/', views.delete_rooms, name='delete_rooms'),
