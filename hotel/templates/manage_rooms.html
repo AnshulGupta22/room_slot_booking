@@ -2,108 +2,25 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Manager</title>
+    <title>Rooms</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="{% static 'hotel/css/base.css' %}">
     <style>
-
       *{
 	      padding: 0;
 	      margin: 0;
       }
-
-      #booke {
-        text-align:center;
-        line-height: 1em;
-      }
-      
-      h1 {
-        margin-top: 40px;
-      }
-
-
-
-
-
-
-
-
-
-
-
-
-
-ul {
-  list-style-type: none;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  /*background-color: #333;*/
-}
-
-li {
-  float: left;
-  border-right:1px solid #bbb;
-}
-
-li:last-child {
-  border-right: none;
-}
-
-li a {
-  display: block;
-  color: rgb(0, 0, 0);
-  text-align: center;
-  padding: 14px 16px;
-  text-decoration: none;
-}
-
-li a:hover:not(.active) {
-  background-color: #bbb;
-}
-
-
-
-
-
-
-
-
-
-
-
-ul.breadcrumb {
-  padding: 10px 16px;
-  list-style: none;
-  /*background-color: #eee;*/
-}
-ul.breadcrumb li {
-  display: inline;
-  font-size: 18px;
-}
-ul.breadcrumb li+li:before {
-  padding: 8px;
-  color: black;
-  content: "/\00a0";
-}
-ul.breadcrumb li a {
-  color: #0275d8;
-  text-decoration: none;
-}
-ul.breadcrumb li a:hover {
-  color: #01447e;
-  text-decoration: underline;
-}
-
-
-
     </style>
   </head>
 	<body id="body-color">
     <!-- Navigation Bar -->
     <div class="w3-bar w3-white w3-large">
 			<div class="w3-bar-item w3-red w3-mobile"><i class="fa fa-bed w3-margin-right"></i>Logo</div>
+      <a href="{% url 'hotel:manage' %}" class="w3-bar-item w3-button w3-mobile">Manager</a>
+      <a href="{% url 'hotel:manage_rooms' %}" class="w3-bar-item w3-button w3-mobile">Rooms</a>
+      <a href="{% url 'hotel:manage_bookings' %}" class="w3-bar-item w3-button w3-mobile">Bookings</a>
 			<div class="dropdown w3-right ert">
 				<button class="dropbtn">{{ username }}
 					<i class="fa fa-caret-down"></i>
@@ -116,23 +33,20 @@ ul.breadcrumb li a:hover {
 			</div>
       <!--<a href="{% url 'hotel:manage' %}" class="w3-right ert"> Manage </a>-->
       <a href="{% url 'hotel:add_rooms' %}" class="w3-right ert"> Add Rooms</a>
-      <ul>
-        <li><a href="{% url 'hotel:manage' %}">Home</a></li>
-        <!--<li><a href="#news">News</a></li>
-        <li><a href="#contact">Contact</a></li>-->
-      </ul>
+      <!--<li><a href="#news">News</a></li>
+      <li><a href="#contact">Contact</a></li>-->
   	</div>
+    <br/>
     <ul class="breadcrumb">
       <li>
-        <a style="display: inline;" href="{% url 'hotel:manage' %}">Home</a>
+        <a href="{% url 'hotel:manage' %}">Manager</a>
         &nbsp;>&nbsp;
-        <i style="display: inline; color: #454444;" href="#">Rooms</i>
-        <!--&nbsp;>&nbsp;
-        <a style="display: inline;" href="#">Summer 15</a>
+        <span class="current">Rooms</span>
       </li>
-      <li>Italy</li>-->
     </ul>
-    <h2>Search Rooms</h2><br/>
+    <br/>
+    <h2>Search Rooms</h2>
+    <br/>
     <form method="POST">
       {% csrf_token %}
       {{ form.as_p }}
@@ -142,19 +56,19 @@ ul.breadcrumb li a:hover {
 		{% if rooms %}
     <h3> All rooms</h3>
 		  {% for room in rooms %}
-      <div class="card card-width container3">
-          <b>Room Number:</b> {{ room.room_number }}<br/>
-          <b>Category:</b> {{ room.category }}<br/>
-          <b>Capicity:</b> {{ room.capacity }}<br/>
-          <b>Advance:</b> {{ room.advance }}<br/>
-          <a href='../../hotel/view_time_slots/{{room.room_number}}'> [Time Slots]</a>
-          <a href='../../hotel/edit_rooms/{{room.room_number}}'> [Edit]</a>
-          <a href='../../hotel/delete_rooms/{{room.room_number}}'> [Delete]</a>
+      <div class="card">
+        <b>Room Number:</b> {{ room.room_number }}<br/>
+        <b>Category:</b> {{ room.category }}<br/>
+        <b>Capicity:</b> {{ room.capacity }}<br/>
+        <b>Advance:</b> {{ room.advance }}<br/>
+        <a href='../../hotel/view_time_slots/{{room.room_number}}'> [Time Slots]</a>
+        <a href='../../hotel/edit_rooms/{{room.room_number}}'> [Edit]</a>
+        <a href='../../hotel/delete_rooms/{{room.room_number}}'> [Delete]</a>
       </div>
 		  {% endfor %}
 	  {% else %}
 		  <p> No rooms</p>
-	{% endif %}
+	  {% endif %}
     <!-- Footer -->
     <footer class="w3-padding-32 w3-black w3-center w3-margin-top">
       <h5>Find Us On</h5>
@@ -169,4 +83,3 @@ ul.breadcrumb li a:hover {
     </footer>
 	</body>
 </html>
-

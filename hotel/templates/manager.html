@@ -4,66 +4,35 @@
   <head>
     <title>Manager</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="{% static 'hotel/css/base.css' %}">
     <style>
-
       *{
-	      padding: 0;
-	      margin: 0;
+        padding: 0;
+        margin: 0;
       }
 
-      #booke {
-        text-align:center;
-        line-height: 1em;
+      /*.home-buttons a {
+        display: block;
+        color: rgb(0, 0, 0);
+        text-align: center;
+        padding: 14px 16px;
+        text-decoration: none;
       }
-      
-      h1 {
-        margin-top: 40px;
-      }
 
-
-
-
-
-
-
-
-ul {
-  list-style-type: none;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  /*background-color: #333;*/
-}
-
-li {
-  float: left;
-  border-right:1px solid #bbb;
-}
-
-li:last-child {
-  border-right: none;
-}
-
-li a {
-  display: block;
-  color: rgb(0, 0, 0);
-  text-align: center;
-  padding: 14px 16px;
-  text-decoration: none;
-}
-
-li a:hover:not(.active) {
-  background-color: #bbb;
-}
-
+      .home-buttons a:hover:not(.active) {
+        background-color: #bbb;
+      }*/
     </style>
   </head>
 	<body id="body-color">
     <!-- Navigation Bar -->
     <div class="w3-bar w3-white w3-large">
 			<div class="w3-bar-item w3-red w3-mobile"><i class="fa fa-bed w3-margin-right"></i>Logo</div>
+      <a href="{% url 'hotel:manage' %}" class="w3-bar-item w3-button w3-mobile">Manager</a>
+      <a href="{% url 'hotel:manage_rooms' %}" class="w3-bar-item w3-button w3-mobile">Rooms</a>
+      <a href="{% url 'hotel:manage_bookings' %}" class="w3-bar-item w3-button w3-mobile">Bookings</a>
       <div class="dropdown w3-right ert">
 				<button class="dropbtn">{{ username }}
 					<i class="fa fa-caret-down"></i>
@@ -74,13 +43,12 @@ li a:hover:not(.active) {
 					<a href="{% url 'hotel:logout' %}">Logout</a>
 				</div>
 			</div>
-      <ul>
-        <li><a href="{% url 'hotel:manage' %}">Home</a></li>
-      </ul>
   	</div>
-		<a href="{% url 'hotel:manage_rooms' %}">Rooms</a>
-    <a href="{% url 'hotel:manage_time_slots' %}">Time Slots</a>
-		<a href="{% url 'hotel:manage_bookings' %}">Bookings</a>
+    <!--<div class="home-buttons">
+      <a href="{% url 'hotel:manage_rooms' %}">Rooms</a>
+      <a href="{% url 'hotel:manage_time_slots' %}">Time Slots</a>
+      <a href="{% url 'hotel:manage_bookings' %}">Bookings</a>
+    </div>-->
     <!-- Footer -->
     <footer class="w3-padding-32 w3-black w3-center w3-margin-top">
       <h5>Find Us On</h5>
