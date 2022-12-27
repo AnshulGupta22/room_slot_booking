@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Manager</title>
+    <title>Room Manager</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -30,8 +30,8 @@
     <!-- Navigation Bar -->
     <div class="w3-bar w3-white w3-large">
 			<div class="w3-bar-item w3-red w3-mobile"><i class="fa fa-bed w3-margin-right"></i>Logo</div>
-      <a href="{% url 'hotel:manage' %}" class="w3-bar-item w3-button w3-mobile">Manager</a>
-      <a href="{% url 'hotel:manage_rooms' %}" class="w3-bar-item w3-button w3-mobile">Rooms</a>
+      <a href="{% url 'hotel:room_manager' %}" class="w3-bar-item w3-button w3-mobile">Room Manager</a>
+      <a href="{% url 'hotel:rooms' %}" class="w3-bar-item w3-button w3-mobile">Rooms</a>
       <a href="{% url 'hotel:manage_bookings' %}" class="w3-bar-item w3-button w3-mobile">Bookings</a>
       <div class="dropdown w3-right ert">
 				<button class="dropbtn">{{ username }}
@@ -44,11 +44,6 @@
 				</div>
 			</div>
   	</div>
-    <!--<div class="home-buttons">
-      <a href="{% url 'hotel:manage_rooms' %}">Rooms</a>
-      <a href="{% url 'hotel:manage_time_slots' %}">Time Slots</a>
-      <a href="{% url 'hotel:manage_bookings' %}">Bookings</a>
-    </div>-->
     <!-- Footer -->
     <footer class="w3-padding-32 w3-black w3-center w3-margin-top">
       <h5>Find Us On</h5>

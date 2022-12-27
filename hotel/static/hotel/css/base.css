@@ -169,15 +169,16 @@ a.fa {
   }
   
   .dropdown .dropbtn { 
-    font-size: 16px;
+    font-size: 18px;
     border: none;
     outline: none;
     color: black;
-    padding: 0 16px;
+    padding: 8px 16px;
+    vertical-align:middle;
+    cursor:pointer;
+    white-space:nowrap;
     background-color: inherit;
     font-family: inherit;
-    margin: 0;
-    margin-right: 53px;
   }
   
   .dropdown:hover .dropbtn {

@@ -104,7 +104,7 @@ def sign_up(request):
     return render(request, 'sign_up.html', context)
 
 """Function for viewing profile."""
-@login_required(login_url="/hotel/signin/")
+@login_required(login_url="/hotel/sign_in/")
 def view_profile(request):
     profile = User.objects.filter(
         username=request.user.username
@@ -113,7 +113,7 @@ def view_profile(request):
     return render(request, 'view_profile.html', context)
 
 """Function for editing profile."""
-@login_required(login_url="/hotel/signin/")
+@login_required(login_url="/hotel/sign_in/")
 def edit_profile(request):
     profile = User.objects.get(username=request.user.username)
     if request.method == 'POST':
@@ -138,7 +138,7 @@ def sign_in(request):
                 )
             login(request, user)
             if user.is_superuser:
-                return redirect('../manage/')
+                return redirect('../room_manager/')
             return redirect('../book/')
         else:
             context = {'form': form}
@@ -147,13 +147,13 @@ def sign_in(request):
     return render(request, 'sign_in.html', context)
 
 """Function to display room manager options."""
-@login_required(login_url="/hotel/signin/")
-def manage(request):
+@login_required(login_url="/hotel/sign_in/")
+def room_manager(request):
     if request.user.email.endswith("@anshul.com"):
         context = {
             'username': request.user.username
             }
-        return render(request, 'manager.html', context)
+        return render(request, 'room_manager.html', context)
     else:
         return redirect('../book/')
 
@@ -290,8 +290,8 @@ def manager_room_search(
     return available_categories"""
 
 """Function to display rooms based on the selected criteria."""
-@login_required(login_url="/hotel/signin/")
-def manage_rooms(request):
+@login_required(login_url="/hotel/sign_in/")
+def rooms(request):
     if request.user.email.endswith("@anshul.com"):
         rooms = Room.objects.filter(room_manager=request.user.username)
         if request.method == 'POST':
@@ -331,7 +331,7 @@ def manage_rooms(request):
                     'rooms': response,
                     'username': request.user.username
                     }
-                return render(request, 'manage_rooms.html', context)
+                return render(request, 'rooms.html', context)
                 #return HttpResponse("Not Available")
             else:
                 context = {
@@ -339,19 +339,19 @@ def manage_rooms(request):
                     'rooms': None,
                     'username': request.user.username
                     }
-                return render(request, 'manage_rooms.html', context)
+                return render(request, 'rooms.html', context)
         context = {
                 'form': RoomForm(),
                 'rooms': rooms,
                 'username': request.user.username
                 }
-        return render(request, 'manage_rooms.html', context)
+        return render(request, 'rooms.html', context)
     else:
         return redirect('../book/')
 
 """Function to add/ edit room."""
 '''
-@login_required(login_url="/hotel/signin/")
+@login_required(login_url="/hotel/sign_in/")
 def add_rooms(request, room_number=None):
     if request.user.email.endswith("@anshul.com"):
         if room_number:
@@ -409,7 +409,7 @@ def add_rooms(request, room_number=None):
 
 
 """Function to add/ edit room."""
-@login_required(login_url="/hotel/signin/")
+@login_required(login_url="/hotel/sign_in/")
 def add_rooms(request):
     if request.user.email.endswith("@anshul.com"):
         room = Room()
@@ -432,7 +432,7 @@ def add_rooms(request):
                     'username': request.user.username
                     }'''
                 # Implemented Post/Redirect/Get.
-                return redirect('../manage_rooms/')
+                return redirect('../rooms/')
                 #return render(request, 'manage_rooms.html', context)
             else:
                 context = {
@@ -461,7 +461,7 @@ def add_rooms(request):
 
 
 """Function to add/ edit room."""
-@login_required(login_url="/hotel/signin/")
+@login_required(login_url="/hotel/sign_in/")
 def edit_rooms(request, room_number=None):
     if request.user.email.endswith("@anshul.com"):
         if room_number:
@@ -486,7 +486,7 @@ def edit_rooms(request, room_number=None):
 
                 # Implemented Post/Redirect/Get.
                 if room_number:
-                    return redirect('../../manage_rooms/')
+                    return redirect('../../rooms/')
             else:
                 context = {
                     'form': form,
@@ -502,7 +502,7 @@ def edit_rooms(request, room_number=None):
         return redirect('../book/')
 
 """Function to add/ edit time_slot."""
-@login_required(login_url="/hotel/signin/")
+@login_required(login_url="/hotel/sign_in/")
 def add_time_slots(request, room_number):
     if request.user.email.endswith("@anshul.com"):
         if request.method == 'POST':
@@ -521,7 +521,7 @@ def add_time_slots(request, room_number):
                 added_available_till = available_till.replace(
                     hour=(available_till.hour + 1) % 24
                 )
-                
+
                 # To ensure no rooms are booked within a gap of 1 hour
                 # before checkin.
                 subtracted_available_from = available_from.replace(
@@ -561,7 +561,7 @@ def add_time_slots(request, room_number):
         return redirect('../book/')
 
 """Function to add/ edit time_slot."""
-@login_required(login_url="/hotel/signin/")
+@login_required(login_url="/hotel/sign_in/")
 def edit_time_slots(request, pk):
     if request.user.email.endswith("@anshul.com"):
         if pk:
@@ -658,7 +658,7 @@ def edit_time_slots(request, pk):
         return redirect('../book/')
 
 """Function to delete room."""
-@login_required(login_url="/hotel/signin/")
+@login_required(login_url="/hotel/sign_in/")
 def delete_time_slot(request, pk):
     if request.user.email.endswith("@anshul.com"):
         if pk:
@@ -818,7 +818,7 @@ def manager_time_slot_search(
     return available_categories"""
 
 """Function to add/ edit time_slot."""
-@login_required(login_url="/hotel/signin/")
+@login_required(login_url="/hotel/sign_in/")
 def view_time_slots(request, room_number):
     if request.user.email.endswith("@anshul.com"):
         '''if room_number:
@@ -898,7 +898,7 @@ def view_time_slots(request, room_number):
         return redirect('../book/')
 
 """Function to add/ edit time_slot."""
-@login_required(login_url="/hotel/signin/")
+@login_required(login_url="/hotel/sign_in/")
 def manage_time_slots(request):
     if request.user.email.endswith("@anshul.com"):
         '''if room_number:
@@ -947,7 +947,7 @@ def manage_time_slots(request):
                     'rooms': response,
                     'username': request.user.username
                     }
-                return render(request, 'manage_rooms.html', context)
+                return render(request, 'rooms.html', context)
                 #return HttpResponse("Not Available")
             else:
                 context = {
@@ -955,7 +955,7 @@ def manage_time_slots(request):
                     'time_slots': TimeSlot.objects.filter(room_id=room_number, room_manager=request.user.username),
                     'username': request.user.username
                     }
-                return render(request, 'manage_rooms.html', context)
+                return render(request, 'rooms.html', context)
         context = {
                 'form': ManageViewTimeSlotForm(),
                 #'room_number': room_number,
@@ -967,7 +967,7 @@ def manage_time_slots(request):
         return redirect('../book/')
 
 """Function to delete room."""
-@login_required(login_url="/hotel/signin/")
+@login_required(login_url="/hotel/sign_in/")
 def delete_rooms(request, room_number=None):
     if request.user.email.endswith("@anshul.com"):
         if room_number:
@@ -977,7 +977,7 @@ def delete_rooms(request, room_number=None):
                 return HttpResponse("Not found.")
             room.delete()
             # Implemented Post/Redirect/Get.
-            return redirect('../../manage_rooms/')
+            return redirect('../../rooms/')
         else:
             return HttpResponse("Not found.")
     else:
@@ -1009,7 +1009,7 @@ def manager_book_search(
     return booking_list
 
 """Function to display bookings based on the selected criteria."""
-@login_required(login_url="/hotel/signin/")
+@login_required(login_url="/hotel/sign_in/")
 def manage_bookings(request):
     if request.user.email.endswith("@anshul.com"):
         bookings = Booking.objects.filter(room_manager=request.user.username)
@@ -1080,7 +1080,7 @@ def manage_bookings(request):
 """Function for log out."""
 def logout_view(request):
     logout(request)
-    return redirect('../signin/')
+    return redirect('../sign_in/')
 
 """Function that returns the list of available categories."""
 def search_availability(
@@ -1144,7 +1144,7 @@ def search_availability(
     return available_categories
 
 """Function to return the available categories."""
-@login_required(login_url="/hotel/signin/")
+@login_required(login_url="/hotel/sign_in/")
 def booking(request):
     if request.method == 'POST':
         form = BookingForm(request.POST)
@@ -1303,7 +1303,7 @@ def room_category(
     return 2
 
 """Function to book room of this category if available."""
-@login_required(login_url="/hotel/signin/")
+@login_required(login_url="/hotel/sign_in/")
 def regular(request):
     room_status = room_category('Regular', request.user.username,
                                 request.session['normal_book_date'],
@@ -1320,7 +1320,7 @@ def regular(request):
         return redirect('../book/')
 
 """Function to book room of this category if available."""
-@login_required(login_url="/hotel/signin/")
+@login_required(login_url="/hotel/sign_in/")
 def executive(request):
     room_status = room_category('Executive',
                                 request.user.username,
@@ -1338,7 +1338,7 @@ def executive(request):
         return redirect('../book/')
 
 """Function to book room of this category if available."""
-@login_required(login_url="/hotel/signin/")
+@login_required(login_url="/hotel/sign_in/")
 def deluxe(request):
     room_status = room_category('Deluxe', request.user.username,
                                 request.session['normal_book_date'],
@@ -1355,7 +1355,7 @@ def deluxe(request):
         return redirect('../book/')
 
 """Function to book room of this category if available."""
-@login_required(login_url="/hotel/signin/")
+@login_required(login_url="/hotel/sign_in/")
 def king(request):
     room_status = room_category('King', request.user.username,
                                 request.session['normal_book_date'],
@@ -1372,7 +1372,7 @@ def king(request):
         return redirect('../book/')
 
 """Function to book room of this category if available."""
-@login_required(login_url="/hotel/signin/")
+@login_required(login_url="/hotel/sign_in/")
 def queen(request):
     room_status = room_category('Queen', request.user.username,
                                 request.session['normal_book_date'],
@@ -1390,7 +1390,7 @@ def queen(request):
 
 """Function to show the booking for regular category.
 Used for implementing Post/Redirect/Get."""
-@login_required(login_url="/hotel/signin/")
+@login_required(login_url="/hotel/sign_in/")
 def booked_regular(request):
     try:
         context = {'book_date': request.session['normal_book_date'],
@@ -1406,7 +1406,7 @@ def booked_regular(request):
 
 """Function to show the booking for regular category.
 Used for implementing Post/Redirect/Get."""
-@login_required(login_url="/hotel/signin/")
+@login_required(login_url="/hotel/sign_in/")
 def booked_executive(request):
     try:
         context = {'book_date': request.session['normal_book_date'],
@@ -1422,7 +1422,7 @@ def booked_executive(request):
 
 """Function to show the booking for regular category.
 Used for implementing Post/Redirect/Get."""
-@login_required(login_url="/hotel/signin/")
+@login_required(login_url="/hotel/sign_in/")
 def booked_deluxe(request):
     try:
         context = {'book_date': request.session['normal_book_date'],
@@ -1438,7 +1438,7 @@ def booked_deluxe(request):
 
 """Function to show the booking for regular category.
 Used for implementing Post/Redirect/Get."""
-@login_required(login_url="/hotel/signin/")
+@login_required(login_url="/hotel/sign_in/")
 def booked_king(request):
     try:
         context = {'book_date': request.session['normal_book_date'],
@@ -1454,7 +1454,7 @@ def booked_king(request):
 
 """Function to show the booking for regular category.
 Used for implementing Post/Redirect/Get."""
-@login_required(login_url="/hotel/signin/")
+@login_required(login_url="/hotel/sign_in/")
 def booked_queen(request):
     try:
         context = {'book_date': request.session['normal_book_date'],
@@ -1469,7 +1469,7 @@ def booked_queen(request):
     return render(request, 'booked.html', context)
 
 """Function to return all the bookings."""
-@login_required(login_url="/hotel/signin/")
+@login_required(login_url="/hotel/sign_in/")
 def all_bookings(request, pk=None):
     if pk:
         try:
