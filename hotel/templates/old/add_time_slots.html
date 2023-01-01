@@ -2,39 +2,50 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Profile</title>
+    <title>Manager</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="{% static 'hotel/css/base.css' %}">
     <style>
+
       *{
-          padding: 0;
-          margin: 0;
+	      padding: 0;
+	      margin: 0;
+      }
+
+      #booke {
+        text-align:center;
+        line-height: 1em;
+      }
+      
+      h1 {
+        margin-top: 40px;
       }
     </style>
   </head>
 	<body id="body-color">
     <!-- Navigation Bar -->
     <div class="w3-bar w3-white w3-large">
-      <div class="w3-bar-item w3-red w3-mobile"><i class="fa fa-bed w3-margin-right"></i>Logo</div>
-      <div class="dropdown w3-right ert">
-    {% for x in profile %}
-        <button class="dropbtn">{{ x.username }} 
-          <i class="fa fa-caret-down"></i>
-        </button>
-        <div class="dropdown-content">
+			<div class="w3-bar-item w3-red w3-mobile"><i class="fa fa-bed w3-margin-right"></i>Logo</div>
+			<div class="dropdown w3-right ert">
+				<button class="dropbtn">{{ username }}
+					<i class="fa fa-caret-down"></i>
+				</button>
+				<div class="dropdown-content">
           <a href="{% url 'hotel:view_profile' %}">View Profile</a>
           <a href="{% url 'hotel:edit_profile' %}">Edit Profile</a>
-          <a href="{% url 'hotel:logout' %}">Logout</a>
-        </div>
-      </div>
-      <!--<a href="{% url 'hotel:all_bookings' %}" class="w3-right ert"> Your Bookings </a>-->
+					<a href="{% url 'hotel:logout' %}">Logout</a>
+				</div>
+			</div>
+      <a href="../../view_time_slots/{{room_number}}" class="w3-right ert"> Search Time Slots </a>
     </div>
-		<h3>User Profile</h3>
-      <p><b>First name</b> {{x.first_name}}</p>
-      <p><b>Last name</b> {{x.last_name}}</p>
-      <p><b>Email</b> {{x.email}}</p>
-    {% endfor %}
+    <h3> Add time slots</h3>
+  	Room Number: {{ room_number }}
+  	<form method="POST">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <input type="submit" class= "submit submit-right" value="Add" />
+    </form><br/><br/><br/><br/>
     <!-- Footer -->
     <footer class="w3-padding-32 w3-black w3-center w3-margin-top">
       <h5>Find Us On</h5>
@@ -49,3 +60,4 @@
     </footer>
 	</body>
 </html>
+
