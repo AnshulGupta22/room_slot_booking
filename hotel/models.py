@@ -5,56 +5,33 @@ from django.core.validators import int_list_validator
 
 # Create your models here.
 
-"""class used when a user sign up. This class has to be deleted"""
-"""class Customer(models.Model):
-    desired_username = models.CharField(max_length=30, primary_key=True)
-    first_name = models.CharField(max_length=120)
-    last_name = models.CharField(max_length=120)
-    email = models.EmailField(unique=True)"""
-
-"""class used when a user sign up using API."""
-"""class CustomerAPI(models.Model):
-    desired_username = models.CharField(max_length=30, primary_key=True)
-    first_name = models.CharField(max_length=120)
-    last_name = models.CharField(max_length=120)
-    email = models.EmailField()
-    password = models.CharField(max_length=120)
-    retype_password = models.CharField(max_length=120)"""
-
-"""class used when a user sign in. This class has to be deleted"""
-"""class SignIn(models.Model):
-    username = models.CharField(max_length=30)"""
-
-"""class used to represent a room."""
+"""class for representing a room."""
 class Room(models.Model):
     class Meta:
-      ordering = ['room_number']
-    room_number =  models.PositiveSmallIntegerField(
+      ordering = ['number']
+    number =  models.PositiveSmallIntegerField(
         validators=[MaxValueValidator(1000), MinValueValidator(1)],
         primary_key=True
         )
-    ROOM_CATEGORIES = (
+    CATEGORIES = (
         ('Regular', 'Regular'),
         ('Executive', 'Executive'),
-        ('Deluxe', 'Deluxe'),
-        ('King', 'King'),
-        ('Queen', 'Queen'),
     )
-    category = models.CharField(max_length=9, choices=ROOM_CATEGORIES, default='Regular')
-    ROOM_CAPACITY = (
+    category = models.CharField(max_length=9, choices=CATEGORIES, default='Regular')
+    CAPACITY = (
         (1, '1'),
         (2, '2'),
         (3, '3'),
         (4, '4'),
     )
     capacity = models.PositiveSmallIntegerField(
-        choices=ROOM_CAPACITY, default=2
+        choices=CAPACITY, default=2
         )
     advance = models.PositiveSmallIntegerField(default=10)
-    room_manager = models.CharField(max_length=30)
+    manager = models.CharField(max_length=30)
 
     def __str__(self):
-        return f'Room number: {self.room_number}, category: {self.category}, capacity: {self.capacity}, advance: {self.advance}, room manager: {self.room_manager}'
+        return f'Room number: {self.number}, category: {self.category}, capacity: {self.capacity}, advance: {self.advance}, room manager: {self.manager}'
 
 class TimeSlot(models.Model):
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
@@ -78,18 +55,18 @@ class Booking(models.Model):
     check_in_date = models.DateField()
     check_in_time = models.TimeField()
     check_out_time = models.TimeField()
-    '''room_number =  models.PositiveSmallIntegerField(
+    '''number =  models.PositiveSmallIntegerField(
         validators=[MaxValueValidator(100), MinValueValidator(1)], unique=True
         )'''
     room_numbers = models.CharField(validators=[int_list_validator(' ,')], max_length=4000)
-    ROOM_CATEGORIES = (
+    CATEGORIES = (
         ('Regular', 'Regular'),
         ('Executive', 'Executive'),
         ('Deluxe', 'Deluxe'),
         ('King', 'King'),
         ('Queen', 'Queen'),
     )
-    category = models.CharField(max_length=9, choices=ROOM_CATEGORIES)
+    category = models.CharField(max_length=9, choices=CATEGORIES)
     PERSON = (
         (1, '1'),
         (2, '2'),

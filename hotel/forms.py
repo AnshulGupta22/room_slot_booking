@@ -279,7 +279,7 @@ from datetime import time
 """class used for booking a time slot."""
 class RoomForm(forms.Form):
 
-    '''room_number = forms.IntegerField(
+    '''number = forms.IntegerField(
         required=False,
         validators=[MaxValueValidator(1000), MinValueValidator(1)]
     )'''
@@ -377,7 +377,7 @@ class RoomForm(forms.Form):
 
     '''class Meta:
         model = Room
-        fields = ['room_number','category', 'capacity', 'available_from',
+        fields = ['number','category', 'capacity', 'available_from',
                     'available_till', 'advance']
 
         widgets = {
@@ -385,7 +385,7 @@ class RoomForm(forms.Form):
         }
 
         widgets = {
-                    #'room_number': forms.PositiveSmallIntegerField(attrs={'cols': 80, 'rows': 20}),
+                    #'number': forms.PositiveSmallIntegerField(attrs={'cols': 80, 'rows': 20}),
                     'available_from': TimeInput(),
                     'available_till': TimeInput(),
                 }'''
@@ -433,7 +433,7 @@ class RoomForm(forms.Form):
 class AddRoomForm(forms.ModelForm):
     class Meta:
         model = Room
-        fields = ['room_number', 'category', 'capacity', 'advance']
+        fields = ['number', 'category', 'capacity', 'advance']
 
 class NumberInput(forms.NumberInput):
     input_type = 'number'
@@ -442,17 +442,17 @@ class NumberInput(forms.NumberInput):
 class EditRoomForm(forms.ModelForm):
     class Meta:
         model = Room
-        fields = ['room_number', 'category', 'capacity', 'advance']
+        fields = ['number', 'category', 'capacity', 'advance']
 
         widgets = {
-                    'room_number': NumberInput(attrs={'readonly': True})
+                    'number': NumberInput(attrs={'readonly': True})
                 }
 class AddTimeSlotForm(forms.ModelForm):
     class Meta:
         model = TimeSlot
         fields = ['available_from', 'available_till']
         widgets = {
-                    #'room_number': PositiveSmallIntegerField(validators=[MaxValueValidator(1000), MinValueValidator(1)], attrs={'readonly': True}),
+                    #'number': PositiveSmallIntegerField(validators=[MaxValueValidator(1000), MinValueValidator(1)], attrs={'readonly': True}),
                     #'available_from': TimeInput(attrs={'readonly': True}),
                     'available_from': TimeInput(),
                     'available_till': TimeInput()
@@ -544,7 +544,7 @@ class ViewTimeSlotForm(forms.Form):
         model = TimeSlot
         fields = ['available_from', 'available_till']
         widgets = {
-                    #'room_number': PositiveSmallIntegerField(validators=[MaxValueValidator(1000), MinValueValidator(1)], attrs={'readonly': True}),
+                    #'number': PositiveSmallIntegerField(validators=[MaxValueValidator(1000), MinValueValidator(1)], attrs={'readonly': True}),
                     'available_from': TimeInput(attrs={'required': False}),
                     'available_till': TimeInput(attrs={'required': False}),
                 }'''
@@ -614,7 +614,7 @@ from datetime import time
 """class used for booking a time slot."""
 class RoomForm2(forms.ModelForm):
 
-    room_number = forms.IntegerField(
+    number = forms.IntegerField(
         required=False,
     )
 
@@ -666,7 +666,7 @@ class RoomForm2(forms.ModelForm):
 
     class Meta:
         model = Room
-        fields = ['room_number','category', 'capacity', 'available_from',
+        fields = ['number','category', 'capacity', 'available_from',
                     'available_till', 'advance']
 
         '''widgets = {
@@ -674,7 +674,7 @@ class RoomForm2(forms.ModelForm):
         }'''
 
         """widgets = {
-                    #'room_number': forms.PositiveSmallIntegerField(attrs={'cols': 80, 'rows': 20}),
+                    #'number': forms.PositiveSmallIntegerField(attrs={'cols': 80, 'rows': 20}),
                     'available_from': TimeInput(),
                     'available_till': TimeInput(),
                 }"""
