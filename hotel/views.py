@@ -352,7 +352,7 @@ def rooms(request):
 """Function to add/ edit room."""
 '''
 @login_required(login_url="/hotel/sign_in/")
-def add_rooms(request, room_number=None):
+def add_room(request, room_number=None):
     if request.user.email.endswith("@anshul.com"):
         if room_number:
             room = Room.objects.get(room_number=room_number)
@@ -385,12 +385,12 @@ def add_rooms(request, room_number=None):
                     'form': form,
                     'username': request.user.username
                     }
-                return render(request, 'add_rooms.html', context)
+                return render(request, 'add_room.html', context)
         context = {
                 'form': AddRoomForm(instance=room),
                 'username': request.user.username
                 }
-        return render(request, 'add_rooms.html', context)
+        return render(request, 'add_room.html', context)
     else:
         return redirect('../book/')
 '''
@@ -410,7 +410,7 @@ def add_rooms(request, room_number=None):
 
 """Function to add/ edit room."""
 @login_required(login_url="/hotel/sign_in/")
-def add_rooms(request):
+def add_room(request):
     if request.user.email.endswith("@anshul.com"):
         room = Room()
         if request.method == 'POST':
@@ -439,7 +439,7 @@ def add_rooms(request):
                     'form': form,
                     'username': request.user.username
                     }
-                return render(request, 'add_rooms.html', context)
+                return render(request, 'add_room.html', context)
         '''context = {
                 'form': AddRoomForm(),
                 'username': request.user.username
@@ -448,7 +448,7 @@ def add_rooms(request):
                 'form': AddRoomForm(instance=room),
                 'username': request.user.username
                 }
-        return render(request, 'add_rooms.html', context)
+        return render(request, 'add_room.html', context)
     else:
         return redirect('../book/')
 
