@@ -18,8 +18,7 @@
     <!-- Navigation Bar -->
     <div class="w3-bar w3-white w3-large">
 			<div class="w3-bar-item w3-red w3-mobile"><i class="fa fa-bed w3-margin-right"></i>Logo</div>
-      <a href="{% url 'hotel:manager' %}" class="w3-bar-item w3-button w3-mobile">Room Manager</a>
-      <a href="{% url 'hotel:rooms' %}" class="w3-bar-item w3-button w3-mobile">Rooms</a>
+      <a href="#" class="w3-bar-item w3-button w3-mobile active">Rooms</a>
       <a href="{% url 'hotel:manage_bookings' %}" class="w3-bar-item w3-button w3-mobile">Bookings</a>
 			<div class="dropdown w3-right ert">
 				<button class="dropbtn">{{ username }}
@@ -35,25 +34,23 @@
       <!--<li><a href="#news">News</a></li>
       <li><a href="#contact">Contact</a></li>-->
   	</div>
-    <br/>
-    <ul class="breadcrumb">
+    
+    <!--<ul class="breadcrumb">
       <li>
-        <a href="{% url 'hotel:manager' %}">Room Manager</a>
+        
         &nbsp;>&nbsp;
         <span class="current">Rooms</span>
       </li>
-    </ul>
-    <br/>
-    <h2>Search Rooms</h2>
-    <br/>
+    </ul>-->
+    
+    <h2>Search</h2>
     <form method="POST">
       {% csrf_token %}
       {{ form.as_p }}
-      <input type="submit" class= "submit submit-right" value="Search Availability" />
+      <input type="submit" class= "submit submit-right" value="Search" />
     </form>
     <br/>
 		{% if rooms %}
-    <h3> All rooms</h3>
 		  {% for room in rooms %}
       <div class="card">
         <b>Room Number:</b> {{ room.number }}<br/>
@@ -61,7 +58,7 @@
         <b>Capicity:</b> {{ room.capacity }}<br/>
         <b>Advance:</b> {{ room.advance }}<br/>
         <a href='../../hotel/view_time_slots/{{room.number}}'> [Time Slots]</a>
-        <a href='../../hotel/edit_rooms/{{room.number}}'> [Edit]</a>
+        <a href='../../hotel/edit_room/{{room.number}}'> [Edit]</a>
         <a href='../../hotel/delete_rooms/{{room.number}}'> [Delete]</a>
       </div>
 		  {% endfor %}

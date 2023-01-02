@@ -18,8 +18,7 @@
     <!-- Navigation Bar -->
     <div class="w3-bar w3-white w3-large">
       <div class="w3-bar-item w3-red w3-mobile"><i class="fa fa-bed w3-margin-right"></i>Logo</div>
-      <a href="{% url 'hotel:room_manager' %}" class="w3-bar-item w3-button w3-mobile">Room Manager</a>
-      <a href="{% url 'hotel:rooms' %}" class="w3-bar-item w3-button w3-mobile">Rooms</a>
+      <a href="{% url 'hotel:rooms' %}" class="w3-bar-item w3-button w3-mobile active">Rooms</a>
       <a href="{% url 'hotel:manage_bookings' %}" class="w3-bar-item w3-button w3-mobile">Bookings</a>
       <div class="dropdown w3-right ert">
         <button class="dropbtn">{{ username }}
@@ -34,8 +33,6 @@
     </div>
     <ul class="breadcrumb">
       <li>
-        <a style="display: inline;" href="{% url 'hotel:room_manager' %}">Room Manager</a>
-        &nbsp;>&nbsp;
         <a style="display: inline;" href="{% url 'hotel:rooms' %}">Rooms</a>
         &nbsp;>&nbsp;
         <span class="current">Add Room</span>

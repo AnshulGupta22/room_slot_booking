@@ -56,6 +56,14 @@ a.fa {
     font-size: 1.2em;
   }
   
+  .active{
+    background-color: #04AA6D;
+  }
+  .active:hover {
+    background-color: #04AA6D !important;
+    color: #000 !important;
+  }
+  
   a.ert:link, a.ert:visited {
     background-color: white;
     color: black;

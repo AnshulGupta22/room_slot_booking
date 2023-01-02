@@ -274,162 +274,40 @@ class ManageBookingForm(forms.Form):
                     "Check out should be after check in.", code='check out after check in'
                 )
 
-
 from datetime import time
-"""class used for booking a time slot."""
-class RoomForm(forms.Form):
+"""class used for searching rooms."""
+class RoomsForm(forms.Form):
 
-    '''number = forms.IntegerField(
-        required=False,
-        validators=[MaxValueValidator(1000), MinValueValidator(1)]
-    )'''
-    room_numbers = forms.CharField(validators=[int_list_validator()], required=False, max_length=4000)
+    numbers = forms.CharField(validators=[int_list_validator()], required=False, max_length=4000)
 
     ROOM_CATEGORIES = (
-        #('', ''),
         ('Regular', 'Regular'),
         ('Executive', 'Executive'),
-        ('Deluxe', 'Deluxe'),
-        ('King', 'King'),
-        ('Queen', 'Queen'),
     )
-    '''Regular = forms.BooleanField(required=False)
-    Executive = forms.BooleanField(required=False)
-    Deluxe = forms.BooleanField(required=False)
-    King = forms.BooleanField(required=False)
-    Queen = forms.BooleanField(required=False)
 
-    One = forms.BooleanField(required=False)
-    Two = forms.BooleanField(required=False)
-    Three = forms.BooleanField(required=False)
-    Four = forms.BooleanField(required=False)'''
-
-    category = forms.MultipleChoiceField(
+    categories = forms.MultipleChoiceField(
         required=False,
         widget=forms.CheckboxSelectMultiple,
         choices=ROOM_CATEGORIES,
     )
-    '''category2 = forms.CharField(
-        max_length=9,
-        required=False,
-        widget=forms.Select(choices=ROOM_CATEGORIES),
-    )
-    category3 = forms.CharField(
-        max_length=9,
-        required=False,
-        widget=forms.Select(choices=ROOM_CATEGORIES),
-    )
-    category4 = forms.CharField(
-        max_length=9,
-        required=False,
-        widget=forms.Select(choices=ROOM_CATEGORIES),
-    )
-    category5 = forms.CharField(
-        max_length=9,
-        required=False,
-        widget=forms.Select(choices=ROOM_CATEGORIES),
-    )'''
 
-    ROOM_CAPACITY = (
-        #('', ''),
+    ROOM_CAPACITIES = (
         (1, '1'),
         (2, '2'),
         (3, '3'),
         (4, '4'),
     )
-    capacity = forms.MultipleChoiceField(
+    capacities = forms.MultipleChoiceField(
         required=False,
         widget=forms.CheckboxSelectMultiple,
-        choices=ROOM_CAPACITY,
+        choices=ROOM_CAPACITIES,
         )
-    '''capacity2 = forms.IntegerField(
-        required=False,
-        widget=forms.Select(choices=ROOM_CAPACITY),
-        )
-    capacity3 = forms.IntegerField(
-        required=False,
-        widget=forms.Select(choices=ROOM_CAPACITY),
-        )
-    capacity4 = forms.IntegerField(
-        required=False,
-        widget=forms.Select(choices=ROOM_CAPACITY),
-        )'''
-
-    '''class TimeInput(forms.TimeInput):
-        input_type = 'time'
-        default=datetime.time()
-
-    available_from = forms.TimeField(
-        required=False,
-        widget=TimeInput(),
-        #initial=time(0)
-        )
-
-    available_till = forms.TimeField(
-        required=False,
-        widget=TimeInput(),
-        #initial=time(23,59,59)
-        )'''
 
     advance = forms.IntegerField(
         required=False,
     )
 
-    '''class Meta:
-        model = Room
-        fields = ['number','category', 'capacity', 'available_from',
-                    'available_till', 'advance']
-
-        widgets = {
-            'name': Textarea(attrs={'cols': 80, 'rows': 20}),
-        }
-
-        widgets = {
-                    #'number': forms.PositiveSmallIntegerField(attrs={'cols': 80, 'rows': 20}),
-                    'available_from': TimeInput(),
-                    'available_till': TimeInput(),
-                }'''
-
-    """Function to ensure that booking is done for future and check out is after check in"""
-    '''def clean(self):
-        cleaned_data = super().clean()
-        available_from = cleaned_data.get("available_from")
-        available_till = cleaned_data.get("available_till")
-        str_available_from = str(available_from)
-        str_available_till = str(available_till)
-        format = '%H:%M:%S'
-        if str_available_from != 'None':
-            try:
-                datetime.datetime.strptime(str_available_from, format).time()
-            except Exception:
-                raise ValidationError(
-                    _('Wrong time entered.'),
-                    code='Wrong time entered.',
-                )
-        if str_available_till != 'None':
-            try:
-                    datetime.datetime.strptime(str_available_till, format).time()
-            except Exception:
-                raise ValidationError(
-                    _('Wrong time entered.'),
-                    code='Wrong time entered.',
-                )
-        if available_till is not None and available_from is not None:
-            if available_till <= available_from:
-                raise ValidationError(
-                    "Available till should be after available from.", code='Available till after available from'
-                )'''
-
-
-
-
-
-
-
-
-
-
-"""class used for booking a time slot."""
+"""class used for adding a room."""
 class AddRoomForm(forms.ModelForm):
     class Meta:
         model = Room

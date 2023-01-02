@@ -18,8 +18,6 @@
     <!-- Navigation Bar -->
     <div class="w3-bar w3-white w3-large">
 			<div class="w3-bar-item w3-red w3-mobile"><i class="fa fa-bed w3-margin-right"></i>Logo</div>
-      <a href="{% url 'hotel:manage' %}" class="w3-bar-item w3-button w3-mobile">Manager</a>
-      <a href="{% url 'hotel:manage_rooms' %}" class="w3-bar-item w3-button w3-mobile">Rooms</a>
       <a href="{% url 'hotel:manage_bookings' %}" class="w3-bar-item w3-button w3-mobile">Bookings</a>
 			<div class="dropdown w3-right ert">
 				<button class="dropbtn">{{ username }}
@@ -35,14 +33,12 @@
     <br/>
     <ul class="breadcrumb">
       <li>
-        <a href="{% url 'hotel:manage' %}">Manager</a>
+        <a href="{% url 'hotel:rooms' %}">Rooms</a>
         &nbsp;>&nbsp;
-        <a href="{% url 'hotel:manage_rooms' %}">Rooms</a>
-        &nbsp;>&nbsp;
-        <span class="current">Edit Rooms</span>
+        <span class="current">Edit Room</span>
       </li>
     </ul>
-    <h3> Edit rooms</h3>
+    <h3> Edit room</h3>
     <form method="POST">
       {% csrf_token %}
       {{ form.as_p }}

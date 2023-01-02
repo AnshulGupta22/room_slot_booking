@@ -12,7 +12,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
-from hotel.forms import CustomerForm, SignInForm, BookingForm, RoomForm, ManageBookingForm, AddRoomForm, ManageViewTimeSlotForm, ViewTimeSlotForm, AddTimeSlotForm, EditRoomForm, EditForm
+from hotel.forms import CustomerForm, SignInForm, BookingForm, RoomsForm, ManageBookingForm, AddRoomForm, ManageViewTimeSlotForm, ViewTimeSlotForm, AddTimeSlotForm, EditRoomForm, EditForm
 from .models import Room, Booking, TimeSlot
 
 from .serializers import (
@@ -22,59 +22,6 @@ from .serializers import (
     )
 
 # Create your views here.
-
-now = timezone.now()
-'''
-#request.session['api_username'] = ''
-request.session['api_book_date'] = None
-
-request.session['api_check_in'] = None
-
-request.session['api_check_out'] = None
-
-request.session['api_person'] = 1
-
-request.session['api_username']
-api_no_of_rooms_required = 1
-request.session['api_username']
-api_ac_rooms = 0
-request.session['api_username']
-api_nac_rooms = 0
-request.session['api_username']
-api_deluxe_rooms = 0
-request.session['api_username']
-api_king_rooms = 0
-request.session['api_username']
-api_queen_rooms = 0
-'''
-
-
-"""Function to convert string to date."""
-def convert_to_date(date_time):
-    format = '%Y-%m-%d'
-    try:
-        datetime_str = datetime.datetime.strptime(date_time, format).date()
-    except Exception:
-        datetime_str = None
-    return datetime_str
-
-"""Function to convert string to time."""
-def convert_to_time_sec(date_time):
-    format = '%H:%M:%S'
-    try:
-        datetime_str = datetime.datetime.strptime(date_time, format).time()
-    except Exception:
-        datetime_str = None
-    return datetime_str
-
-"""Function to convert string to time."""
-def convert_to_time(date_time):
-    format = '%H:%M'
-    try:
-        datetime_str = datetime.datetime.strptime(date_time, format).time()
-    except Exception:
-        datetime_str = None
-    return datetime_str
 
 """Function to go to home page."""
 def home(request):
@@ -103,6 +50,25 @@ def sign_up(request):
     context = {'form': CustomerForm()}
     return render(request, 'sign_up.html', context)
 
+"""Function for sign in."""
+def sign_in(request):
+    if request.method == 'POST':
+        form = SignInForm(request.POST)
+        if form.is_valid():
+            password = request.POST['password']
+            user = authenticate(
+                request, username=request.POST['username'], password=password
+                )
+            login(request, user)
+            if user.is_superuser:
+                return redirect('../rooms/')
+            return redirect('../book/')
+        else:
+            context = {'form': form}
+            return render(request, 'sign_in.html', context)
+    context = {'form': SignInForm()}
+    return render(request, 'sign_in.html', context)
+
 """Function for viewing profile."""
 @login_required(login_url="/hotel/sign_in/")
 def view_profile(request):
@@ -127,212 +93,59 @@ def edit_profile(request):
     context = {'form': EditForm(instance=profile), 'username': request.user.username}
     return render(request, 'edit_profile.html', context)
 
-"""Function for sign in."""
-def sign_in(request):
-    if request.method == 'POST':
-        form = SignInForm(request.POST)
-        if form.is_valid():
-            password = request.POST['password']
-            user = authenticate(
-                request, username=request.POST['username'], password=password
-                )
-            login(request, user)
-            if user.is_superuser:
-                return redirect('../manager/')
-            return redirect('../book/')
-        else:
-            context = {'form': form}
-            return render(request, 'sign_in.html', context)
-    context = {'form': SignInForm()}
-    return render(request, 'sign_in.html', context)
-
-"""Function to display room manager options."""
-@login_required(login_url="/hotel/sign_in/")
-def manager(request):
-    if request.user.email.endswith("@anshul.com"):
-        context = {
-            'username': request.user.username
-            }
-        return render(request, 'manager.html', context)
+"""Function that returns the list of rooms based on the search criterias."""
+def rooms_search(
+        str_numbers, categories, capacities, advance, manager):
+    if str_numbers != '':
+        spaces_numbers = list(str_numbers.split(","))
+        numbers = list()
+        for i in spaces_numbers:
+            numbers.append(i.strip())
     else:
-        return redirect('../book/')
-
-"""Function that returns the list of rooms based on the search criteria."""
-def manager_room_search(
-        str_room_numbers, categories, capacities, advance, username):
-    #print(str_room_numbers)
-    if str_room_numbers != '':
-        spaces_room_numbers = list(str_room_numbers.split(","))
-        room_numbers = list()
-        for i in spaces_room_numbers:
-            room_numbers.append(i.strip())
-        #print(room_numbers)
-    else:
-        room_numbers = ''
-    #available_from = convert_to_time(str_available_from)
-    #available_till = convert_to_time(str_available_till)
-    #room_list = list()
-    #for category in categories:
-    '''room_list = Room.objects.filter(
-        number=number,
-        category=categories,
-        available_from__lte=available_from,
-        available_till__gte=available_till,
-        capacity__gte=capacities,
-        advance__gte=advance
-    )'''
-    #print(categories)
-    '''if categories == []:
-        categories = ['Regular', 'Executive', 'Deluxe', 'King', 'Queen']
-    if capacities == []:
-        capacities = [1, 2, 3, 4]
-    if advance is None:
-        advance = 0
-    if available_from is None and available_till is None:
-        room_list = Room.objects.filter(
-        category__in=categories,
-        capacity__in=capacities,
-        advance__gte=advance
-    )
-    elif available_from is None:
-        room_list = Room.objects.filter(
-        category__in=categories,
-        available_till__gte=available_till,
-        capacity__in=capacities,
-        advance__gte=advance
-    )
-    elif available_till is None:
-        room_list = Room.objects.filter(
-        category__in=categories,
-        available_from__lte=available_from,
-        capacity__in=capacities,
-        advance__gte=advance
-    )
-    else:'''
-
-    '''keys = ['room_number__in', 'category__in', 'available_from__lte', 'available_till__gte', 'capacity__in', 'advance__gte', 'manager']
-    values = [room_numbers, categories, available_from, available_till, capacities, advance, username]'''
-    keys = ['room_number__in', 'category__in', 'capacity__in', 'advance__gte', 'manager']
-    values = [room_numbers, categories, capacities, advance, username]
+        numbers = ''
+    keys = ['number__in', 'category__in', 'capacity__in', 'advance__gte', 'manager']
+    values = [numbers, categories, capacities, advance, manager]
     parameters = {}
-    #temp = {'category__in': categories, 'available_from__lte': available_from, 'available_till__gte': available_till, 'capacity__in': capacities, 'advance__gte': advance}
     for key, value in zip(keys, values):
         if value is not None and value !=[] and value != '':
             parameters[key] = value
-    #for key, value in temp:
-    #    if value is not None and value !=[]:
-    #        parameters[key] = value
-    #print(room_numbers)
     room_list = Room.objects.filter(**parameters)
-    #print("hwqaf")
-    '''room_list = Room.objects.filter(
-        category__in=categories,
-        available_from__lte=available_from,
-        available_till__gte=available_till,
-        capacity__in=capacities,
-        advance__gte=advance
-    )'''
-    #print(room_list)
     return room_list
-        #select * from ROOM where db_room_number = number and db_category IN category and db_capacity IN capacity and db_available_from <= available_from and db_available_till >= available_till and db_advance >= advance
-    """print(room_list)
-    for capacity in capacities:
-        room_list += Room.objects.filter(
-            number=number,
-            category=category,
-            available_from__lte=available_from,
-            available_till__gte=available_till,
-            #capacity__gte=capacity,
-            advance=advance
-        )
-    
-    for room in room_list:
-        # Calculating the maximum date to which a room can be
-        # booked in advance.
-        max_book = now + datetime.timedelta(days=room.advance)
-        if (book_date <= max_book.date()):
-            # To ensure no rooms are booked within a gap of 1 hour
-            # after checkout.
-            added_check_out = check_out.replace(
-                hour=(check_out.hour + 1) % 24
-            )
-            # To ensure no rooms are booked within a gap of 1 hour
-            # before checkin.
-            subtracted_check_in = check_in.replace(
-                hour=(check_in.hour - 1) % 24
-            )
-            # Checking if the room is already booked.
-            taken = Booking.objects.filter(Q(Q(check_in_time__lt=added_check_out)
-                                             | Q(check_out_time__gt=subtracted_check_in))
-                                           & Q(room_number__contains=room.number)
-                                           & Q(check_in_date=book_date))
-            if not taken:
-                if (room.category == 'Regular'):
-                    normal_regular_rooms = normal_regular_rooms + 1
-                elif (room.category == 'Executive'):
-                    normal_executive_rooms = normal_executive_rooms + 1
-                elif (room.category == 'Deluxe'):
-                    normal_deluxe_rooms = normal_deluxe_rooms + 1
-                elif (room.category == 'King'):
-                    normal_king_rooms = normal_king_rooms + 1
-                elif (room.category == 'Queen'):
-                    normal_queen_rooms = normal_queen_rooms + 1
-    if (normal_regular_rooms >= normal_no_of_rooms_required):
-        available_categories.append('Regular')
-    if (normal_executive_rooms >= normal_no_of_rooms_required):
-        available_categories.append('Executive')
-    if (normal_deluxe_rooms >= normal_no_of_rooms_required):
-        available_categories.append('Deluxe')
-    if (normal_king_rooms >= normal_no_of_rooms_required):
-        available_categories.append('King')
-    if (normal_queen_rooms >= normal_no_of_rooms_required):
-        available_categories.append('Queen')
-    return available_categories"""
 
-"""Function to display rooms based on the selected criteria."""
+"""Function to display rooms based on the selected criterias."""
 @login_required(login_url="/hotel/sign_in/")
 def rooms(request):
     if request.user.email.endswith("@anshul.com"):
         rooms = Room.objects.filter(manager=request.user.username)
         if request.method == 'POST':
-            form = RoomForm(request.POST)
+            form = RoomsForm(request.POST)
             if form.is_valid():
                 try:
-                    request.session['room_numbers'] = request.POST['room_numbers']
-                    print(request.session['room_numbers'])
-                    #request.session['number'] = int(request.POST['number'])
+                    request.session['numbers'] = request.POST['numbers']
                 except Exception:
-                    request.session['room_numbers'] = ''
-                request.session['category'] = form.cleaned_data.get("category")
-                str_capacity = form.cleaned_data.get("capacity")
-                # using list comprehension to
-                # perform conversion
+                    request.session['numbers'] = ''
+                request.session['categories'] = form.cleaned_data.get("categories")
+                str_capacity = form.cleaned_data.get("capacities")
+                # using list comprehension to perform conversion
                 try:
-                    request.session['capacity'] = [int(i) for i in str_capacity]
+                    request.session['capacities'] = [int(i) for i in str_capacity]
                 except Exception:
-                    request.session['capacity'] = None
-                #request.session['available_from'] = request.POST['available_from']
-                #request.session['available_till'] = request.POST['available_till']
+                    request.session['capacities'] = None
                 try:
                     request.session['advance'] = int(request.POST['advance'])
                 except Exception:
                     request.session['advance'] = None
-                #print(request.POST['room_numbers'])
-                response = manager_room_search(request.session['room_numbers'],
-                                        request.session['category'],
-                                        request.session['capacity'],
-                                        #request.session['available_from'],
-                                        #request.session['available_till'],
+                response = rooms_search(request.session['numbers'],
+                                        request.session['categories'],
+                                        request.session['capacities'],
                                         request.session['advance'],
                                         request.user.username)
-                #if response:
                 context = {
                     'form': form,
                     'rooms': response,
                     'username': request.user.username
                     }
                 return render(request, 'rooms.html', context)
-                #return HttpResponse("Not Available")
             else:
                 context = {
                     'form': form,
@@ -341,7 +154,7 @@ def rooms(request):
                     }
                 return render(request, 'rooms.html', context)
         context = {
-                'form': RoomForm(),
+                'form': RoomsForm(),
                 'rooms': rooms,
                 'username': request.user.username
                 }
@@ -349,108 +162,67 @@ def rooms(request):
     else:
         return redirect('../book/')
 
-"""Function to add/ edit room."""
-'''
-@login_required(login_url="/hotel/sign_in/")
-def add_room(request, number=None):
-    if request.user.email.endswith("@anshul.com"):
-        if number:
-            room = Room.objects.get(number=number)
-        else:
-            room = Room()
-
-        if request.method == 'POST':
-
-            if number:
-                form = EditRoomForm(request.POST, instance=room)
-            else:
-                form = AddRoomForm(request.POST, instance=room)
-            
-            if form.is_valid():
-                room = Room(number=request.POST['number'],
-                        category=request.POST['category'],
-                        capacity=request.POST['capacity'],
-                        #available_from=request.POST['available_from'],
-                        #available_till=request.POST['available_till'],
-                        advance=request.POST['advance'],
-                        manager=request.user.username)
-                room.save()
-                # Implemented Post/Redirect/Get.
-                if number:
-                    return redirect('../../manage_rooms/')
-                return redirect('../manage_rooms/')
-                #return render(request, 'manage_rooms.html', context)
-            else:
-                context = {
-                    'form': form,
-                    'username': request.user.username
-                    }
-                return render(request, 'add_room.html', context)
-        context = {
-                'form': AddRoomForm(instance=room),
-                'username': request.user.username
-                }
-        return render(request, 'add_room.html', context)
-    else:
-        return redirect('../book/')
-'''
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-"""Function to add/ edit room."""
+"""Function to add a room."""
 @login_required(login_url="/hotel/sign_in/")
 def add_room(request):
     if request.user.email.endswith("@anshul.com"):
-        room = Room()
         if request.method == 'POST':
-            form = AddRoomForm(request.POST, instance=room)
+            form = AddRoomForm(request.POST)
             if form.is_valid():
                 room = Room(number=request.POST['number'],
                         category=request.POST['category'],
                         capacity=request.POST['capacity'],
-                        #available_from=request.POST['available_from'],
-                        #available_till=request.POST['available_till'],
                         advance=request.POST['advance'],
                         manager=request.user.username)
                 room.save()
-
-                '''form = RoomForm()
-                context = {
-                    'form': form,
-                    'rooms': Room.objects.filter(manager=request.user.username),
-                    'username': request.user.username
-                    }'''
                 # Implemented Post/Redirect/Get.
                 return redirect('../rooms/')
-                #return render(request, 'manage_rooms.html', context)
             else:
                 context = {
                     'form': form,
                     'username': request.user.username
                     }
                 return render(request, 'add_room.html', context)
-        '''context = {
-                'form': AddRoomForm(),
-                'username': request.user.username
-                }'''
         context = {
-                'form': AddRoomForm(instance=room),
+                'form': AddRoomForm(),
                 'username': request.user.username
                 }
         return render(request, 'add_room.html', context)
     else:
         return redirect('../book/')
+
+now = timezone.now()
+
+"""Function to convert string to date."""
+def convert_to_date(date_time):
+    format = '%Y-%m-%d'
+    try:
+        datetime_str = datetime.datetime.strptime(date_time, format).date()
+    except Exception:
+        datetime_str = None
+    return datetime_str
+
+"""Function to convert string to time."""
+def convert_to_time_sec(date_time):
+    format = '%H:%M:%S'
+    try:
+        datetime_str = datetime.datetime.strptime(date_time, format).time()
+    except Exception:
+        datetime_str = None
+    return datetime_str
+
+"""Function to convert string to time."""
+def convert_to_time(date_time):
+    format = '%H:%M'
+    try:
+        datetime_str = datetime.datetime.strptime(date_time, format).time()
+    except Exception:
+        datetime_str = None
+    return datetime_str
+
+
+
+
 
 
 
@@ -462,7 +234,7 @@ def add_room(request):
 
 """Function to add/ edit room."""
 @login_required(login_url="/hotel/sign_in/")
-def edit_rooms(request, number=None):
+def edit_room(request, number=None):
     if request.user.email.endswith("@anshul.com"):
         if number:
             try:
@@ -492,12 +264,12 @@ def edit_rooms(request, number=None):
                     'form': form,
                     'username': request.user.username
                     }
-                return render(request, 'edit_rooms.html', context)
+                return render(request, 'edit_room.html', context)
         context = {
                 'form': EditRoomForm(instance=room),
                 'username': request.user.username
                 }
-        return render(request, 'edit_rooms.html', context)
+        return render(request, 'edit_room.html', context)
     else:
         return redirect('../book/')
 
@@ -681,14 +453,14 @@ def manager_time_slot_search(
         number, str_available_from, str_available_till, occupancy):
     room_obj = Room.objects.get(number=number)
     #print(str_available_from)
-    '''if str_room_numbers != '':
-        spaces_room_numbers = list(str_room_numbers.split(","))
-        room_numbers = list()
-        for i in spaces_room_numbers:
-            room_numbers.append(i.strip())
-        #print(room_numbers)
+    '''if str_numbers != '':
+        spaces_numbers = list(str_numbers.split(","))
+        numbers = list()
+        for i in spaces_numbers:
+            numbers.append(i.strip())
+        #print(numbers)
     else:
-        room_numbers = '''''
+        numbers = '''''
     available_from = convert_to_time(str_available_from)
     available_till = convert_to_time(str_available_till)
     #room_list = list()
@@ -731,7 +503,7 @@ def manager_time_slot_search(
     else:'''
     #print(available_from)
     '''keys = ['room_number__in', 'category__in', 'available_from__lte', 'available_till__gte', 'capacity__in', 'advance__gte', 'manager']
-    values = [room_numbers, categories, available_from, available_till, capacities, advance, username]'''
+    values = [numbers, categories, available_from, available_till, capacities, advance, username]'''
     if available_till is None:
         keys = ['room', 'available_from__lte', 'available_till__gt', 'occupancy']
         values = [room_obj, available_from, available_from, occupancy]
@@ -841,11 +613,11 @@ def view_time_slots(request, number):
                 except Exception:
                     booked = False'''
                 '''try:
-                    request.session['room_numbers'] = request.POST['room_numbers']
-                    #print(request.session['room_numbers'])
+                    request.session['numbers'] = request.POST['numbers']
+                    #print(request.session['numbers'])
                     #request.session['number'] = int(request.POST['number'])
                 except Exception:
-                    request.session['room_numbers'] = ''
+                    request.session['numbers'] = ''
                 request.session['category'] = form.cleaned_data.get("category")
                 str_capacity = form.cleaned_data.get("capacity")
                 # using list comprehension to
@@ -914,11 +686,11 @@ def manage_time_slots(request):
             form = ManageViewTimeSlotForm(request.POST)
             if form.is_valid():
                 try:
-                    request.session['room_numbers'] = request.POST['room_numbers']
-                    #print(request.session['room_numbers'])
+                    request.session['numbers'] = request.POST['numbers']
+                    #print(request.session['numbers'])
                     #request.session['number'] = int(request.POST['number'])
                 except Exception:
-                    request.session['room_numbers'] = ''
+                    request.session['numbers'] = ''
                 request.session['category'] = form.cleaned_data.get("category")
                 str_capacity = form.cleaned_data.get("capacity")
                 # using list comprehension to
@@ -933,8 +705,8 @@ def manage_time_slots(request):
                     request.session['advance'] = int(request.POST['advance'])
                 except Exception:
                     request.session['advance'] = None
-                #print(request.POST['room_numbers'])
-                response = manager_room_search(request.session['room_numbers'],
+                #print(request.POST['numbers'])
+                response = rooms_search(request.session['numbers'],
                                         request.session['category'],
                                         request.session['capacity'],
                                         request.session['available_from'],
@@ -985,21 +757,21 @@ def delete_rooms(request, number=None):
 
 """Function that returns the list of bookings based on the search criteria."""
 def manager_book_search(
-        str_room_numbers, customer_name, str_check_in_date, str_check_in_time, str_check_out_time, category, person, no_of_rooms, manager):
+        str_numbers, customer_name, str_check_in_date, str_check_in_time, str_check_out_time, category, person, no_of_rooms, manager):
 
     booking_list = Booking.objects.none()
-    spaces_room_numbers = list(str_room_numbers.split(","))
-    room_numbers = list()
-    for i in spaces_room_numbers:
-        room_numbers.append(i.strip())
+    spaces_numbers = list(str_numbers.split(","))
+    numbers = list()
+    for i in spaces_numbers:
+        numbers.append(i.strip())
     check_in_date = convert_to_date(str_check_in_date)
     check_in_time = convert_to_time(str_check_in_time)
     check_out_time = convert_to_time(str_check_out_time)
-    for number in room_numbers:
+    for number in numbers:
         room_number_regex = rf"\b{number}\b"
         '''keys = ['room_numbers__iregex', 'customer_name', 'check_in_date', 'check_in_time__gte', 'check_out_time__lte', 'category__in', 'person__in', 'no_of_rooms', 'room_managers__regex']
         values = [room_number_regex, customer_name, check_in_date, check_in_time, check_out_time, category, person, no_of_rooms, room_manager_regex]'''
-        keys = ['room_numbers__iregex', 'customer_name', 'check_in_date', 'check_in_time__gte', 'check_out_time__lte', 'category__in', 'person__in', 'no_of_rooms', 'room_managers__regex']
+        keys = ['numbers__iregex', 'customer_name', 'check_in_date', 'check_in_time__gte', 'check_out_time__lte', 'category__in', 'person__in', 'no_of_rooms', 'room_managers__regex']
         values = [room_number_regex, customer_name, check_in_date, check_in_time, check_out_time, category, person, no_of_rooms]
         parameters = {}
         for key, value in zip(keys, values):
@@ -1016,8 +788,8 @@ def manage_bookings(request):
         if request.method == 'POST':
             form = ManageBookingForm(request.POST)
             if form.is_valid():
-                request.session['room_numbers'] = request.POST['room_numbers']
-                #print(request.session['room_numbers'])
+                request.session['numbers'] = request.POST['numbers']
+                #print(request.session['numbers'])
                 request.session['customer_name'] = request.POST['customer_name']
                 try:
                     request.session['check_in_date_month'] = request.POST['check_in_date_month']
@@ -1046,7 +818,7 @@ def manage_bookings(request):
                     request.session['no_of_rooms'] = int(request.POST['no_of_rooms'])
                 except Exception:
                     request.session['no_of_rooms'] = None
-                response = manager_book_search(request.session['room_numbers'],
+                response = manager_book_search(request.session['numbers'],
                                         request.session['customer_name'],
                                         str_check_in_date,
                                         request.session['check_in_time'],
@@ -1187,22 +959,22 @@ def booking(request):
 
 """Function to book the time slot."""
 def time_booking(
-        room_numbers, room_type, no_of_rooms_required, normal_username,
+        numbers, room_type, no_of_rooms_required, normal_username,
         normal_book_date, normal_check_in, normal_check_out, normal_person, room_managers):
     #for i in range(no_of_rooms_required):
-        #room_no = room_numbers.pop()
-    #print(room_numbers)
+        #room_no = numbers.pop()
+    #print(numbers)
 
 
     # getting the comma-separated string from the list
-    room_numbers_string = ", ".join([str(item) for item in room_numbers if item])
+    room_numbers_string = ", ".join([str(item) for item in numbers if item])
     room_managers_string = ", ".join([str(item) for item in room_managers if item])
 
     time_slot = Booking(customer_name=normal_username,
                         check_in_date=normal_book_date,
                         check_in_time=normal_check_in,
                         check_out_time=normal_check_out,
-                        room_numbers=room_numbers_string,
+                        numbers=room_numbers_string,
                         category=room_type, person=normal_person,
                         no_of_rooms = no_of_rooms_required,
                         room_managers=room_managers_string)
@@ -1220,7 +992,7 @@ def room_category(
     normal_deluxe_rooms = 0
     normal_king_rooms = 0
     normal_queen_rooms = 0
-    room_numbers = list()
+    numbers = list()
     room_managers = list()
     # List of rooms for the given category.
     try:
@@ -1252,51 +1024,51 @@ def room_category(
             if not taken:
                 if (room_type == 'Regular'):
                     normal_regular_rooms = normal_regular_rooms + 1
-                    room_numbers.append(room.number)
+                    numbers.append(room.number)
                     room_managers.append(room.manager)
                 elif (room_type == 'Executive'):
                     normal_executive_rooms = normal_executive_rooms + 1
-                    room_numbers.append(room.number)
+                    numbers.append(room.number)
                     room_managers.append(room.manager)
                 elif (room_type == 'Deluxe'):
                     normal_deluxe_rooms = normal_deluxe_rooms + 1
-                    room_numbers.append(room.number)
+                    numbers.append(room.number)
                     room_managers.append(room.manager)
                 elif (room_type == 'King'):
                     normal_king_rooms = normal_king_rooms + 1
-                    room_numbers.append(room.number)
+                    numbers.append(room.number)
                     room_managers.append(room.manager)
                 elif (room_type == 'Queen'):
                     normal_queen_rooms = normal_queen_rooms + 1
-                    room_numbers.append(room.number)
+                    numbers.append(room.number)
                     room_managers.append(room.manager)
                 if (room_type == 'Regular' and
                     normal_regular_rooms == normal_no_of_rooms_required  and room.category == 'Regular'):
-                    time_booking(room_numbers, room_type, normal_no_of_rooms_required,
+                    time_booking(numbers, room_type, normal_no_of_rooms_required,
                                     normal_username, normal_book_date, normal_check_in,
                                     normal_check_out, normal_person, room_managers)
                     return 1
                 elif (room_type == 'Executive' and
                     normal_executive_rooms == normal_no_of_rooms_required and room.category == 'Executive'):
-                    time_booking(room_numbers, room_type, normal_no_of_rooms_required,
+                    time_booking(numbers, room_type, normal_no_of_rooms_required,
                                     normal_username, normal_book_date, normal_check_in,
                                     normal_check_out, normal_person)
                     return 1
                 elif (room_type == 'Deluxe' and
                     normal_deluxe_rooms == normal_no_of_rooms_required and room.category == 'Deluxe'):
-                    time_booking(room_numbers, room_type, normal_no_of_rooms_required,
+                    time_booking(numbers, room_type, normal_no_of_rooms_required,
                                     normal_username, normal_book_date, normal_check_in,
                                     normal_check_out, normal_person)
                     return 1
                 elif (room_type == 'King' and
                     normal_king_rooms == normal_no_of_rooms_required and room.category == 'King'):
-                    time_booking(room_numbers, room_type, normal_no_of_rooms_required,
+                    time_booking(numbers, room_type, normal_no_of_rooms_required,
                                     normal_username, normal_book_date, normal_check_in,
                                     normal_check_out, normal_person)
                     return 1
                 elif (room_type == 'Queen' and
                     normal_queen_rooms == normal_no_of_rooms_required and room.category == 'Queen'):
-                    time_booking(room_numbers, room_type, normal_no_of_rooms_required,
+                    time_booking(numbers, room_type, normal_no_of_rooms_required,
                                     normal_username, normal_book_date, normal_check_in,
                                     normal_check_out, normal_person)
                     return 1
@@ -1638,7 +1410,7 @@ def booking_category(request, category):
     normal_deluxe_rooms = 0
     normal_king_rooms = 0
     normal_queen_rooms = 0
-    room_numbers = list()
+    numbers = list()
     # List of rooms for the given category.
     try:
         room_list = Room.objects.filter(
@@ -1671,46 +1443,46 @@ def booking_category(request, category):
             if not taken:
                 if (category == 'Regular'):
                     normal_regular_rooms = normal_regular_rooms + 1
-                    room_numbers.append(room.number)
+                    numbers.append(room.number)
                 elif (category == 'Executive'):
                     normal_executive_rooms = normal_executive_rooms + 1
-                    room_numbers.append(room.number)
+                    numbers.append(room.number)
                 elif (category == 'Deluxe'):
                     normal_deluxe_rooms = normal_deluxe_rooms + 1
-                    room_numbers.append(room.number)
+                    numbers.append(room.number)
                 elif (category == 'King'):
                     normal_king_rooms = normal_king_rooms + 1
-                    room_numbers.append(room.number)
+                    numbers.append(room.number)
                 elif (category == 'Queen'):
                     normal_queen_rooms = normal_queen_rooms + 1
-                    room_numbers.append(room.number)
+                    numbers.append(room.number)
                 if (category == 'Regular' and
                     normal_regular_rooms == request.session['no_of_rooms']):
-                    time_booking(room_numbers, category, request.session['no_of_rooms'],
+                    time_booking(numbers, category, request.session['no_of_rooms'],
                                     request.session['api_username'], request.session['api_book_date'], request.session['api_check_in'],
                                     request.session['api_check_out'], request.session['api_person'])
                     return Response({'msg': 'Booked'})
                 elif (category == 'Executive' and
                     normal_executive_rooms == request.session['no_of_rooms']):
-                    time_booking(room_numbers, category, request.session['no_of_rooms'],
+                    time_booking(numbers, category, request.session['no_of_rooms'],
                                     request.session['api_username'], request.session['api_book_date'], request.session['api_check_in'],
                                     request.session['api_check_out'], request.session['api_person'])
                     return Response({'msg': 'Booked'})
                 elif (category == 'Deluxe' and
                     normal_deluxe_rooms == request.session['no_of_rooms']):
-                    time_booking(room_numbers, category, request.session['no_of_rooms'],
+                    time_booking(numbers, category, request.session['no_of_rooms'],
                                     request.session['api_username'], request.session['api_book_date'], request.session['api_check_in'],
                                     request.session['api_check_out'], request.session['api_person'])
                     return Response({'msg': 'Booked'})
                 elif (category == 'King' and
                     normal_king_rooms == request.session['no_of_rooms']):
-                    time_booking(room_numbers, category, request.session['no_of_rooms'],
+                    time_booking(numbers, category, request.session['no_of_rooms'],
                                     request.session['api_username'], request.session['api_book_date'], request.session['api_check_in'],
                                     request.session['api_check_out'], request.session['api_person'])
                     return Response({'msg': 'Booked'})
                 elif (category == 'Queen' and
                     normal_queen_rooms == request.session['no_of_rooms']):
-                    time_booking(room_numbers, category, request.session['no_of_rooms'],
+                    time_booking(numbers, category, request.session['no_of_rooms'],
                                     request.session['api_username'], request.session['api_book_date'], request.session['api_check_in'],
                                     request.session['api_check_out'], request.session['api_person'])
                     return Response({'msg': 'Booked'})
