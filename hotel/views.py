@@ -12,7 +12,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
-from hotel.forms import CustomerForm, SignInForm, BookingForm, RoomsForm, ManageBookingForm, AddRoomForm, ManageViewTimeSlotForm, ViewTimeSlotForm, AddTimeSlotForm, EditRoomForm, EditForm
+from hotel.forms import CustomerForm, SignInForm, BookingForm, RoomsForm, ManageBookingForm, AddRoomForm, ManageViewTimeSlotForm, SearchTimeSlotForm, AddTimeSlotForm, EditRoomForm, EditForm
 from .models import Room, Booking, TimeSlot
 
 from .serializers import (
@@ -92,6 +92,11 @@ def edit_profile(request):
             return render(request, 'edit_profile.html', context)
     context = {'form': EditForm(instance=profile), 'username': request.user.username}
     return render(request, 'edit_profile.html', context)
+
+"""Function for logout."""
+def logout_view(request):
+    logout(request)
+    return redirect('../sign_in/')
 
 """Function that returns the list of rooms based on the search criterias."""
 def rooms_search(
@@ -191,6 +196,152 @@ def add_room(request):
     else:
         return redirect('../book/')
 
+"""Function to edit a room."""
+@login_required(login_url="/hotel/sign_in/")
+def edit_room(request, number=None):
+    if request.user.email.endswith("@anshul.com"):
+        if number:
+            try:
+                room = Room.objects.get(number=number, manager=request.user.username)
+            except Exception:
+                return HttpResponse("Not Found.")
+        else:
+            return HttpResponse("Bad request.")
+        if request.method == 'POST':
+            form = EditRoomForm(request.POST, instance=room)
+            if form.is_valid():
+                room = Room(number=request.POST['number'],
+                        category=request.POST['category'],
+                        capacity=request.POST['capacity'],
+                        advance=request.POST['advance'],
+                        manager=request.user.username)
+                room.save()
+                # Implemented Post/Redirect/Get.
+                if number:
+                    return redirect('../../rooms/')
+            else:
+                context = {
+                    'form': form,
+                    'username': request.user.username
+                    }
+                return render(request, 'edit_room.html', context)
+        context = {
+                'form': EditRoomForm(instance=room),
+                'username': request.user.username
+                }
+        return render(request, 'edit_room.html', context)
+    else:
+        return redirect('../book/')
+
+"""Function to delete room."""
+@login_required(login_url="/hotel/sign_in/")
+def delete_rooms(request, number=None):
+    if request.user.email.endswith("@anshul.com"):
+        if number:
+            try:
+                room = Room.objects.get(Q(number=number) & Q(manager=request.user.username))
+            except Exception:
+                return HttpResponse("Not found.")
+            room.delete()
+            # Implemented Post/Redirect/Get.
+            return redirect('../../rooms/')
+        else:
+            return HttpResponse("Bad request.")
+    else:
+        return redirect('../book/')
+
+"""Function to view time slots."""
+@login_required(login_url="/hotel/sign_in/")
+def time_slots(request, number):
+    if request.user.email.endswith("@anshul.com"):
+        try:
+            room = Room.objects.get(number=number, manager=request.user.username)
+        except Exception:
+            return HttpResponse("Not found.")
+        if request.method == 'POST':
+            form = SearchTimeSlotForm(request.POST)
+            if form.is_valid():
+                #print("bgyjm")
+                #print(form.cleaned_data.get("booked"))
+                #request.session['booked'] = form.cleaned_data.get("booked")
+                '''booked = True
+                try:
+                    request.POST['booked']
+                except Exception:
+                    booked = False'''
+                '''try:
+                    request.session['numbers'] = request.POST['numbers']
+                    #print(request.session['numbers'])
+                    #request.session['number'] = int(request.POST['number'])
+                except Exception:
+                    request.session['numbers'] = ''
+                request.session['category'] = form.cleaned_data.get("category")
+                str_capacity = form.cleaned_data.get("capacity")
+                # using list comprehension to
+                # perform conversion
+                try:
+                    request.session['capacity'] = [int(i) for i in str_capacity]
+                except Exception:
+                    request.session['capacity'] = None'''
+                #print(request.POST['available_from'])
+                request.session['available_from'] = request.POST['available_from']
+                request.session['available_till'] = request.POST['available_till']
+                request.session['occupancy'] = form.cleaned_data.get("occupancy")
+                #print(request.session['booked'])
+                '''try:
+                    request.session['advance'] = int(request.POST['advance'])
+                except Exception:
+                    request.session['advance'] = None'''
+                time_slots = manager_time_slot_search(number,
+                                        request.session['available_from'],
+                                        request.session['available_till'], request.session['occupancy']
+                                        )
+                #if response:
+                #print(time_slots)
+                context = {
+                    'form': form,
+                    'room': room,
+                    'time_slots': time_slots,
+                    'username': request.user.username
+                    }
+                return render(request, 'time_slots.html', context)
+                #return HttpResponse("Not Available")
+            else:
+                context = {
+                    'form': form,
+                    'room': room,
+                    'time_slots': None,
+                    'username': request.user.username
+                    }
+                return render(request, 'time_slots.html', context)
+        context = {
+                'form': SearchTimeSlotForm(),
+                'room': room,
+                #'number': number,
+                #'time_slots': TimeSlot.objects.filter(room=number, manager=request.user.username),
+                'time_slots': TimeSlot.objects.filter(room_id=number),
+                'username': request.user.username
+                }
+        return render(request, 'time_slots.html', context)
+    else:
+        return redirect('../book/')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 now = timezone.now()
 
 """Function to convert string to date."""
@@ -222,56 +373,6 @@ def convert_to_time(date_time):
 
 
 
-
-
-
-
-
-
-
-
-
-
-"""Function to add/ edit room."""
-@login_required(login_url="/hotel/sign_in/")
-def edit_room(request, number=None):
-    if request.user.email.endswith("@anshul.com"):
-        if number:
-            try:
-                room = Room.objects.get(number=number, manager=request.user.username)
-            except Exception:
-                return HttpResponse("Bad request.")
-        else:
-            return HttpResponse("Bad request.")
-
-        if request.method == 'POST':
-
-            form = EditRoomForm(request.POST, instance=room)
-            
-            if form.is_valid():
-                room = Room(number=request.POST['number'],
-                        category=request.POST['category'],
-                        capacity=request.POST['capacity'],
-                        advance=request.POST['advance'],
-                        manager=request.user.username)
-                room.save()
-
-                # Implemented Post/Redirect/Get.
-                if number:
-                    return redirect('../../rooms/')
-            else:
-                context = {
-                    'form': form,
-                    'username': request.user.username
-                    }
-                return render(request, 'edit_room.html', context)
-        context = {
-                'form': EditRoomForm(instance=room),
-                'username': request.user.username
-                }
-        return render(request, 'edit_room.html', context)
-    else:
-        return redirect('../book/')
 
 """Function to add/ edit time_slot."""
 @login_required(login_url="/hotel/sign_in/")
@@ -589,85 +690,7 @@ def manager_time_slot_search(
         available_categories.append('Queen')
     return available_categories"""
 
-"""Function to add/ edit time_slot."""
-@login_required(login_url="/hotel/sign_in/")
-def view_time_slots(request, number):
-    if request.user.email.endswith("@anshul.com"):
-        '''if number:
-            time_slot = TimeSlot.objects.get(number=number)
-        else:
-            time_slot = TimeSlot()'''
-        try:
-            room = Room.objects.get(number=number, manager=request.user.username)
-        except Exception:
-            return HttpResponse("Bad request.")
-        if request.method == 'POST':
-            form = ViewTimeSlotForm(request.POST)
-            if form.is_valid():
-                #print("bgyjm")
-                #print(form.cleaned_data.get("booked"))
-                #request.session['booked'] = form.cleaned_data.get("booked")
-                '''booked = True
-                try:
-                    request.POST['booked']
-                except Exception:
-                    booked = False'''
-                '''try:
-                    request.session['numbers'] = request.POST['numbers']
-                    #print(request.session['numbers'])
-                    #request.session['number'] = int(request.POST['number'])
-                except Exception:
-                    request.session['numbers'] = ''
-                request.session['category'] = form.cleaned_data.get("category")
-                str_capacity = form.cleaned_data.get("capacity")
-                # using list comprehension to
-                # perform conversion
-                try:
-                    request.session['capacity'] = [int(i) for i in str_capacity]
-                except Exception:
-                    request.session['capacity'] = None'''
-                #print(request.POST['available_from'])
-                request.session['available_from'] = request.POST['available_from']
-                request.session['available_till'] = request.POST['available_till']
-                request.session['occupancy'] = form.cleaned_data.get("occupancy")
-                #print(request.session['booked'])
-                '''try:
-                    request.session['advance'] = int(request.POST['advance'])
-                except Exception:
-                    request.session['advance'] = None'''
-                time_slots = manager_time_slot_search(number,
-                                        request.session['available_from'],
-                                        request.session['available_till'], request.session['occupancy']
-                                        )
-                #if response:
-                #print(time_slots)
-                context = {
-                    'form': form,
-                    'room': room,
-                    'time_slots': time_slots,
-                    'username': request.user.username
-                    }
-                return render(request, 'view_time_slots.html', context)
-                #return HttpResponse("Not Available")
-            else:
-                context = {
-                    'form': form,
-                    'room': room,
-                    'time_slots': None,
-                    'username': request.user.username
-                    }
-                return render(request, 'view_time_slots.html', context)
-        context = {
-                'form': ViewTimeSlotForm(),
-                'room': room,
-                #'number': number,
-                #'time_slots': TimeSlot.objects.filter(room=number, manager=request.user.username),
-                'time_slots': TimeSlot.objects.filter(room_id=number),
-                'username': request.user.username
-                }
-        return render(request, 'view_time_slots.html', context)
-    else:
-        return redirect('../book/')
+
 
 """Function to add/ edit time_slot."""
 @login_required(login_url="/hotel/sign_in/")
@@ -734,26 +757,11 @@ def manage_time_slots(request):
                 'time_slots': TimeSlot.objects.filter(manager=request.user.username),
                 'username': request.user.username
                 }
-        return render(request, 'view_time_slots.html', context)
+        return render(request, 'time_slots.html', context)
     else:
         return redirect('../book/')
 
-"""Function to delete room."""
-@login_required(login_url="/hotel/sign_in/")
-def delete_rooms(request, number=None):
-    if request.user.email.endswith("@anshul.com"):
-        if number:
-            try:
-                room = Room.objects.get(Q(number=number) & Q(manager=request.user.username))
-            except Exception:
-                return HttpResponse("Not found.")
-            room.delete()
-            # Implemented Post/Redirect/Get.
-            return redirect('../../rooms/')
-        else:
-            return HttpResponse("Not found.")
-    else:
-        return redirect('../book/')
+
 
 """Function that returns the list of bookings based on the search criteria."""
 def manager_book_search(
@@ -849,10 +857,7 @@ def manage_bookings(request):
     else:
         return redirect('../book/')
 
-"""Function for log out."""
-def logout_view(request):
-    logout(request)
-    return redirect('../sign_in/')
+
 
 """Function that returns the list of available categories."""
 def search_availability(

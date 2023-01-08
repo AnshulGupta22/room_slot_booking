@@ -16,6 +16,7 @@ class Room(models.Model):
     CATEGORIES = (
         ('Regular', 'Regular'),
         ('Executive', 'Executive'),
+        ('Deluxe', 'Deluxe'),
     )
     category = models.CharField(max_length=9, choices=CATEGORIES, default='Regular')
     CAPACITY = (
