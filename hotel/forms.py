@@ -126,7 +126,7 @@ class RoomsForm(forms.Form):
     advance = forms.IntegerField(
         required=False,
     )
-
+'''
 """class for adding a room."""
 class AddRoomForm(forms.ModelForm):
     ROOM_CATEGORIES = (
@@ -137,7 +137,7 @@ class AddRoomForm(forms.ModelForm):
 
     category = forms.CharField(
         max_length=9,
-        widget=forms.RadioSelect(choices=ROOM_CATEGORIES, attrs={'class': 'myfieldclass'}),
+        widget=forms.RadioSelect(choices=ROOM_CATEGORIES),
     )
 
     ROOM_CAPACITY = (
@@ -154,6 +154,31 @@ class AddRoomForm(forms.ModelForm):
     class Meta:
         model = Room
         fields = ['number', 'category', 'capacity', 'advance']
+'''
+
+
+
+
+
+
+
+
+
+"""class for adding a room."""
+class AddRoomForm(forms.ModelForm):
+    class Meta:
+        model = Room
+        fields = ['number', 'category', 'capacity', 'advance']
+        widgets = {'category': forms.RadioSelect, 'capacity': forms.RadioSelect}
+
+
+
+
+
+
+
+
+
 
 class NumberInput(forms.NumberInput):
     input_type = 'number'

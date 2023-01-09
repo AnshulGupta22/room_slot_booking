@@ -121,7 +121,8 @@ def rooms_search(
 @login_required(login_url="/hotel/sign_in/")
 def rooms(request):
     if request.user.email.endswith("@anshul.com"):
-        rooms = Room.objects.filter(manager=request.user.username)
+        #rooms = Room.objects.filter(manager=request.user.username)
+        rooms = Room.objects.filter(manager=request.user)
         if request.method == 'POST':
             form = RoomsForm(request.POST)
             if form.is_valid():
@@ -144,7 +145,7 @@ def rooms(request):
                                         request.session['categories'],
                                         request.session['capacities'],
                                         request.session['advance'],
-                                        request.user.username)
+                                        request.user)
                 context = {
                     'form': form,
                     'rooms': response,
@@ -174,12 +175,21 @@ def add_room(request):
         if request.method == 'POST':
             form = AddRoomForm(request.POST)
             if form.is_valid():
-                room = Room(number=request.POST['number'],
+                '''room = Room(number=request.POST['number'],
                         category=request.POST['category'],
                         capacity=request.POST['capacity'],
                         advance=request.POST['advance'],
                         manager=request.user.username)
-                room.save()
+                room.save()'''
+
+
+
+                form.instance.manager = request.user
+                form.save()
+
+
+
+
                 # Implemented Post/Redirect/Get.
                 return redirect('../rooms/')
             else:

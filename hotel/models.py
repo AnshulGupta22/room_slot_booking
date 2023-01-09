@@ -2,6 +2,7 @@ from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 #from django.core.validators import validate_comma_separated_integer_list, int_list_validator
 from django.core.validators import int_list_validator
+from django.conf import settings
 
 # Create your models here.
 
@@ -29,7 +30,13 @@ class Room(models.Model):
         choices=CAPACITY, default=2
         )
     advance = models.PositiveSmallIntegerField(default=10)
-    manager = models.CharField(max_length=30)
+    #manager = models.CharField(max_length=30)
+    '''manager = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, editable=False
+    )'''
+    manager = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE
+    )
 
     def __str__(self):
         return f'Room number: {self.number}, category: {self.category}, capacity: {self.capacity}, advance: {self.advance}, room manager: {self.manager}'
