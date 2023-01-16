@@ -220,7 +220,13 @@ a.fa {
     display: block;
   }
 
-
+  #bold-form {
+    font-weight: bold;
+  }
+  .unbold-form {
+    font-weight: normal;
+    margin-left: 5px;
+  }
 
 
 

@@ -12,7 +12,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
-from hotel.forms import CustomerForm, SignInForm, BookingForm, RoomsForm, ManageBookingForm, AddRoomForm, ManageViewTimeSlotForm, SearchTimeSlotForm, AddTimeSlotForm, EditRoomForm, EditForm
+from hotel.forms import CustomerForm, SignInForm, BookingForm, RoomsForm, ManageBookingForm, AddRoomForm, ManageViewTimeSlotForm, SearchTimeSlotsForm, AddTimeSlotForm, EditRoomForm, EditForm
 from .models import Room, Booking, TimeSlot
 
 from .serializers import (
@@ -121,7 +121,7 @@ def rooms_search(
 @login_required(login_url="/hotel/sign_in/")
 def rooms(request):
     if request.user.email.endswith("@anshul.com"):
-        #rooms = Room.objects.filter(manager=request.user.username)
+        #rooms = Room.objects.filter(manager=request.user)
         rooms = Room.objects.filter(manager=request.user)
         if request.method == 'POST':
             form = RoomsForm(request.POST)
@@ -179,17 +179,11 @@ def add_room(request):
                         category=request.POST['category'],
                         capacity=request.POST['capacity'],
                         advance=request.POST['advance'],
-                        manager=request.user.username)
+                        manager=request.user)
                 room.save()'''
-
-
 
                 form.instance.manager = request.user
                 form.save()
-
-
-
-
                 # Implemented Post/Redirect/Get.
                 return redirect('../rooms/')
             else:
@@ -208,24 +202,30 @@ def add_room(request):
 
 """Function to edit a room."""
 @login_required(login_url="/hotel/sign_in/")
-def edit_room(request, number=None):
+def edit_room(request, number):
     if request.user.email.endswith("@anshul.com"):
-        if number:
-            try:
-                room = Room.objects.get(number=number, manager=request.user.username)
-            except Exception:
-                return HttpResponse("Not Found.")
-        else:
-            return HttpResponse("Bad request.")
+        #if number:
+        try:
+            room = Room.objects.get(number=number, manager=request.user)
+        except Exception:
+            return HttpResponse("Not Found.")
+        '''else:
+            return HttpResponse("Bad request.")'''
         if request.method == 'POST':
             form = EditRoomForm(request.POST, instance=room)
             if form.is_valid():
-                room = Room(number=request.POST['number'],
+                '''room = Room(number=request.POST['number'],
                         category=request.POST['category'],
                         capacity=request.POST['capacity'],
                         advance=request.POST['advance'],
-                        manager=request.user.username)
-                room.save()
+                        manager=request.user)
+                room.save()'''
+
+
+                form.instance.manager = request.user
+                form.save()
+
+
                 # Implemented Post/Redirect/Get.
                 if number:
                     return redirect('../../rooms/')
@@ -245,323 +245,23 @@ def edit_room(request, number=None):
 
 """Function to delete room."""
 @login_required(login_url="/hotel/sign_in/")
-def delete_rooms(request, number=None):
+def delete_rooms(request, number):
     if request.user.email.endswith("@anshul.com"):
-        if number:
-            try:
-                room = Room.objects.get(Q(number=number) & Q(manager=request.user.username))
-            except Exception:
-                return HttpResponse("Not found.")
-            room.delete()
-            # Implemented Post/Redirect/Get.
-            return redirect('../../rooms/')
-        else:
-            return HttpResponse("Bad request.")
-    else:
-        return redirect('../book/')
-
-"""Function to view time slots."""
-@login_required(login_url="/hotel/sign_in/")
-def time_slots(request, number):
-    if request.user.email.endswith("@anshul.com"):
+        #if number:
         try:
-            room = Room.objects.get(number=number, manager=request.user.username)
+            room = Room.objects.get(Q(number=number) & Q(manager=request.user))
         except Exception:
             return HttpResponse("Not found.")
-        if request.method == 'POST':
-            form = SearchTimeSlotForm(request.POST)
-            if form.is_valid():
-                #print("bgyjm")
-                #print(form.cleaned_data.get("booked"))
-                #request.session['booked'] = form.cleaned_data.get("booked")
-                '''booked = True
-                try:
-                    request.POST['booked']
-                except Exception:
-                    booked = False'''
-                '''try:
-                    request.session['numbers'] = request.POST['numbers']
-                    #print(request.session['numbers'])
-                    #request.session['number'] = int(request.POST['number'])
-                except Exception:
-                    request.session['numbers'] = ''
-                request.session['category'] = form.cleaned_data.get("category")
-                str_capacity = form.cleaned_data.get("capacity")
-                # using list comprehension to
-                # perform conversion
-                try:
-                    request.session['capacity'] = [int(i) for i in str_capacity]
-                except Exception:
-                    request.session['capacity'] = None'''
-                #print(request.POST['available_from'])
-                request.session['available_from'] = request.POST['available_from']
-                request.session['available_till'] = request.POST['available_till']
-                request.session['occupancy'] = form.cleaned_data.get("occupancy")
-                #print(request.session['booked'])
-                '''try:
-                    request.session['advance'] = int(request.POST['advance'])
-                except Exception:
-                    request.session['advance'] = None'''
-                time_slots = manager_time_slot_search(number,
-                                        request.session['available_from'],
-                                        request.session['available_till'], request.session['occupancy']
-                                        )
-                #if response:
-                #print(time_slots)
-                context = {
-                    'form': form,
-                    'room': room,
-                    'time_slots': time_slots,
-                    'username': request.user.username
-                    }
-                return render(request, 'time_slots.html', context)
-                #return HttpResponse("Not Available")
-            else:
-                context = {
-                    'form': form,
-                    'room': room,
-                    'time_slots': None,
-                    'username': request.user.username
-                    }
-                return render(request, 'time_slots.html', context)
-        context = {
-                'form': SearchTimeSlotForm(),
-                'room': room,
-                #'number': number,
-                #'time_slots': TimeSlot.objects.filter(room=number, manager=request.user.username),
-                'time_slots': TimeSlot.objects.filter(room_id=number),
-                'username': request.user.username
-                }
-        return render(request, 'time_slots.html', context)
-    else:
-        return redirect('../book/')
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-now = timezone.now()
-
-"""Function to convert string to date."""
-def convert_to_date(date_time):
-    format = '%Y-%m-%d'
-    try:
-        datetime_str = datetime.datetime.strptime(date_time, format).date()
-    except Exception:
-        datetime_str = None
-    return datetime_str
-
-"""Function to convert string to time."""
-def convert_to_time_sec(date_time):
-    format = '%H:%M:%S'
-    try:
-        datetime_str = datetime.datetime.strptime(date_time, format).time()
-    except Exception:
-        datetime_str = None
-    return datetime_str
-
-"""Function to convert string to time."""
-def convert_to_time(date_time):
-    format = '%H:%M'
-    try:
-        datetime_str = datetime.datetime.strptime(date_time, format).time()
-    except Exception:
-        datetime_str = None
-    return datetime_str
-
-
-
-
-"""Function to add/ edit time_slot."""
-@login_required(login_url="/hotel/sign_in/")
-def add_time_slots(request, number):
-    if request.user.email.endswith("@anshul.com"):
-        if request.method == 'POST':
-            form = AddTimeSlotForm(request.POST)
-            if form.is_valid():
-                try:
-                    room_obj = Room.objects.get(number=number, manager=request.user.username)
-                except Exception:
-                    return HttpResponse("Bad request.")
-
-                available_till = convert_to_time(request.POST['available_till'])
-                available_from = convert_to_time(request.POST['available_from'])
-
-                # To ensure no rooms are booked within a gap of 1 hour
-                # after checkout.
-                added_available_till = available_till.replace(
-                    hour=(available_till.hour + 1) % 24
-                )
-
-                # To ensure no rooms are booked within a gap of 1 hour
-                # before checkin.
-                subtracted_available_from = available_from.replace(
-                    hour=(available_from.hour - 1) % 24
-                )
-
-                taken = TimeSlot.objects.filter(Q(room=room_obj)
-                                             & (Q(Q(available_till__gt=subtracted_available_from)
-                                             & Q(available_from__lte=subtracted_available_from))
-                                             | Q(Q(available_from__lt=added_available_till)
-                                             & Q(available_till__gte=added_available_till))
-                                             | Q(Q(available_from__gte=subtracted_available_from)
-                                             & Q(available_till__lte=added_available_till))))
-                if not taken:
-                    time_slot = TimeSlot(room=room_obj,
-                            available_from=available_from,
-                            available_till=available_till)
-                    time_slot.save()
-                    # Implemented Post/Redirect/Get.
-                    return redirect(f'../../view_time_slots/{room_obj.number}/')
-                else:
-                    return HttpResponse("Time slot not available.")
-            else:
-                context = {
-                    'form': form,
-                    'number': number,
-                    'username': request.user.username
-                    }
-                return render(request, 'add_time_slots.html', context)
-        context = {
-                'form': AddTimeSlotForm(),
-                'number': number,
-                'username': request.user.username
-                }
-        return render(request, 'add_time_slots.html', context)
-    else:
-        return redirect('../book/')
-
-"""Function to add/ edit time_slot."""
-@login_required(login_url="/hotel/sign_in/")
-def edit_time_slots(request, pk):
-    if request.user.email.endswith("@anshul.com"):
-        if pk:
-            try:
-                #time_slot_obj = TimeSlot.objects.get(pk=pk)
-                time_slot_obj = TimeSlot.objects.get(Q(pk=pk) & Q(occupancy='Vacant'))
-            except Exception:
-                return HttpResponse("Bad request.")
-        else:
-            return HttpResponse("Bad request.")
-        if time_slot_obj.room.manager != request.user.username:
-            return HttpResponse("Bad request.")
-        #if time_slot_obj.occupancy == 'Booked':
-            #return HttpResponse("Bad request.")
-        if request.method == 'POST':
-            form = AddTimeSlotForm(request.POST, instance=time_slot_obj)
-            if form.is_valid():
-                try:
-                    Room.objects.get(number=time_slot_obj.room.number, manager=request.user.username)
-                except Exception:
-                    return HttpResponse("Bad request.")
-                #print(type(request.POST['available_from']))
-                #print(request.POST['available_till'])
-                available_till = convert_to_time_sec(request.POST['available_till'])
-                available_from = convert_to_time_sec(request.POST['available_from'])
-                #print(available_till)
-                #print(available_from)
-                # To ensure no rooms are booked within a gap of 1 hour
-                # after checkout.
-                added_available_till = available_till.replace(
-                    hour=(available_till.hour + 1) % 24
-                )
-
-                # To ensure no rooms are booked within a gap of 1 hour
-                # before checkin.
-                subtracted_available_from = available_from.replace(
-                    hour=(available_from.hour - 1) % 24
-                )
-
-                taken = TimeSlot.objects.filter(Q(room=time_slot_obj.room)
-                                             & (Q(Q(available_till__gt=subtracted_available_from)
-                                             & Q(available_from__lte=subtracted_available_from))
-                                             | Q(Q(available_from__lt=added_available_till)
-                                             & Q(available_till__gte=added_available_till))
-                                             | Q(Q(available_from__gte=subtracted_available_from)
-                                             & Q(available_till__lte=added_available_till))))
-                if not taken:
-                    time_slot_obj.available_from = available_from
-                    time_slot_obj.available_till = available_till
-                    time_slot_obj.save()
-                    # Implemented Post/Redirect/Get.
-                    return redirect(f'../../view_time_slots/{time_slot_obj.room.number}/')
-                else:
-                    if taken.count() == 1:
-                        for record in taken:
-                            if record.pk == time_slot_obj.pk and time_slot_obj.available_from <= available_from and time_slot_obj.available_till >= available_till:
-                                time_slot_obj.available_from = available_from
-                                time_slot_obj.available_till = available_till
-                                time_slot_obj.save()
-                                # Implemented Post/Redirect/Get.
-                                return redirect(f'../../view_time_slots/{time_slot_obj.room.number}/')
-                            else:
-                                return HttpResponse("Time slot not available.")
-                    else:
-                        return HttpResponse("Time slot not available.")
-                    #if record.pk == time_slot_obj.pk or not taken:
-                    #print(time_slot_obj.pk) & Q(time_slot_obj.pk=time_slot_obj.pk)
-                    '''if not taken:
-                    time_slot_obj.available_from = available_from
-                    time_slot_obj.available_till = available_till
-                    time_slot_obj.save()
-                    # Implemented Post/Redirect/Get.
-                    return redirect(f'../../view_time_slots/{time_slot_obj.room.number}/')
-                    elif record.pk == time_slot_obj.pk and time_slot_obj.available_from <= available_from and time_slot_obj.available_till >= available_till:
-                    time_slot_obj.available_from = available_from
-                    time_slot_obj.available_till = available_till
-                    time_slot_obj.save()
-                    # Implemented Post/Redirect/Get.
-                    return redirect(f'../../view_time_slots/{time_slot_obj.room.number}/')'''                
-            else:
-                context = {
-                    'form': form,
-                    'username': request.user.username,
-                    'number': time_slot_obj.room.number
-                    }
-                return render(request, 'add_time_slots.html', context)
-        context = {
-                'form': AddTimeSlotForm(instance=time_slot_obj),
-                'username': request.user.username,
-                'number': time_slot_obj.room.number
-                }
-        return render(request, 'edit_time_slots.html', context)
-    else:
-        return redirect('../book/')
-
-"""Function to delete room."""
-@login_required(login_url="/hotel/sign_in/")
-def delete_time_slot(request, pk):
-    if request.user.email.endswith("@anshul.com"):
-        if pk:
-            try:
-                time_slot_obj = TimeSlot.objects.get(Q(pk=pk) & Q(occupancy='Vacant'))
-            except Exception:
-                return HttpResponse("Not found.")
-            if time_slot_obj.room.manager != request.user.username:
-                return HttpResponse("Bad request.")
-            time_slot_obj.delete()
-            # Implemented Post/Redirect/Get.
-            return redirect(f'../../view_time_slots/{time_slot_obj.room.number}/')
-        else:
-            return HttpResponse("Not found.")
+        room.delete()
+        return redirect('../../rooms/')
+        #else:
+        #    return HttpResponse("Bad request.")
     else:
         return redirect('../book/')
 
 """Function that returns the list of rooms based on the search criteria."""
-def manager_time_slot_search(
-        number, str_available_from, str_available_till, occupancy):
+def time_slots_search(
+        number, str_available_from, str_available_till, occupancies):
     room_obj = Room.objects.get(number=number)
     #print(str_available_from)
     '''if str_numbers != '':
@@ -612,19 +312,18 @@ def manager_time_slot_search(
         advance__gte=advance
     )
     else:'''
-    #print(available_from)
+    #print(occupancies)
     '''keys = ['room_number__in', 'category__in', 'available_from__lte', 'available_till__gte', 'capacity__in', 'advance__gte', 'manager']
     values = [numbers, categories, available_from, available_till, capacities, advance, username]'''
-    if available_till is None:
-        keys = ['room', 'available_from__lte', 'available_till__gt', 'occupancy']
-        values = [room_obj, available_from, available_from, occupancy]
-
-    elif available_from is None:
+    if available_from is None:
         keys = ['room', 'available_from__lt', 'available_till__gte', 'occupancy']
-        values = [room_obj, available_till, available_till, occupancy]
+        values = [room_obj, available_till, available_till, occupancies]
+    elif available_till is None:
+        keys = ['room', 'available_from__lte', 'available_till__gt', 'occupancy']
+        values = [room_obj, available_from, available_from, occupancies]
     else:
         keys = ['room', 'available_from__lte', 'available_till__gte', 'occupancy']
-        values = [room_obj, available_from, available_till, occupancy]
+        values = [room_obj, available_from, available_till, occupancies]
     parameters = {}
     #temp = {'category__in': categories, 'available_from__lte': available_from, 'available_till__gte': available_till, 'capacity__in': capacities, 'advance__gte': advance}
     for key, value in zip(keys, values):
@@ -668,7 +367,7 @@ def manager_time_slot_search(
                 hour=(check_out.hour + 1) % 24
             )
             # To ensure no rooms are booked within a gap of 1 hour
-            # before checkin.
+            # before check-in.
             subtracted_check_in = check_in.replace(
                 hour=(check_in.hour - 1) % 24
             )
@@ -699,6 +398,311 @@ def manager_time_slot_search(
     if (normal_queen_rooms >= normal_no_of_rooms_required):
         available_categories.append('Queen')
     return available_categories"""
+
+"""Function to search time slots."""
+@login_required(login_url="/hotel/sign_in/")
+def time_slots(request, number):
+    if request.user.email.endswith("@anshul.com"):
+        try:
+            room = Room.objects.get(number=number, manager=request.user)
+        except Exception:
+            return HttpResponse("Not found.")
+        if request.method == 'POST':
+            form = SearchTimeSlotsForm(request.POST)
+            if form.is_valid():
+                #print("bgyjm")
+                #print(form.cleaned_data.get("booked"))
+                #request.session['booked'] = form.cleaned_data.get("booked")
+                '''booked = True
+                try:
+                    request.POST['booked']
+                except Exception:
+                    booked = False'''
+                '''try:
+                    request.session['numbers'] = request.POST['numbers']
+                    #print(request.session['numbers'])
+                    #request.session['number'] = int(request.POST['number'])
+                except Exception:
+                    request.session['numbers'] = ''
+                request.session['category'] = form.cleaned_data.get("category")
+                str_capacity = form.cleaned_data.get("capacity")
+                # using list comprehension to
+                # perform conversion
+                try:
+                    request.session['capacity'] = [int(i) for i in str_capacity]
+                except Exception:
+                    request.session['capacity'] = None'''
+                #print(request.POST['available_from'])
+                request.session['available_from'] = request.POST['available_from']
+                request.session['available_till'] = request.POST['available_till']
+                request.session['occupancies'] = form.cleaned_data.get("occupancies")
+                #print(request.session['booked'])
+                '''try:
+                    request.session['advance'] = int(request.POST['advance'])
+                except Exception:
+                    request.session['advance'] = None'''
+                time_slots = time_slots_search(number,
+                                        request.session['available_from'],
+                                        request.session['available_till'], request.session['occupancies']
+                                        )
+                #if response:
+                #print(time_slots)
+                context = {
+                    'form': form,
+                    'room': room,
+                    'time_slots': time_slots,
+                    'username': request.user.username
+                    }
+                return render(request, 'time_slots.html', context)
+                #return HttpResponse("Not Available")
+            else:
+                context = {
+                    'form': form,
+                    'room': room,
+                    'time_slots': None,
+                    'username': request.user.username
+                    }
+                return render(request, 'time_slots.html', context)
+        context = {
+                'form': SearchTimeSlotsForm(),
+                'room': room,
+                #'number': number,
+                #'time_slots': TimeSlot.objects.filter(room=number, manager=request.user),
+                'time_slots': TimeSlot.objects.filter(room_id=number),
+                'username': request.user.username
+                }
+        return render(request, 'time_slots.html', context)
+    else:
+        return redirect('../book/')
+
+"""Function to add time slot."""
+@login_required(login_url="/hotel/sign_in/")
+def add_time_slot(request, number):
+    if request.user.email.endswith("@anshul.com"):
+        if request.method == 'POST':
+            form = AddTimeSlotForm(request.POST)
+            if form.is_valid():
+                try:
+                    room_obj = Room.objects.get(number=number, manager=request.user)
+                except Exception:
+                    return HttpResponse("Not Found.")
+
+                available_till = convert_to_time(request.POST['available_till'])
+                available_from = convert_to_time(request.POST['available_from'])
+
+                # To ensure no rooms are booked within a gap of 1 hour
+                # after checkout.
+                added_available_till = available_till.replace(
+                    hour=(available_till.hour + 1) % 24
+                )
+
+                # To ensure no rooms are booked within a gap of 1 hour
+                # before check-in.
+                subtracted_available_from = available_from.replace(
+                    hour=(available_from.hour - 1) % 24
+                )
+
+                taken = TimeSlot.objects.filter(Q(room=room_obj)
+                                             & (Q(Q(available_till__gt=subtracted_available_from)
+                                             & Q(available_from__lte=subtracted_available_from))
+                                             | Q(Q(available_from__lt=added_available_till)
+                                             & Q(available_till__gte=added_available_till))
+                                             | Q(Q(available_from__gte=subtracted_available_from)
+                                             & Q(available_till__lte=added_available_till))))
+                if not taken:
+                    '''time_slot = TimeSlot(room=room_obj,
+                            available_from=available_from,
+                            available_till=available_till)
+                    time_slot.save()'''
+
+                    form.instance.room = room_obj
+                    form.save()
+
+                    # Implemented Post/Redirect/Get.
+                    return redirect(f'../../time_slots/{room_obj.number}/')
+                else:
+                    return HttpResponse("Time slot not available.")
+            else:
+                context = {
+                    'form': form,
+                    'number': number,
+                    'username': request.user.username
+                    }
+                return render(request, 'add_time_slot.html', context)
+        context = {
+                'form': AddTimeSlotForm(),
+                'number': number,
+                'username': request.user.username
+                }
+        return render(request, 'add_time_slot.html', context)
+    else:
+        return redirect('../book/')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+now = timezone.now()
+
+"""Function to convert string to date."""
+def convert_to_date(date_time):
+    format = '%Y-%m-%d'
+    try:
+        datetime_str = datetime.datetime.strptime(date_time, format).date()
+    except Exception:
+        datetime_str = None
+    return datetime_str
+
+"""Function to convert string to time."""
+def convert_to_time_sec(date_time):
+    format = '%H:%M:%S'
+    try:
+        datetime_str = datetime.datetime.strptime(date_time, format).time()
+    except Exception:
+        datetime_str = None
+    return datetime_str
+
+"""Function to convert string to time."""
+def convert_to_time(date_time):
+    format = '%H:%M'
+    try:
+        datetime_str = datetime.datetime.strptime(date_time, format).time()
+    except Exception:
+        datetime_str = None
+    return datetime_str
+
+
+
+
+
+
+"""Function to add/ edit time_slot."""
+@login_required(login_url="/hotel/sign_in/")
+def edit_time_slot(request, pk):
+    if request.user.email.endswith("@anshul.com"):
+        if pk:
+            try:
+                #time_slot_obj = TimeSlot.objects.get(pk=pk)
+                time_slot_obj = TimeSlot.objects.get(Q(pk=pk) & Q(occupancy='Vacant'))
+            except Exception:
+                return HttpResponse("Bad request.")
+        else:
+            return HttpResponse("Bad request.")
+        if time_slot_obj.room.manager != request.user.username:
+            return HttpResponse("Bad request.")
+        #if time_slot_obj.occupancy == 'Booked':
+            #return HttpResponse("Bad request.")
+        if request.method == 'POST':
+            form = AddTimeSlotForm(request.POST, instance=time_slot_obj)
+            if form.is_valid():
+                try:
+                    Room.objects.get(number=time_slot_obj.room.number, manager=request.user)
+                except Exception:
+                    return HttpResponse("Bad request.")
+                #print(type(request.POST['available_from']))
+                #print(request.POST['available_till'])
+                available_till = convert_to_time_sec(request.POST['available_till'])
+                available_from = convert_to_time_sec(request.POST['available_from'])
+                #print(available_till)
+                #print(available_from)
+                # To ensure no rooms are booked within a gap of 1 hour
+                # after checkout.
+                added_available_till = available_till.replace(
+                    hour=(available_till.hour + 1) % 24
+                )
+
+                # To ensure no rooms are booked within a gap of 1 hour
+                # before check-in.
+                subtracted_available_from = available_from.replace(
+                    hour=(available_from.hour - 1) % 24
+                )
+
+                taken = TimeSlot.objects.filter(Q(room=time_slot_obj.room)
+                                             & (Q(Q(available_till__gt=subtracted_available_from)
+                                             & Q(available_from__lte=subtracted_available_from))
+                                             | Q(Q(available_from__lt=added_available_till)
+                                             & Q(available_till__gte=added_available_till))
+                                             | Q(Q(available_from__gte=subtracted_available_from)
+                                             & Q(available_till__lte=added_available_till))))
+                if not taken:
+                    time_slot_obj.available_from = available_from
+                    time_slot_obj.available_till = available_till
+                    time_slot_obj.save()
+                    # Implemented Post/Redirect/Get.
+                    return redirect(f'../../view_time_slots/{time_slot_obj.room.number}/')
+                else:
+                    if taken.count() == 1:
+                        for record in taken:
+                            if record.pk == time_slot_obj.pk and time_slot_obj.available_from <= available_from and time_slot_obj.available_till >= available_till:
+                                time_slot_obj.available_from = available_from
+                                time_slot_obj.available_till = available_till
+                                time_slot_obj.save()
+                                # Implemented Post/Redirect/Get.
+                                return redirect(f'../../view_time_slots/{time_slot_obj.room.number}/')
+                            else:
+                                return HttpResponse("Time slot not available.")
+                    else:
+                        return HttpResponse("Time slot not available.")
+                    #if record.pk == time_slot_obj.pk or not taken:
+                    #print(time_slot_obj.pk) & Q(time_slot_obj.pk=time_slot_obj.pk)
+                    '''if not taken:
+                    time_slot_obj.available_from = available_from
+                    time_slot_obj.available_till = available_till
+                    time_slot_obj.save()
+                    # Implemented Post/Redirect/Get.
+                    return redirect(f'../../view_time_slots/{time_slot_obj.room.number}/')
+                    elif record.pk == time_slot_obj.pk and time_slot_obj.available_from <= available_from and time_slot_obj.available_till >= available_till:
+                    time_slot_obj.available_from = available_from
+                    time_slot_obj.available_till = available_till
+                    time_slot_obj.save()
+                    # Implemented Post/Redirect/Get.
+                    return redirect(f'../../view_time_slots/{time_slot_obj.room.number}/')'''                
+            else:
+                context = {
+                    'form': form,
+                    'username': request.user.username,
+                    'number': time_slot_obj.room.number
+                    }
+                return render(request, 'add_time_slot.html', context)
+        context = {
+                'form': AddTimeSlotForm(instance=time_slot_obj),
+                'username': request.user.username,
+                'number': time_slot_obj.room.number
+                }
+        return render(request, 'edit_time_slot.html', context)
+    else:
+        return redirect('../book/')
+
+"""Function to delete room."""
+@login_required(login_url="/hotel/sign_in/")
+def delete_time_slot(request, pk):
+    if request.user.email.endswith("@anshul.com"):
+        if pk:
+            try:
+                time_slot_obj = TimeSlot.objects.get(Q(pk=pk) & Q(occupancy='Vacant'))
+            except Exception:
+                return HttpResponse("Not found.")
+            if time_slot_obj.room.manager != request.user.username:
+                return HttpResponse("Bad request.")
+            time_slot_obj.delete()
+            # Implemented Post/Redirect/Get.
+            return redirect(f'../../view_time_slots/{time_slot_obj.room.number}/')
+        else:
+            return HttpResponse("Not found.")
+    else:
+        return redirect('../book/')
+
+
 
 
 
@@ -745,7 +749,7 @@ def manage_time_slots(request):
                                         request.session['available_from'],
                                         request.session['available_till'],
                                         request.session['advance'],
-                                        request.user.username)
+                                        request.user)
                 #if response:
                 context = {
                     'form': form,
@@ -757,14 +761,14 @@ def manage_time_slots(request):
             else:
                 context = {
                     'form': form,
-                    'time_slots': TimeSlot.objects.filter(room_id=number, manager=request.user.username),
+                    'time_slots': TimeSlot.objects.filter(room_id=number, manager=request.user),
                     'username': request.user.username
                     }
                 return render(request, 'rooms.html', context)
         context = {
                 'form': ManageViewTimeSlotForm(),
                 #'number': number,
-                'time_slots': TimeSlot.objects.filter(manager=request.user.username),
+                'time_slots': TimeSlot.objects.filter(manager=request.user),
                 'username': request.user.username
                 }
         return render(request, 'time_slots.html', context)
@@ -802,7 +806,7 @@ def manager_book_search(
 @login_required(login_url="/hotel/sign_in/")
 def manage_bookings(request):
     if request.user.email.endswith("@anshul.com"):
-        bookings = Booking.objects.filter(manager=request.user.username)
+        bookings = Booking.objects.filter(manager=request.user)
         if request.method == 'POST':
             form = ManageBookingForm(request.POST)
             if form.is_valid():
@@ -898,7 +902,7 @@ def search_availability(
                 hour=(check_out.hour + 1) % 24
             )
             # To ensure no rooms are booked within a gap of 1 hour
-            # before checkin.
+            # before check-in.
             subtracted_check_in = check_in.replace(
                 hour=(check_in.hour - 1) % 24
             )
@@ -1027,7 +1031,7 @@ def room_category(
                 hour=(normal_check_out.hour + 1) % 24
             )
             # To ensure no rooms are booked within a gap of 1 hour
-            # before checkin.
+            # before check-in.
             subtracted_check_in = normal_check_in.replace(
                 hour=(normal_check_in.hour - 1) % 24
             )
@@ -1446,7 +1450,7 @@ def booking_category(request, category):
                 hour=(request.session['api_check_out'].hour + 1) % 24
             )
             # To ensure no rooms are booked within a gap of 1 hour
-            # before checkin.
+            # before check-in.
             subtracted_check_in = request.session['api_check_in'].replace(
                 hour=(request.session['api_check_in'].hour - 1) % 24
             )

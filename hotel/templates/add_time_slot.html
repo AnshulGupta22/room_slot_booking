@@ -18,8 +18,7 @@
     <!-- Navigation Bar -->
     <div class="w3-bar w3-white w3-large">
 			<div class="w3-bar-item w3-red w3-mobile"><i class="fa fa-bed w3-margin-right"></i>Logo</div>
-      <a href="{% url 'hotel:manage' %}" class="w3-bar-item w3-button w3-mobile">Manager</a>
-      <a href="{% url 'hotel:manage_rooms' %}" class="w3-bar-item w3-button w3-mobile">Rooms</a>
+      <a href="{% url 'hotel:rooms' %}" class="w3-bar-item w3-button w3-mobile active">Rooms</a>
       <a href="{% url 'hotel:manage_bookings' %}" class="w3-bar-item w3-button w3-mobile">Bookings</a>
 			<div class="dropdown w3-right ert">
 				<button class="dropbtn">{{ username }}
@@ -34,19 +33,17 @@
     </div>
     <ul class="breadcrumb">
       <li>
-        <a href="{% url 'hotel:manage' %}">Manager</a>
+        <a href="{% url 'hotel:rooms' %}">Rooms</a>
         &nbsp;>&nbsp;
-        <a href="{% url 'hotel:manage_rooms' %}">Rooms</a>
-        &nbsp;>&nbsp;
-        <a href="../../view_time_slots/{{room_number}}">Time Slots</a>
+        <a href="../../time_slots/{{number}}">Time Slots</a>
         &nbsp;>&nbsp;
         <span class="current">Add Time Slots</span>
       </li>
     </ul>
     <br/>
     <h3> Add time slots</h3>
-  	Room Number: {{ room_number }}
-  	<form method="POST">
+  	<b>Number:</b> {{ number }}
+  	<form method="POST" id="bold-form">
       {% csrf_token %}
       {{ form.as_p }}
       <input type="submit" class= "submit submit-right" value="Add" />

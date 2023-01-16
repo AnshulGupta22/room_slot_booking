@@ -16,9 +16,8 @@ urlpatterns = [
     path('edit_room/<int:number>/', views.edit_room, name='edit_room'),
     path('delete_rooms/<int:number>/', views.delete_rooms, name='delete_rooms'),
     path('time_slots/<int:number>/', views.time_slots, name='time_slots'),
-    path('manage_time_slots/', views.manage_time_slots, name='manage_time_slots'),
-    path('add_time_slots/<int:number>/', views.add_time_slots, name='add_time_slots'),
-    path('edit_time_slots/<int:pk>/', views.edit_time_slots, name='edit_time_slots'),
+    path('add_time_slot/<int:number>/', views.add_time_slot, name='add_time_slot'),
+    path('edit_time_slot/<int:pk>/', views.edit_time_slot, name='edit_time_slot'),
     path('delete_time_slot/<int:pk>/', views.delete_time_slot, name='delete_time_slot'),
     path('book/', views.booking, name='book'),
     path('manage_bookings/', views.manage_bookings, name='manage_bookings'),
@@ -41,6 +40,7 @@ urlpatterns = [
     path('bookings/<int:pk>/', views.booking_detail),
     path('bookings/<category>/', views.booking_category),
     path('profile_view/', views.profile_view),
+    path('manage_time_slots/', views.manage_time_slots, name='manage_time_slots'),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
