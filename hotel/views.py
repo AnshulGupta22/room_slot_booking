@@ -100,7 +100,7 @@ def logout_view(request):
 
 """Function that returns the list of rooms based on the search criterias."""
 def rooms_search(
-        str_numbers, categories, capacities, advance, manager):
+        str_numbers, categories, capacities, advance, manager, sort_by):
     if str_numbers != '':
         spaces_numbers = list(str_numbers.split(","))
         numbers = list()
@@ -114,7 +114,7 @@ def rooms_search(
     for key, value in zip(keys, values):
         if value is not None and value !=[] and value != '':
             parameters[key] = value
-    room_list = Room.objects.filter(**parameters)
+    room_list = Room.objects.filter(**parameters).order_by(sort_by)
     return room_list
 
 """Function to display rooms based on the selected criterias."""
@@ -141,11 +141,13 @@ def rooms(request):
                     request.session['advance'] = int(request.POST['advance'])
                 except Exception:
                     request.session['advance'] = None
+                print(request.POST['sort_by'])
                 response = rooms_search(request.session['numbers'],
                                         request.session['categories'],
                                         request.session['capacities'],
                                         request.session['advance'],
-                                        request.user)
+                                        request.user,
+                                        request.POST['sort_by'])
                 context = {
                     'form': form,
                     'rooms': response,

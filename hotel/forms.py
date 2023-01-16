@@ -128,6 +128,19 @@ class RoomsForm(forms.Form):
         widget=forms.NumberInput(attrs={'class': 'unbold-form'})
     )
 
+    SORT = (
+        ('number', 'Numbers: Ascending'),
+        ('-number', 'Numbers: Descending'),
+        ('capacity', 'Capacities: Ascending'),
+        ('-capacity', 'Capacities: Descending'),
+        ('advance', 'Advance: Ascending'),
+        ('-advance', 'Advance: Descending'),
+    )
+    sort_by = forms.ChoiceField(
+        required=False,
+        widget=forms.Select(attrs={'class': 'unbold-form'}),
+        choices=SORT,
+    )
 '''
 """class for adding a room."""
 class AddRoomForm(forms.ModelForm):
