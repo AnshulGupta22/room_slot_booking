@@ -12,6 +12,17 @@
 	      padding: 0;
 	      margin: 0;
       }
+      .whole {
+        display:flex;
+      }
+      .half {
+        box-sizing:border-box;
+        display:inline-block;
+        width:50%;
+      }
+      .right {
+        text-align:right;
+      }
     </style>
   </head>
 	<body id="body-color">
@@ -31,11 +42,22 @@
 				</div>
 			</div>
       <a href="{% url 'hotel:add_room' %}" class="w3-right ert"> Add Room</a>
-  	</div>    
-    <h2>Search</h2>
+  	</div>
     <form method="POST" id="bold-form">
       {% csrf_token %}
-      {{ form.as_p }}
+      <div class="whole">
+        <div class="half">
+          <h2>Filter</h2>
+          <p><label>{{form.numbers.label_tag}}</label> {{form.numbers}}</p>
+          <p><label>{{form.categories.label_tag}}</label> {{form.categories}}</p>
+          <p><label>{{form.capacities.label_tag}}</label> {{form.capacities}}</p>
+          <p><label>{{form.advance.label_tag}}</label> {{form.advance}}</p>
+        </div>
+        <div class="half right">
+          <h2>Sort</h2>
+          <p><label>{{form.sort_by.label_tag}}</label> {{form.sort_by}}</p>
+        </div>
+      </div>
       <input type="submit" class= "submit submit-right" value="Search" />
     </form>
     <br/>
