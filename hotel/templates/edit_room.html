@@ -39,8 +39,9 @@
         <span class="current">Edit Room</span>
       </li>
     </ul>
-    <h3> Edit room</h3>
-    <form method="POST">
+    <h3>Edit room</h3>
+    <b>Number:</b> {{ number }}
+    <form method="POST" id="bold-form">
       {% csrf_token %}
       {{ form.as_p }}
       <input type="submit" class= "submit submit-right" value="Edit" />

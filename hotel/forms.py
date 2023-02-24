@@ -185,9 +185,13 @@ class NumberInput(forms.NumberInput):
 class EditRoomForm(forms.ModelForm):
     class Meta:
         model = Room
-        fields = ['number', 'category', 'capacity', 'advance']
+        fields = ['category', 'capacity', 'advance']
+        #fields = ['number', 'category', 'capacity', 'advance']
+        #widgets = {
+        #            'number': NumberInput(attrs={'readonly': True, 'class': 'unbold-form'}), 'category': forms.RadioSelect(attrs={'class': 'unbold-form'}), 'capacity': forms.RadioSelect(attrs={'class': 'unbold-form'}), 'advance': forms.NumberInput(attrs={'class': 'unbold-form'})
+        #        }
         widgets = {
-                    'number': NumberInput(attrs={'readonly': True})
+                    'category': forms.RadioSelect(attrs={'class': 'unbold-form'}), 'capacity': forms.RadioSelect(attrs={'class': 'unbold-form'}), 'advance': forms.NumberInput(attrs={'class': 'unbold-form'})
                 }
 
 class TimeInput(forms.TimeInput):

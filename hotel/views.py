@@ -141,7 +141,6 @@ def rooms(request):
                     request.session['advance'] = int(request.POST['advance'])
                 except Exception:
                     request.session['advance'] = None
-                print(request.POST['sort_by'])
                 response = rooms_search(request.session['numbers'],
                                         request.session['categories'],
                                         request.session['capacities'],
@@ -223,10 +222,8 @@ def edit_room(request, number):
                         manager=request.user)
                 room.save()'''
 
-
                 form.instance.manager = request.user
                 form.save()
-
 
                 # Implemented Post/Redirect/Get.
                 if number:
@@ -234,11 +231,13 @@ def edit_room(request, number):
             else:
                 context = {
                     'form': form,
+                    'number': number,
                     'username': request.user.username
                     }
                 return render(request, 'edit_room.html', context)
         context = {
                 'form': EditRoomForm(instance=room),
+                'number': number,
                 'username': request.user.username
                 }
         return render(request, 'edit_room.html', context)
@@ -600,8 +599,8 @@ def edit_time_slot(request, pk):
                 return HttpResponse("Bad request.")
         else:
             return HttpResponse("Bad request.")
-        if time_slot_obj.room.manager != request.user.username:
-            return HttpResponse("Bad request.")
+        if str(time_slot_obj.room.manager) != request.user.username:
+            return HttpResponse("Not Found.")
         #if time_slot_obj.occupancy == 'Booked':
             #return HttpResponse("Bad request.")
         if request.method == 'POST':
@@ -610,7 +609,7 @@ def edit_time_slot(request, pk):
                 try:
                     Room.objects.get(number=time_slot_obj.room.number, manager=request.user)
                 except Exception:
-                    return HttpResponse("Bad request.")
+                    return HttpResponse("Not Found.")
                 #print(type(request.POST['available_from']))
                 #print(request.POST['available_till'])
                 available_till = convert_to_time_sec(request.POST['available_till'])
