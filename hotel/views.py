@@ -591,14 +591,21 @@ def convert_to_time(date_time):
 @login_required(login_url="/hotel/sign_in/")
 def edit_time_slot(request, pk):
     if request.user.email.endswith("@anshul.com"):
-        if pk:
+        '''if pk:
             try:
                 #time_slot_obj = TimeSlot.objects.get(pk=pk)
                 time_slot_obj = TimeSlot.objects.get(Q(pk=pk) & Q(occupancy='Vacant'))
             except Exception:
                 return HttpResponse("Bad request.")
         else:
-            return HttpResponse("Bad request.")
+            return HttpResponse("Bad request.")'''
+
+        try:
+            #time_slot_obj = TimeSlot.objects.get(pk=pk)
+            time_slot_obj = TimeSlot.objects.get(Q(pk=pk) & Q(occupancy='Vacant'))
+        except Exception:
+            return HttpResponse("Not Found.")
+
         if str(time_slot_obj.room.manager) != request.user.username:
             return HttpResponse("Not Found.")
         #if time_slot_obj.occupancy == 'Booked':
