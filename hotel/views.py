@@ -205,13 +205,10 @@ def add_room(request):
 @login_required(login_url="/hotel/sign_in/")
 def edit_room(request, number):
     if request.user.email.endswith("@anshul.com"):
-        #if number:
         try:
             room = Room.objects.get(number=number, manager=request.user)
         except Exception:
             return HttpResponse("Not Found.")
-        '''else:
-            return HttpResponse("Bad request.")'''
         if request.method == 'POST':
             form = EditRoomForm(request.POST, instance=room)
             if form.is_valid():
@@ -248,15 +245,12 @@ def edit_room(request, number):
 @login_required(login_url="/hotel/sign_in/")
 def delete_rooms(request, number):
     if request.user.email.endswith("@anshul.com"):
-        #if number:
         try:
             room = Room.objects.get(Q(number=number) & Q(manager=request.user))
         except Exception:
-            return HttpResponse("Not found.")
+            return HttpResponse("Not Found.")
         room.delete()
         return redirect('../../rooms/')
-        #else:
-        #    return HttpResponse("Bad request.")
     else:
         return redirect('../book/')
 
@@ -316,15 +310,18 @@ def time_slots_search(
     #print(occupancies)
     '''keys = ['room_number__in', 'category__in', 'available_from__lte', 'available_till__gte', 'capacity__in', 'advance__gte', 'manager']
     values = [numbers, categories, available_from, available_till, capacities, advance, username]'''
-    if available_from is None:
-        keys = ['room', 'available_from__lt', 'available_till__gte', 'occupancy']
-        values = [room_obj, available_till, available_till, occupancies]
-    elif available_till is None:
-        keys = ['room', 'available_from__lte', 'available_till__gt', 'occupancy']
-        values = [room_obj, available_from, available_from, occupancies]
-    else:
-        keys = ['room', 'available_from__lte', 'available_till__gte', 'occupancy']
-        values = [room_obj, available_from, available_till, occupancies]
+    # if available_from is None:
+    #     keys = ['room', 'available_from__lt', 'available_till__gte', 'occupancy']
+    #     values = [room_obj, available_till, available_till, occupancies]
+    # elif available_till is None:
+    #     keys = ['room', 'available_from__lte', 'available_till__gt', 'occupancy']
+    #     values = [room_obj, available_from, available_from, occupancies]
+    # else:
+    #     keys = ['room', 'available_from__lte', 'available_till__gte', 'occupancy']
+    #     values = [room_obj, available_from, available_till, occupancies]
+
+    keys = ['room', 'available_from__lte', 'available_till__gte', 'occupancy']
+    values = [room_obj, available_from, available_till, occupancies]
     parameters = {}
     #temp = {'category__in': categories, 'available_from__lte': available_from, 'available_till__gte': available_till, 'capacity__in': capacities, 'advance__gte': advance}
     for key, value in zip(keys, values):
@@ -407,11 +404,10 @@ def time_slots(request, number):
         try:
             room = Room.objects.get(number=number, manager=request.user)
         except Exception:
-            return HttpResponse("Not found.")
+            return HttpResponse("Not Found.")
         if request.method == 'POST':
             form = SearchTimeSlotsForm(request.POST)
             if form.is_valid():
-                #print("bgyjm")
                 #print(form.cleaned_data.get("booked"))
                 #request.session['booked'] = form.cleaned_data.get("booked")
                 '''booked = True
@@ -539,67 +535,10 @@ def add_time_slot(request, number):
     else:
         return redirect('../book/')
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-now = timezone.now()
-
-"""Function to convert string to date."""
-def convert_to_date(date_time):
-    format = '%Y-%m-%d'
-    try:
-        datetime_str = datetime.datetime.strptime(date_time, format).date()
-    except Exception:
-        datetime_str = None
-    return datetime_str
-
-"""Function to convert string to time."""
-def convert_to_time_sec(date_time):
-    format = '%H:%M:%S'
-    try:
-        datetime_str = datetime.datetime.strptime(date_time, format).time()
-    except Exception:
-        datetime_str = None
-    return datetime_str
-
-"""Function to convert string to time."""
-def convert_to_time(date_time):
-    format = '%H:%M'
-    try:
-        datetime_str = datetime.datetime.strptime(date_time, format).time()
-    except Exception:
-        datetime_str = None
-    return datetime_str
-
-
-
-
-
-
-"""Function to add/ edit time_slot."""
+"""Function to edit time slot."""
 @login_required(login_url="/hotel/sign_in/")
 def edit_time_slot(request, pk):
     if request.user.email.endswith("@anshul.com"):
-        '''if pk:
-            try:
-                #time_slot_obj = TimeSlot.objects.get(pk=pk)
-                time_slot_obj = TimeSlot.objects.get(Q(pk=pk) & Q(occupancy='Vacant'))
-            except Exception:
-                return HttpResponse("Bad request.")
-        else:
-            return HttpResponse("Bad request.")'''
-
         try:
             #time_slot_obj = TimeSlot.objects.get(pk=pk)
             time_slot_obj = TimeSlot.objects.get(Q(pk=pk) & Q(occupancy='Vacant'))
@@ -647,16 +586,17 @@ def edit_time_slot(request, pk):
                     time_slot_obj.available_till = available_till
                     time_slot_obj.save()
                     # Implemented Post/Redirect/Get.
-                    return redirect(f'../../view_time_slots/{time_slot_obj.room.number}/')
+                    return redirect(f'../../time_slots/{time_slot_obj.room.number}/')
                 else:
                     if taken.count() == 1:
                         for record in taken:
+                            # Checking if the new time slot is a smaller version of the existing time slot. For e.g. if the existing time slot is from 1:00 to 8:00 and we are changing it to 4:00 to 5:00.
                             if record.pk == time_slot_obj.pk and time_slot_obj.available_from <= available_from and time_slot_obj.available_till >= available_till:
                                 time_slot_obj.available_from = available_from
                                 time_slot_obj.available_till = available_till
                                 time_slot_obj.save()
                                 # Implemented Post/Redirect/Get.
-                                return redirect(f'../../view_time_slots/{time_slot_obj.room.number}/')
+                                return redirect(f'../../time_slots/{time_slot_obj.room.number}/')
                             else:
                                 return HttpResponse("Time slot not available.")
                     else:
@@ -668,13 +608,13 @@ def edit_time_slot(request, pk):
                     time_slot_obj.available_till = available_till
                     time_slot_obj.save()
                     # Implemented Post/Redirect/Get.
-                    return redirect(f'../../view_time_slots/{time_slot_obj.room.number}/')
+                    return redirect(f'../../time_slots/{time_slot_obj.room.number}/')
                     elif record.pk == time_slot_obj.pk and time_slot_obj.available_from <= available_from and time_slot_obj.available_till >= available_till:
                     time_slot_obj.available_from = available_from
                     time_slot_obj.available_till = available_till
                     time_slot_obj.save()
                     # Implemented Post/Redirect/Get.
-                    return redirect(f'../../view_time_slots/{time_slot_obj.room.number}/')'''                
+                    return redirect(f'../../time_slots/{time_slot_obj.room.number}/')'''                
             else:
                 context = {
                     'form': form,
@@ -691,24 +631,69 @@ def edit_time_slot(request, pk):
     else:
         return redirect('../book/')
 
-"""Function to delete room."""
+"""Function to delete time slot."""
 @login_required(login_url="/hotel/sign_in/")
 def delete_time_slot(request, pk):
     if request.user.email.endswith("@anshul.com"):
-        if pk:
-            try:
-                time_slot_obj = TimeSlot.objects.get(Q(pk=pk) & Q(occupancy='Vacant'))
-            except Exception:
-                return HttpResponse("Not found.")
-            if time_slot_obj.room.manager != request.user.username:
-                return HttpResponse("Bad request.")
-            time_slot_obj.delete()
-            # Implemented Post/Redirect/Get.
-            return redirect(f'../../view_time_slots/{time_slot_obj.room.number}/')
-        else:
-            return HttpResponse("Not found.")
+        try:
+            time_slot_obj = TimeSlot.objects.get(Q(pk=pk) & Q(occupancy='Vacant'))
+        except Exception:
+            return HttpResponse("Not Found.")
+        if str(time_slot_obj.room.manager) != request.user.username:
+            return HttpResponse("Not Found.")
+        time_slot_obj.delete()
+        # Implemented Post/Redirect/Get.
+        return redirect(f'../../time_slots/{time_slot_obj.room.number}/')
     else:
         return redirect('../book/')
+
+
+
+
+
+
+
+
+
+
+
+
+
+now = timezone.now()
+
+"""Function to convert string to date."""
+def convert_to_date(date_time):
+    format = '%Y-%m-%d'
+    try:
+        datetime_str = datetime.datetime.strptime(date_time, format).date()
+    except Exception:
+        datetime_str = None
+    return datetime_str
+
+"""Function to convert string to time."""
+def convert_to_time_sec(date_time):
+    format = '%H:%M:%S'
+    try:
+        datetime_str = datetime.datetime.strptime(date_time, format).time()
+    except Exception:
+        datetime_str = None
+    return datetime_str
+
+"""Function to convert string to time."""
+def convert_to_time(date_time):
+    format = '%H:%M'
+    try:
+        datetime_str = datetime.datetime.strptime(date_time, format).time()
+    except Exception:
+        datetime_str = None
+    return datetime_str
+
+
+
+
+
+
+
 
 
 
@@ -1274,7 +1259,7 @@ def all_bookings(request, pk=None):
         try:
             booking = Booking.objects.get(pk=pk)
         except Exception:
-            return HttpResponse("Not found.")
+            return HttpResponse("Not Found.")
         if booking.customer_name == request.user.username:
             booking.delete()
             # Implemented Post/Redirect/Get.
