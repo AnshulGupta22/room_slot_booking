@@ -256,7 +256,7 @@ def delete_rooms(request, number):
 
 """Function that returns the list of rooms based on the search criteria."""
 def time_slots_search(
-        number, str_available_from, str_available_till, occupancies):
+        number, str_available_from, str_available_till, occupancy):
     room_obj = Room.objects.get(number=number)
     #print(str_available_from)
     '''if str_numbers != '':
@@ -320,18 +320,29 @@ def time_slots_search(
     #     keys = ['room', 'available_from__lte', 'available_till__gte', 'occupancy']
     #     values = [room_obj, available_from, available_till, occupancies]
 
+    # keys = ['room', 'available_from__lte', 'available_till__gte', 'occupancy']
+    # values = [room_obj, available_from, available_till, occupancy]
+
+
+
     keys = ['room', 'available_from__lte', 'available_till__gte', 'occupancy']
-    values = [room_obj, available_from, available_till, occupancies]
+    values = [room_obj, available_from, available_till, occupancy]
+
     parameters = {}
     #temp = {'category__in': categories, 'available_from__lte': available_from, 'available_till__gte': available_till, 'capacity__in': capacities, 'advance__gte': advance}
     for key, value in zip(keys, values):
-        if value is not None and value !=[] and value != '':
+        if value is not None:
             parameters[key] = value
-    #for key, value in temp:
+    #for key, value in temp:available_till__gte
     #    if value is not None and value !=[]:
     #        parameters[key] = value
-    #print(parameters)
+    print(parameters)
+    
     time_slots_list = TimeSlot.objects.filter(**parameters)
+
+    #time_slots_list = TimeSlot.objects.filter(room=room_obj, available_from__lte=available_from, available_till__gte=available_till, occupancy=occupancy)
+
+
     #print("hwqaf")
     '''room_list = Room.objects.filter(
         category__in=categories,
@@ -432,15 +443,16 @@ def time_slots(request, number):
                 #print(request.POST['available_from'])
                 request.session['available_from'] = request.POST['available_from']
                 request.session['available_till'] = request.POST['available_till']
-                request.session['occupancies'] = form.cleaned_data.get("occupancies")
+                request.session['occupancy'] = form.cleaned_data.get("occupancy")
                 #print(request.session['booked'])
+                print(request.session['occupancy'] == None)
                 '''try:
                     request.session['advance'] = int(request.POST['advance'])
                 except Exception:
                     request.session['advance'] = None'''
                 time_slots = time_slots_search(number,
                                         request.session['available_from'],
-                                        request.session['available_till'], request.session['occupancies']
+                                        request.session['available_till'], request.session['occupancy']
                                         )
                 #if response:
                 #print(time_slots)

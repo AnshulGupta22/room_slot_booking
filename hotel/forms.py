@@ -204,14 +204,14 @@ class SearchTimeSlotsForm(forms.Form):
     # available_till = forms.TimeField(required=False, widget=TimeInput(attrs={'class': 'unbold-form'}), initial=time(23,59,59))
 
     available_from = forms.TimeField(widget=TimeInput(attrs={'class': 'unbold-form'}), initial=time(0))
-    available_till = forms.TimeField(widget=TimeInput(attrs={'class': 'unbold-form'}), initial=time(23,59,59))
+    available_till = forms.TimeField(widget=TimeInput(attrs={'class': 'unbold-form'}), initial=time(23,59))
 
     STATUS = (
         (None, 'Any'),
         ('Vacant', 'Vacant'),
         ('Booked', 'Booked'),
     )
-    occupancies = forms.ChoiceField(
+    occupancy = forms.ChoiceField(
         required=False,
         widget=forms.RadioSelect(attrs={'class': 'unbold-form'}),
         choices=STATUS,
