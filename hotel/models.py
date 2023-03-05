@@ -42,6 +42,8 @@ class Room(models.Model):
         return f'Room number: {self.number}, category: {self.category}, capacity: {self.capacity}, advance: {self.advance}, room manager: {self.manager}'
 
 class TimeSlot(models.Model):
+    class Meta:
+      ordering = ['available_from']
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
     available_from = models.TimeField()
     available_till = models.TimeField()
@@ -61,30 +63,31 @@ class Booking(models.Model):
     #  ordering = ['-check_in_date', 'check_in_time']
     customer_name = models.CharField(max_length=150)
     check_in_date = models.DateField()
-    check_in_time = models.TimeField()
-    check_out_time = models.TimeField()
+    # check_in_time = models.TimeField()
+    # check_out_time = models.TimeField()
     '''number =  models.PositiveSmallIntegerField(
         validators=[MaxValueValidator(100), MinValueValidator(1)], unique=True
         )'''
-    room_numbers = models.CharField(validators=[int_list_validator(' ,')], max_length=4000)
-    CATEGORIES = (
-        ('Regular', 'Regular'),
-        ('Executive', 'Executive'),
-        ('Deluxe', 'Deluxe'),
-        ('King', 'King'),
-        ('Queen', 'Queen'),
-    )
-    category = models.CharField(max_length=9, choices=CATEGORIES)
-    PERSON = (
-        (1, '1'),
-        (2, '2'),
-        (3, '3'),
-        (4, '4'),
-    )
-    person = models.PositiveSmallIntegerField(choices=PERSON, default=1)
-    no_of_rooms = models.PositiveSmallIntegerField(
-        validators=[MaxValueValidator(1000), MinValueValidator(1)], default=1
-        )
-    room_managers = models.CharField(validators=[int_list_validator(' ,')], max_length=4000)
-    def __str__(self):
-        return f'Customer name: {self.customer_name}; check in date: {self.check_in_date}; check in time: {self.check_in_time}; check out time: {self.check_out_time}; room number: {self.room_numbers}; category: {self.category}; number of person: {self.person}'
+    #room_numbers = models.CharField(validators=[int_list_validator(' ,')], max_length=4000)
+    time_slots_ids = models.CharField(validators=[int_list_validator(' ,')], max_length=4000)
+    # CATEGORIES = (
+    #     ('Regular', 'Regular'),
+    #     ('Executive', 'Executive'),
+    #     ('Deluxe', 'Deluxe'),
+    #     ('King', 'King'),
+    #     ('Queen', 'Queen'),
+    # )
+    # category = models.CharField(max_length=9, choices=CATEGORIES)
+    # PERSON = (
+    #     (1, '1'),
+    #     (2, '2'),
+    #     (3, '3'),
+    #     (4, '4'),
+    # )
+    # person = models.PositiveSmallIntegerField(choices=PERSON, default=1)
+    # no_of_rooms = models.PositiveSmallIntegerField(
+    #     validators=[MaxValueValidator(1000), MinValueValidator(1)], default=1
+    #     )
+    #room_managers = models.CharField(validators=[int_list_validator(' ,')], max_length=4000)
+    # def __str__(self):
+    #     return f'Customer name: {self.customer_name}; check in date: {self.check_in_date}; check in time: {self.check_in_time}; check out time: {self.check_out_time}; room number: {self.room_numbers}; category: {self.category}; number of person: {self.person}'
