@@ -409,24 +409,24 @@ def time_slots_search(
                                            & Q(check_in_date=book_date))
             if not taken:
                 if (room.category == 'Regular'):
-                    normal_regular_rooms = normal_regular_rooms + 1
+                    regular_rooms = regular_rooms + 1
                 elif (room.category == 'Executive'):
-                    normal_executive_rooms = normal_executive_rooms + 1
+                    executive_rooms = executive_rooms + 1
                 elif (room.category == 'Deluxe'):
-                    normal_deluxe_rooms = normal_deluxe_rooms + 1
+                    deluxe_rooms = deluxe_rooms + 1
                 elif (room.category == 'King'):
-                    normal_king_rooms = normal_king_rooms + 1
+                    king_rooms = king_rooms + 1
                 elif (room.category == 'Queen'):
-                    normal_queen_rooms = normal_queen_rooms + 1
-    if (normal_regular_rooms >= normal_no_of_rooms_required):
+                    queen_rooms = queen_rooms + 1
+    if (regular_rooms >= no_of_rooms_required):
         available_categories.append('Regular')
-    if (normal_executive_rooms >= normal_no_of_rooms_required):
+    if (executive_rooms >= no_of_rooms_required):
         available_categories.append('Executive')
-    if (normal_deluxe_rooms >= normal_no_of_rooms_required):
+    if (deluxe_rooms >= no_of_rooms_required):
         available_categories.append('Deluxe')
-    if (normal_king_rooms >= normal_no_of_rooms_required):
+    if (king_rooms >= no_of_rooms_required):
         available_categories.append('King')
-    if (normal_queen_rooms >= normal_no_of_rooms_required):
+    if (queen_rooms >= no_of_rooms_required):
         available_categories.append('Queen')
     return available_categories"""
 
@@ -695,7 +695,10 @@ def delete_time_slot(request, pk):
 def search_availability(
         book_date_str, check_in_str, check_out_str,
         person, no_of_rooms_required):
-    book_date = convert_to_date(book_date_str)
+    #book_date = convert_to_date(book_date_str)
+
+    # Converting string to date.
+    book_date = datetime.datetime.strptime(book_date_str, '%Y-%m-%d').date()
     check_in = datetime.datetime.strptime(check_in_str, '%H:%M').time()
     check_out = datetime.datetime.strptime(check_out_str, '%H:%M').time()
 
@@ -775,24 +778,24 @@ def search_availability(
             #                                & Q(check_in_date=book_date))
             # if not taken:
             #     if (room.category == 'Regular'):
-            #         normal_regular_rooms = normal_regular_rooms + 1
+            #         regular_rooms = regular_rooms + 1
             #     elif (room.category == 'Executive'):
-            #         normal_executive_rooms = normal_executive_rooms + 1
+            #         executive_rooms = executive_rooms + 1
             #     elif (room.category == 'Deluxe'):
-            #         normal_deluxe_rooms = normal_deluxe_rooms + 1
+            #         deluxe_rooms = deluxe_rooms + 1
             #     elif (room.category == 'King'):
-            #         normal_king_rooms = normal_king_rooms + 1
+            #         king_rooms = king_rooms + 1
             #     elif (room.category == 'Queen'):
-            #         normal_queen_rooms = normal_queen_rooms + 1
-            #     if (normal_regular_rooms == normal_no_of_rooms_required and room.category == 'Regular'):
+            #         queen_rooms = queen_rooms + 1
+            #     if (regular_rooms == no_of_rooms_required and room.category == 'Regular'):
             #         available_categories.append('Regular')
-            #     if (normal_executive_rooms == normal_no_of_rooms_required and room.category == 'Executive'):
+            #     if (executive_rooms == no_of_rooms_required and room.category == 'Executive'):
             #         available_categories.append('Executive')
-            #     if (normal_deluxe_rooms == normal_no_of_rooms_required and room.category == 'Deluxe'):
+            #     if (deluxe_rooms == no_of_rooms_required and room.category == 'Deluxe'):
             #         available_categories.append('Deluxe')
-            #     if (normal_king_rooms == normal_no_of_rooms_required and room.category == 'King'):
+            #     if (king_rooms == no_of_rooms_required and room.category == 'King'):
             #         available_categories.append('King')
-            #     if (normal_queen_rooms == normal_no_of_rooms_required and room.category == 'Queen'):
+            #     if (queen_rooms == no_of_rooms_required and room.category == 'Queen'):
             #         available_categories.append('Queen')
     #return available_categories
 
@@ -801,11 +804,11 @@ def search_availability(
 
 
 
-# normal_regular_rooms = 0
-#     normal_executive_rooms = 0
-#     normal_deluxe_rooms = 0
-#     normal_king_rooms = 0
-#     normal_queen_rooms = 0
+# regular_rooms = 0
+#     executive_rooms = 0
+#     deluxe_rooms = 0
+#     king_rooms = 0
+#     queen_rooms = 0
 #     available_categories = list()
 #     room_list = Room.objects.filter(
 #         available_from__lte=check_in,
@@ -819,25 +822,25 @@ def booking(request):
     if request.method == 'POST':
         form = BookingForm(request.POST)
         if form.is_valid():
-            request.session['normal_book_date'] = request.POST['check_in_date']
-            request.session['normal_check_in'] = request.POST['check_in_time']
-            request.session['normal_check_out'] = request.POST['check_out_time']
-            request.session['normal_person'] = int(request.POST['person'])
-            request.session['normal_no_of_rooms_required'] = int(
+            request.session['book_date'] = request.POST['check_in_date']
+            request.session['check_in'] = request.POST['check_in_time']
+            request.session['check_out'] = request.POST['check_out_time']
+            request.session['person'] = int(request.POST['person'])
+            request.session['no_of_rooms_required'] = int(
                 request.POST['no_of_rooms']
                 )
-            response = search_availability(request.session['normal_book_date'],
-                                           request.session['normal_check_in'],
-                                           request.session['normal_check_out'],
-                                           request.session['normal_person'],
-                                           request.session['normal_no_of_rooms_required'])
+            response = search_availability(request.session['book_date'],
+                                           request.session['check_in'],
+                                           request.session['check_out'],
+                                           request.session['person'],
+                                           request.session['no_of_rooms_required'])
             #if response:
             context = {
-                'book_date': request.session['normal_book_date'],
-                'check_in': request.session['normal_check_in'],
-                'check_out': request.session['normal_check_out'],
-                'person': request.session['normal_person'],
-                'no_of_rooms_required': request.session['normal_no_of_rooms_required'],
+                'book_date': request.session['book_date'],
+                'check_in': request.session['check_in'],
+                'check_out': request.session['check_out'],
+                'person': request.session['person'],
+                'no_of_rooms_required': request.session['no_of_rooms_required'],
                 'categories': response,
                 'username': request.user.username
                 }
@@ -858,36 +861,18 @@ def booking(request):
 
 
 
-
-
-
-
-
-
-
 now = timezone.now()
 
 """Function to convert string to date."""
-def convert_to_date(date_time):
-    format = '%Y-%m-%d'
-    try:
-        datetime_str = datetime.datetime.strptime(date_time, format).date()
-    except Exception:
-        datetime_str = None
-    return datetime_str
+# def convert_to_date(date_time):
+#     format = '%Y-%m-%d'
+#     try:
+#         datetime_str = datetime.datetime.strptime(date_time, format).date()
 
-
-
-
-
-
-
-
-
-
-
-
-
+#         datetime.datetime.strptime(date_time, '%Y-%m-%d').date()
+#     except Exception:
+#         datetime_str = None
+#     return datetime_str
 
 
 
@@ -971,9 +956,15 @@ def manager_book_search(
     numbers = list()
     for i in spaces_numbers:
         numbers.append(i.strip())
-    check_in_date = convert_to_date(str_check_in_date)
-    check_in_time = convert_to_time(str_check_in_time)
-    check_out_time = convert_to_time(str_check_out_time)
+    #check_in_date = convert_to_date(str_check_in_date)
+    check_in_date = datetime.datetime.strptime(str_check_in_date, '%Y-%m-%d').date()
+
+    #check_in_time = convert_to_time(str_check_in_time)
+    check_in_time = datetime.datetime.strptime(str_check_in_time, '%H:%M').time()
+
+    #check_out_time = convert_to_time(str_check_out_time)
+    check_out_time = datetime.datetime.strptime(str_check_out_time, '%H:%M').time()
+
     for number in numbers:
         room_number_regex = rf"\b{number}\b"
         '''keys = ['room_numbers__iregex', 'customer_name', 'check_in_date', 'check_in_time__gte', 'check_out_time__lte', 'category__in', 'person__in', 'no_of_rooms', 'room_managers__regex']
@@ -1057,15 +1048,14 @@ def manage_bookings(request):
         return redirect('../book/')
 
 
-
-
-
+from datetime import datetime, date
+#import date
 
 
 """Function to book the time slot."""
 def time_booking(
-        numbers, room_type, no_of_rooms_required, normal_username,
-        normal_book_date, normal_check_in, normal_check_out, normal_person, room_managers):
+        numbers, room_type, no_of_rooms_required, username,
+        book_date, check_in, check_out, person, room_managers):
     #for i in range(no_of_rooms_required):
         #room_no = numbers.pop()
     #print(numbers)
@@ -1075,123 +1065,260 @@ def time_booking(
     room_numbers_string = ", ".join([str(item) for item in numbers if item])
     room_managers_string = ", ".join([str(item) for item in room_managers if item])
 
-    time_slot = Booking(customer_name=normal_username,
-                        check_in_date=normal_book_date,
-                        check_in_time=normal_check_in,
-                        check_out_time=normal_check_out,
+    time_slot = Booking(customer_name=username,
+                        check_in_date=book_date,
+                        check_in_time=check_in,
+                        check_out_time=check_out,
                         numbers=room_numbers_string,
-                        category=room_type, person=normal_person,
+                        category=room_type, person=person,
                         no_of_rooms = no_of_rooms_required,
                         room_managers=room_managers_string)
     time_slot.save()
 
 """Function to check if the room(s) is/are available."""
-def room_category(
-        room_type, normal_username, normal_book_date_str,normal_check_in_str,
-        normal_check_out_str, normal_person, normal_no_of_rooms_required):
-    normal_book_date = convert_to_date(normal_book_date_str)
-    normal_check_in = convert_to_time(normal_check_in_str)
-    normal_check_out = convert_to_time(normal_check_out_str)
-    normal_regular_rooms = 0
-    normal_executive_rooms = 0
-    normal_deluxe_rooms = 0
-    normal_king_rooms = 0
-    normal_queen_rooms = 0
-    numbers = list()
-    room_managers = list()
-    # List of rooms for the given category.
-    try:
-        room_list = Room.objects.filter(
-            available_from__lte=normal_check_in,
-            available_till__gte=normal_check_out,
-            capacity__gte=normal_person, category=room_type
-        )
-    except Exception:
-        return 3
+def available_time_slots(
+        room_type, book_date_str,check_in_str,
+        check_out_str, person, no_of_rooms_required):
+    # Converting string to date.
+    book_date = datetime.datetime.strptime(book_date_str, '%Y-%m-%d').date()
+    check_in = datetime.datetime.strptime(check_in_str, '%H:%M').time()
+    check_out = datetime.datetime.strptime(check_out_str, '%H:%M').time()
+
+
+
+
+    # Converting string to date.
+    # book_date = datetime.datetime.strptime(book_date_str, '%Y-%m-%d').date()
+    # check_in = datetime.datetime.strptime(check_in_str, '%H:%M').time()
+    # check_out = datetime.datetime.strptime(check_out_str, '%H:%M').time()
+
+    room_list = Room.objects.filter(
+        capacity__gte=person,
+        category=room_type
+    )
+    # regular_rooms = 0
+    # executive_rooms = 0
+    # deluxe_rooms = 0
+    #time_slots = TimeSlot.objects.none()
+    #count_time_slots = 0
+    time_slots = list()
+    #print(room_list)
     for room in room_list:
+
+        # Calculating the maximum date to which a room can be
+        # booked in advance.
         max_book = now + datetime.timedelta(days=room.advance)
-        if (normal_book_date <= max_book.date()):
-            # To ensure no rooms are booked within a gap of 1 hour
-            # after checkout.
-            added_check_out = normal_check_out.replace(
-                hour=(normal_check_out.hour + 1) % 24
-            )
-            # To ensure no rooms are booked within a gap of 1 hour
-            # before check-in.
-            subtracted_check_in = normal_check_in.replace(
-                hour=(normal_check_in.hour - 1) % 24
-            )
-            taken = Booking.objects.filter(
-                Q(Q(check_in_time__lt=added_check_out)
-                  | Q(check_out_time__gt=subtracted_check_in))
-                & Q(room_numbers__contains=room.number)
-                & Q(check_in_date=normal_book_date))
-            if not taken:
-                if (room_type == 'Regular'):
-                    normal_regular_rooms = normal_regular_rooms + 1
-                    numbers.append(room.number)
-                    room_managers.append(room.manager)
-                elif (room_type == 'Executive'):
-                    normal_executive_rooms = normal_executive_rooms + 1
-                    numbers.append(room.number)
-                    room_managers.append(room.manager)
-                elif (room_type == 'Deluxe'):
-                    normal_deluxe_rooms = normal_deluxe_rooms + 1
-                    numbers.append(room.number)
-                    room_managers.append(room.manager)
-                elif (room_type == 'King'):
-                    normal_king_rooms = normal_king_rooms + 1
-                    numbers.append(room.number)
-                    room_managers.append(room.manager)
-                elif (room_type == 'Queen'):
-                    normal_queen_rooms = normal_queen_rooms + 1
-                    numbers.append(room.number)
-                    room_managers.append(room.manager)
-                if (room_type == 'Regular' and
-                    normal_regular_rooms == normal_no_of_rooms_required  and room.category == 'Regular'):
-                    time_booking(numbers, room_type, normal_no_of_rooms_required,
-                                    normal_username, normal_book_date, normal_check_in,
-                                    normal_check_out, normal_person, room_managers)
-                    return 1
-                elif (room_type == 'Executive' and
-                    normal_executive_rooms == normal_no_of_rooms_required and room.category == 'Executive'):
-                    time_booking(numbers, room_type, normal_no_of_rooms_required,
-                                    normal_username, normal_book_date, normal_check_in,
-                                    normal_check_out, normal_person)
-                    return 1
-                elif (room_type == 'Deluxe' and
-                    normal_deluxe_rooms == normal_no_of_rooms_required and room.category == 'Deluxe'):
-                    time_booking(numbers, room_type, normal_no_of_rooms_required,
-                                    normal_username, normal_book_date, normal_check_in,
-                                    normal_check_out, normal_person)
-                    return 1
-                elif (room_type == 'King' and
-                    normal_king_rooms == normal_no_of_rooms_required and room.category == 'King'):
-                    time_booking(numbers, room_type, normal_no_of_rooms_required,
-                                    normal_username, normal_book_date, normal_check_in,
-                                    normal_check_out, normal_person)
-                    return 1
-                elif (room_type == 'Queen' and
-                    normal_queen_rooms == normal_no_of_rooms_required and room.category == 'Queen'):
-                    time_booking(numbers, room_type, normal_no_of_rooms_required,
-                                    normal_username, normal_book_date, normal_check_in,
-                                    normal_check_out, normal_person)
-                    return 1
-    return 2
+        if (book_date <= max_book.date()):
+            try:
+                # time_slots = TimeSlot.objects.get(
+                #     room=room,
+                #     available_from_lte=check_in,
+                #     available_till_gte=check_out,
+                # ).union(time_slots)
+
+                time_slot = TimeSlot.objects.get(
+                    room=room,
+                    available_from__lte=check_in,
+                    available_till__gte=check_out,
+                )
+            except Exception:
+                continue
+
+            try:
+                #taken = Booking.objects.get(Q(time_slots_ids__contains=time_slot.id)
+                #                            & Q(check_in_date=book_date))
+                Booking.objects.get(Q(time_slots_ids__contains=time_slot.id)
+                                            & Q(check_in_date=book_date))
+            except Exception:
+            #if not taken:
+                time_slots.append(time_slot)
+                #count_time_slots+=1
+    if len(time_slots) >= no_of_rooms_required:
+        
+                #time_slots = time_slot.union(time_slots)
+
+
+
+
+
+
+
+
+
+# [<TimeSlot: Room: Room number: 1, category: Regular, capacity: 4, advance: 10, room manager: anshul, from: 03:00:00, till: 04:00:00, occupancy: Vacant>, <TimeSlot: Room: Room number: 2, category: Regular, capacity: 3, advance: 17, room manager: anshul, from: 03:00:00, till: 04:00:00, occupancy: Vacant>]
+
+
+
+        n = len(time_slots)
+        # optimize code, so if the array is already sorted, it doesn't need
+        # to go through the entire process
+        swapped = False
+        # Traverse through all array elements
+        for i in range(n-1):
+            # range(n) also work but outer loop will
+            # repeat one time more than needed.
+            # Last i elements are already in place
+            for j in range(0, n-i-1):
+
+                # traverse the array from 0 to n-i-1
+                # Swap if the element found is greater
+                # than the next element
+
+                if (datetime.combine(date.today(), time_slots[j].available_till) - datetime.combine(date.today(), time_slots[j].available_from)) > (datetime.combine(date.today(), time_slots[j + 1].available_till) - datetime.combine(date.today(), time_slots[j + 1].available_from)):
+                    swapped = True
+                    print("frffddd")
+                print("mnfdh")
+                    #time_slots[j], time_slots[j + 1] = time_slots[j + 1], time_slots[j]
+            
+            if not swapped:
+                # if we haven't needed to make a single swap, we
+                # can just exit the main loop.
+                return
+                    
+
+
+
+
+        print(time_slots)
+        return time_slots
+
+    #             if (time_slot.room.category == 'Regular'):
+    #                 regular_rooms = regular_rooms + 1
+    #             elif (time_slot.room.category == 'Executive'):
+    #                 executive_rooms = executive_rooms + 1
+    #             elif (time_slot.room.category == 'Deluxe'):
+    #                 deluxe_rooms = deluxe_rooms + 1
+
+    #             if (regular_rooms == no_of_rooms_required and time_slot.room.category == 'Regular'):
+    #                 available_categories.append('Regular')
+    #             if (executive_rooms == no_of_rooms_required and time_slot.room.category == 'Executive'):
+    #                 available_categories.append('Executive')
+    #             if (deluxe_rooms == no_of_rooms_required and time_slot.room.category == 'Deluxe'):
+    #                 available_categories.append('Deluxe')
+    #     return HttpResponse("Not Available")
+    # return available_categories
+
+
+
+
+
+
+
+    
+    # regular_rooms = 0
+    # executive_rooms = 0
+    # deluxe_rooms = 0
+    # # king_rooms = 0
+    # # queen_rooms = 0
+    # numbers = list()
+    # room_managers = list()
+    # # List of rooms for the given category.
+    # try:
+    #     room_list = Room.objects.filter(
+    #         available_from__lte=check_in,
+    #         available_till__gte=check_out,
+    #         capacity__gte=person, category=room_type
+    #     )
+    # except Exception:
+    #     return 3
+    # for room in room_list:
+    #     max_book = now + datetime.timedelta(days=room.advance)
+    #     if (book_date <= max_book.date()):
+    #         # To ensure no rooms are booked within a gap of 1 hour
+    #         # after checkout.
+    #         added_check_out = check_out.replace(
+    #             hour=(check_out.hour + 1) % 24
+    #         )
+    #         # To ensure no rooms are booked within a gap of 1 hour
+    #         # before check-in.
+    #         subtracted_check_in = check_in.replace(
+    #             hour=(check_in.hour - 1) % 24
+    #         )
+    #         taken = Booking.objects.filter(
+    #             Q(Q(check_in_time__lt=added_check_out)
+    #               | Q(check_out_time__gt=subtracted_check_in))
+    #             & Q(room_numbers__contains=room.number)
+    #             & Q(check_in_date=book_date))
+    #         if not taken:
+    #             if (room_type == 'Regular'):
+    #                 regular_rooms = regular_rooms + 1
+    #                 numbers.append(room.number)
+    #                 room_managers.append(room.manager)
+    #             elif (room_type == 'Executive'):
+    #                 executive_rooms = executive_rooms + 1
+    #                 numbers.append(room.number)
+    #                 room_managers.append(room.manager)
+    #             elif (room_type == 'Deluxe'):
+    #                 deluxe_rooms = deluxe_rooms + 1
+    #                 numbers.append(room.number)
+    #                 room_managers.append(room.manager)
+    #             elif (room_type == 'King'):
+    #                 king_rooms = king_rooms + 1
+    #                 numbers.append(room.number)
+    #                 room_managers.append(room.manager)
+    #             elif (room_type == 'Queen'):
+    #                 queen_rooms = queen_rooms + 1
+    #                 numbers.append(room.number)
+    #                 room_managers.append(room.manager)
+    #             if (room_type == 'Regular' and
+    #                 regular_rooms == no_of_rooms_required  and room.category == 'Regular'):
+    #                 time_booking(numbers, room_type, no_of_rooms_required,
+    #                                 username, book_date, check_in,
+    #                                 check_out, person, room_managers)
+    #                 return 1
+    #             elif (room_type == 'Executive' and
+    #                 executive_rooms == no_of_rooms_required and room.category == 'Executive'):
+    #                 time_booking(numbers, room_type, no_of_rooms_required,
+    #                                 username, book_date, check_in,
+    #                                 check_out, person)
+    #                 return 1
+    #             elif (room_type == 'Deluxe' and
+    #                 deluxe_rooms == no_of_rooms_required and room.category == 'Deluxe'):
+    #                 time_booking(numbers, room_type, no_of_rooms_required,
+    #                                 username, book_date, check_in,
+    #                                 check_out, person)
+    #                 return 1
+    #             elif (room_type == 'King' and
+    #                 king_rooms == no_of_rooms_required and room.category == 'King'):
+    #                 time_booking(numbers, room_type, no_of_rooms_required,
+    #                                 username, book_date, check_in,
+    #                                 check_out, person)
+    #                 return 1
+    #             elif (room_type == 'Queen' and
+    #                 queen_rooms == no_of_rooms_required and room.category == 'Queen'):
+    #                 time_booking(numbers, room_type, no_of_rooms_required,
+    #                                 username, book_date, check_in,
+    #                                 check_out, person)
+    #                 return 1
+    # return 2
 
 """Function to book room of this category if available."""
 @login_required(login_url="/hotel/sign_in/")
 def regular(request):
-    room_status = room_category('Regular', request.user.username,
-                                request.session['normal_book_date'],
-                                request.session['normal_check_in'],
-                                request.session['normal_check_out'],
-                                request.session['normal_person'],
-                                request.session['normal_no_of_rooms_required'])
-    if room_status == 1:
+    #print(request)
+    #if request.method == 'POST':
+    response = available_time_slots('Regular',
+                                request.session['book_date'],
+                                request.session['check_in'],
+                                request.session['check_out'],
+                                request.session['person'],
+                                request.session['no_of_rooms_required'])
+    context = {
+        'category': 'Regular',
+        'book_date': request.session['book_date'],
+        'check_in': request.session['check_in'],
+        'check_out': request.session['check_out'],
+        'person': request.session['person'],
+        'no_of_rooms_required': request.session['no_of_rooms_required'],
+        'time_slots': response,
+        'username': request.user.username
+        }
+    return render(request, 'available_time_slots.html', context)
+
+    if response == 1:
         # Implemented Post/Redirect/Get.
         return redirect('../booked_regular/')
-    elif room_status == 2:
+    elif response == 2:
         return HttpResponse("Unavailable")
     else:
         return redirect('../book/')
@@ -1199,17 +1326,17 @@ def regular(request):
 """Function to book room of this category if available."""
 @login_required(login_url="/hotel/sign_in/")
 def executive(request):
-    room_status = room_category('Executive',
+    response = available_time_slots('Executive',
                                 request.user.username,
-                                request.session['normal_book_date'],
-                                request.session['normal_check_in'],
-                                request.session['normal_check_out'],
-                                request.session['normal_person'],
-                                request.session['normal_no_of_rooms_required'])
-    if room_status == 1:
+                                request.session['book_date'],
+                                request.session['check_in'],
+                                request.session['check_out'],
+                                request.session['person'],
+                                request.session['no_of_rooms_required'])
+    if response == 1:
         # Implemented Post/Redirect/Get.
         return redirect('../booked_executive/')
-    elif room_status == 2:
+    elif response == 2:
         return HttpResponse("Unavailable")
     else:
         return redirect('../book/')
@@ -1217,16 +1344,16 @@ def executive(request):
 """Function to book room of this category if available."""
 @login_required(login_url="/hotel/sign_in/")
 def deluxe(request):
-    room_status = room_category('Deluxe', request.user.username,
-                                request.session['normal_book_date'],
-                                request.session['normal_check_in'],
-                                request.session['normal_check_out'],
-                                request.session['normal_person'],
-                                request.session['normal_no_of_rooms_required'])
-    if room_status == 1:
+    response = available_time_slots('Deluxe', request.user.username,
+                                request.session['book_date'],
+                                request.session['check_in'],
+                                request.session['check_out'],
+                                request.session['person'],
+                                request.session['no_of_rooms_required'])
+    if response == 1:
         # Implemented Post/Redirect/Get.
         return redirect('../booked_deluxe/')
-    elif room_status == 2:
+    elif response == 2:
         return HttpResponse("Unavailable")
     else:
         return redirect('../book/')
@@ -1234,16 +1361,16 @@ def deluxe(request):
 """Function to book room of this category if available."""
 @login_required(login_url="/hotel/sign_in/")
 def king(request):
-    room_status = room_category('King', request.user.username,
-                                request.session['normal_book_date'],
-                                request.session['normal_check_in'],
-                                request.session['normal_check_out'],
-                                request.session['normal_person'],
-                                request.session['normal_no_of_rooms_required'])
-    if room_status == 1:
+    response = available_time_slots('King', request.user.username,
+                                request.session['book_date'],
+                                request.session['check_in'],
+                                request.session['check_out'],
+                                request.session['person'],
+                                request.session['no_of_rooms_required'])
+    if response == 1:
         # Implemented Post/Redirect/Get.
         return redirect('../booked_king/')
-    elif room_status == 2:
+    elif response == 2:
         return HttpResponse("Unavailable")
     else:
         return redirect('../book/')
@@ -1251,16 +1378,16 @@ def king(request):
 """Function to book room of this category if available."""
 @login_required(login_url="/hotel/sign_in/")
 def queen(request):
-    room_status = room_category('Queen', request.user.username,
-                                request.session['normal_book_date'],
-                                request.session['normal_check_in'],
-                                request.session['normal_check_out'],
-                                request.session['normal_person'],
-                                request.session['normal_no_of_rooms_required'])
-    if room_status == 1:
+    response = available_time_slots('Queen', request.user.username,
+                                request.session['book_date'],
+                                request.session['check_in'],
+                                request.session['check_out'],
+                                request.session['person'],
+                                request.session['no_of_rooms_required'])
+    if response == 1:
         # Implemented Post/Redirect/Get.
         return redirect('../booked_queen/')
-    elif room_status == 2:
+    elif response == 2:
         return HttpResponse("Unavailable")
     else:
         return redirect('../book/')
@@ -1270,11 +1397,11 @@ Used for implementing Post/Redirect/Get."""
 @login_required(login_url="/hotel/sign_in/")
 def booked_regular(request):
     try:
-        context = {'book_date': request.session['normal_book_date'],
-                'check_in': request.session['normal_check_in'],
-                'check_out': request.session['normal_check_out'],
-                'person': request.session['normal_person'],
-                'no_of_rooms_required': request.session['normal_no_of_rooms_required'],
+        context = {'book_date': request.session['book_date'],
+                'check_in': request.session['check_in'],
+                'check_out': request.session['check_out'],
+                'person': request.session['person'],
+                'no_of_rooms_required': request.session['no_of_rooms_required'],
                 'category': 'Regular',
                 'username': request.user.username}
     except Exception:
@@ -1286,11 +1413,11 @@ Used for implementing Post/Redirect/Get."""
 @login_required(login_url="/hotel/sign_in/")
 def booked_executive(request):
     try:
-        context = {'book_date': request.session['normal_book_date'],
-                'check_in': request.session['normal_check_in'],
-                'check_out': request.session['normal_check_out'],
-                'person': request.session['normal_person'],
-                'no_of_rooms_required': request.session['normal_no_of_rooms_required'],
+        context = {'book_date': request.session['book_date'],
+                'check_in': request.session['check_in'],
+                'check_out': request.session['check_out'],
+                'person': request.session['person'],
+                'no_of_rooms_required': request.session['no_of_rooms_required'],
                 'category': 'Executive',
                 'username': request.user.username}
     except Exception:
@@ -1302,11 +1429,11 @@ Used for implementing Post/Redirect/Get."""
 @login_required(login_url="/hotel/sign_in/")
 def booked_deluxe(request):
     try:
-        context = {'book_date': request.session['normal_book_date'],
-                'check_in': request.session['normal_check_in'],
-                'check_out': request.session['normal_check_out'],
-                'person': request.session['normal_person'],
-                'no_of_rooms_required': request.session['normal_no_of_rooms_required'],
+        context = {'book_date': request.session['book_date'],
+                'check_in': request.session['check_in'],
+                'check_out': request.session['check_out'],
+                'person': request.session['person'],
+                'no_of_rooms_required': request.session['no_of_rooms_required'],
                 'category': 'Deluxe',
                 'username': request.user.username}
     except Exception:
@@ -1318,11 +1445,11 @@ Used for implementing Post/Redirect/Get."""
 @login_required(login_url="/hotel/sign_in/")
 def booked_king(request):
     try:
-        context = {'book_date': request.session['normal_book_date'],
-                'check_in': request.session['normal_check_in'],
-                'check_out': request.session['normal_check_out'],
-                'person': request.session['normal_person'],
-                'no_of_rooms_required': request.session['normal_no_of_rooms_required'],
+        context = {'book_date': request.session['book_date'],
+                'check_in': request.session['check_in'],
+                'check_out': request.session['check_out'],
+                'person': request.session['person'],
+                'no_of_rooms_required': request.session['no_of_rooms_required'],
                 'category': 'King',
                 'username': request.user.username}
     except Exception:
@@ -1334,11 +1461,11 @@ Used for implementing Post/Redirect/Get."""
 @login_required(login_url="/hotel/sign_in/")
 def booked_queen(request):
     try:
-        context = {'book_date': request.session['normal_book_date'],
-                'check_in': request.session['normal_check_in'],
-                'check_out': request.session['normal_check_out'],
-                'person': request.session['normal_person'],
-                'no_of_rooms_required': request.session['normal_no_of_rooms_required'],
+        context = {'book_date': request.session['book_date'],
+                'check_in': request.session['check_in'],
+                'check_out': request.session['check_out'],
+                'person': request.session['person'],
+                'no_of_rooms_required': request.session['no_of_rooms_required'],
                 'category': 'Queen',
                 'username': request.user.username}
     except Exception:
@@ -1510,11 +1637,11 @@ def booking_category(request, category):
     """
     To book a room for a given category.
     """
-    normal_regular_rooms = 0
-    normal_executive_rooms = 0
-    normal_deluxe_rooms = 0
-    normal_king_rooms = 0
-    normal_queen_rooms = 0
+    regular_rooms = 0
+    executive_rooms = 0
+    deluxe_rooms = 0
+    king_rooms = 0
+    queen_rooms = 0
     numbers = list()
     # List of rooms for the given category.
     try:
@@ -1547,46 +1674,46 @@ def booking_category(request, category):
                 & Q(check_in_date=request.session['api_book_date']))
             if not taken:
                 if (category == 'Regular'):
-                    normal_regular_rooms = normal_regular_rooms + 1
+                    regular_rooms = regular_rooms + 1
                     numbers.append(room.number)
                 elif (category == 'Executive'):
-                    normal_executive_rooms = normal_executive_rooms + 1
+                    executive_rooms = executive_rooms + 1
                     numbers.append(room.number)
                 elif (category == 'Deluxe'):
-                    normal_deluxe_rooms = normal_deluxe_rooms + 1
+                    deluxe_rooms = deluxe_rooms + 1
                     numbers.append(room.number)
                 elif (category == 'King'):
-                    normal_king_rooms = normal_king_rooms + 1
+                    king_rooms = king_rooms + 1
                     numbers.append(room.number)
                 elif (category == 'Queen'):
-                    normal_queen_rooms = normal_queen_rooms + 1
+                    queen_rooms = queen_rooms + 1
                     numbers.append(room.number)
                 if (category == 'Regular' and
-                    normal_regular_rooms == request.session['no_of_rooms']):
+                    regular_rooms == request.session['no_of_rooms']):
                     time_booking(numbers, category, request.session['no_of_rooms'],
                                     request.session['api_username'], request.session['api_book_date'], request.session['api_check_in'],
                                     request.session['api_check_out'], request.session['api_person'])
                     return Response({'msg': 'Booked'})
                 elif (category == 'Executive' and
-                    normal_executive_rooms == request.session['no_of_rooms']):
+                    executive_rooms == request.session['no_of_rooms']):
                     time_booking(numbers, category, request.session['no_of_rooms'],
                                     request.session['api_username'], request.session['api_book_date'], request.session['api_check_in'],
                                     request.session['api_check_out'], request.session['api_person'])
                     return Response({'msg': 'Booked'})
                 elif (category == 'Deluxe' and
-                    normal_deluxe_rooms == request.session['no_of_rooms']):
+                    deluxe_rooms == request.session['no_of_rooms']):
                     time_booking(numbers, category, request.session['no_of_rooms'],
                                     request.session['api_username'], request.session['api_book_date'], request.session['api_check_in'],
                                     request.session['api_check_out'], request.session['api_person'])
                     return Response({'msg': 'Booked'})
                 elif (category == 'King' and
-                    normal_king_rooms == request.session['no_of_rooms']):
+                    king_rooms == request.session['no_of_rooms']):
                     time_booking(numbers, category, request.session['no_of_rooms'],
                                     request.session['api_username'], request.session['api_book_date'], request.session['api_check_in'],
                                     request.session['api_check_out'], request.session['api_person'])
                     return Response({'msg': 'Booked'})
                 elif (category == 'Queen' and
-                    normal_queen_rooms == request.session['no_of_rooms']):
+                    queen_rooms == request.session['no_of_rooms']):
                     time_booking(numbers, category, request.session['no_of_rooms'],
                                     request.session['api_username'], request.session['api_book_date'], request.session['api_check_in'],
                                     request.session['api_check_out'], request.session['api_person'])
