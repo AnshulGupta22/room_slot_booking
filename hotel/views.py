@@ -2,7 +2,8 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
-import datetime
+#import datetime
+from datetime import date, datetime, timedelta
 from django.db.models import Q
 from django.utils import timezone
 from django.http import HttpResponse
@@ -288,8 +289,8 @@ def time_slots_search(
     available_from = ''
     available_till = ''
     if str_available_from != '':
-        available_from = datetime.datetime.strptime(str_available_from, '%H:%M').time() #Function to convert string to time.
-        available_till = datetime.datetime.strptime(str_available_till, '%H:%M').time() #Function to convert string to time.
+        available_from = datetime.strptime(str_available_from, '%H:%M').time() #Function to convert string to time.
+        available_till = datetime.strptime(str_available_till, '%H:%M').time() #Function to convert string to time.
 
     # if available_from is None or available_till is None:
     #     return None
@@ -519,8 +520,8 @@ def add_time_slot(request, number):
                 except Exception:
                     return HttpResponse("Not Found.")
 
-                available_till = datetime.datetime.strptime(request.POST['available_till'], '%H:%M').time() #Function to convert string to time.
-                available_from = datetime.datetime.strptime(request.POST['available_from'], '%H:%M').time() #Function to convert string to time.
+                available_till = datetime.strptime(request.POST['available_till'], '%H:%M').time() #Function to convert string to time.
+                available_from = datetime.strptime(request.POST['available_from'], '%H:%M').time() #Function to convert string to time.
 
                 # To ensure no rooms are booked within a gap of 1 hour
                 # after checkout.
@@ -574,7 +575,7 @@ def add_time_slot(request, number):
 def convert_to_time_sec(date_time):
     format = '%H:%M:%S'
     try:
-        datetime_str = datetime.datetime.strptime(date_time, format).time()
+        datetime_str = datetime.strptime(date_time, format).time()
     except Exception:
         datetime_str = None
     return datetime_str
@@ -698,9 +699,9 @@ def search_availability(
     #book_date = convert_to_date(book_date_str)
 
     # Converting string to date.
-    book_date = datetime.datetime.strptime(book_date_str, '%Y-%m-%d').date()
-    check_in = datetime.datetime.strptime(check_in_str, '%H:%M').time()
-    check_out = datetime.datetime.strptime(check_out_str, '%H:%M').time()
+    book_date = datetime.strptime(book_date_str, '%Y-%m-%d').date()
+    check_in = datetime.strptime(check_in_str, '%H:%M').time()
+    check_out = datetime.strptime(check_out_str, '%H:%M').time()
 
     room_list = Room.objects.filter(
         capacity__gte=person
@@ -714,7 +715,7 @@ def search_availability(
         
         # Calculating the maximum date to which a room can be
         # booked in advance.
-        max_book = now + datetime.timedelta(days=room.advance)
+        max_book = now + timedelta(days=room.advance)
         if (book_date <= max_book.date()):
             try:
                 # time_slots = TimeSlot.objects.get(
@@ -957,13 +958,13 @@ def manager_book_search(
     for i in spaces_numbers:
         numbers.append(i.strip())
     #check_in_date = convert_to_date(str_check_in_date)
-    check_in_date = datetime.datetime.strptime(str_check_in_date, '%Y-%m-%d').date()
+    check_in_date = datetime.strptime(str_check_in_date, '%Y-%m-%d').date()
 
     #check_in_time = convert_to_time(str_check_in_time)
-    check_in_time = datetime.datetime.strptime(str_check_in_time, '%H:%M').time()
+    check_in_time = datetime.strptime(str_check_in_time, '%H:%M').time()
 
     #check_out_time = convert_to_time(str_check_out_time)
-    check_out_time = datetime.datetime.strptime(str_check_out_time, '%H:%M').time()
+    check_out_time = datetime.strptime(str_check_out_time, '%H:%M').time()
 
     for number in numbers:
         room_number_regex = rf"\b{number}\b"
@@ -1048,7 +1049,7 @@ def manage_bookings(request):
         return redirect('../book/')
 
 
-from datetime import datetime, date
+#from datetime import datetime, date
 #import date
 
 
@@ -1075,14 +1076,36 @@ def time_booking(
                         room_managers=room_managers_string)
     time_slot.save()
 
+
+
+
+
+
+
+
+
+def bubbleSort(time_slots):
+    swapped = False
+    # Looping from size of array from last index[-1] to index [0]
+    for n in range(len(time_slots)-1, 0, -1):
+        for i in range(n):
+            if (datetime.combine(date.today(), time_slots[i].available_till) - datetime.combine(date.today(), time_slots[i].available_from)) > (datetime.combine(date.today(), time_slots[i + 1].available_till) - datetime.combine(date.today(), time_slots[i + 1].available_from)):
+                swapped = True
+                # swapping data if the element is less than next element in the array
+                time_slots[i], time_slots[i + 1] = time_slots[i + 1], time_slots[i]       
+        if not swapped:
+            # exiting the function if we didn't make a single swap
+            # meaning that the array is already sorted.
+            return
+
 """Function to check if the room(s) is/are available."""
 def available_time_slots(
         room_type, book_date_str,check_in_str,
         check_out_str, person, no_of_rooms_required):
     # Converting string to date.
-    book_date = datetime.datetime.strptime(book_date_str, '%Y-%m-%d').date()
-    check_in = datetime.datetime.strptime(check_in_str, '%H:%M').time()
-    check_out = datetime.datetime.strptime(check_out_str, '%H:%M').time()
+    book_date = datetime.strptime(book_date_str, '%Y-%m-%d').date()
+    check_in = datetime.strptime(check_in_str, '%H:%M').time()
+    check_out = datetime.strptime(check_out_str, '%H:%M').time()
 
 
 
@@ -1107,7 +1130,7 @@ def available_time_slots(
 
         # Calculating the maximum date to which a room can be
         # booked in advance.
-        max_book = now + datetime.timedelta(days=room.advance)
+        max_book = now + timedelta(days=room.advance)
         if (book_date <= max_book.date()):
             try:
                 # time_slots = TimeSlot.objects.get(
@@ -1149,37 +1172,25 @@ def available_time_slots(
 
 
 
-        n = len(time_slots)
-        # optimize code, so if the array is already sorted, it doesn't need
-        # to go through the entire process
-        swapped = False
-        # Traverse through all array elements
-        for i in range(n-1):
-            # range(n) also work but outer loop will
-            # repeat one time more than needed.
-            # Last i elements are already in place
-            for j in range(0, n-i-1):
-
-                # traverse the array from 0 to n-i-1
-                # Swap if the element found is greater
-                # than the next element
-
-                if (datetime.combine(date.today(), time_slots[j].available_till) - datetime.combine(date.today(), time_slots[j].available_from)) > (datetime.combine(date.today(), time_slots[j + 1].available_till) - datetime.combine(date.today(), time_slots[j + 1].available_from)):
-                    swapped = True
-                    print("frffddd")
-                print("mnfdh")
-                    #time_slots[j], time_slots[j + 1] = time_slots[j + 1], time_slots[j]
-            
-            if not swapped:
-                # if we haven't needed to make a single swap, we
-                # can just exit the main loop.
-                return
-                    
 
 
 
 
-        print(time_slots)
+
+
+
+
+
+
+
+
+
+
+        bubbleSort(time_slots)
+
+        # for i in range(len(time_slots)):
+        #     print("%d" % time_slots[i], end=" ")
+        #print(time_slots)
         return time_slots
 
     #             if (time_slot.room.category == 'Regular'):
@@ -1654,7 +1665,7 @@ def booking_category(request, category):
         return Response({'msg': 'No such category exist.'},
                         status=status.HTTP_400_BAD_REQUEST)
     for room in room_list:
-        max_book = now + datetime.timedelta(days=room.advance)
+        max_book = now + timedelta(days=room.advance)
         # Ensuring that books are book before a room max advance
         if (request.session['api_book_date'] <= max_book.date()):
             # To ensure no rooms are booked within a gap of 1 hour

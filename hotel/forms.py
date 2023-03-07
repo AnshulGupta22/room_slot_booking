@@ -4,10 +4,10 @@ from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.utils import timezone
-import datetime
+#import datetime
 from django.core.validators import int_list_validator, MaxValueValidator, MinValueValidator, RegexValidator
 from django.utils.regex_helper import _lazy_re_compile
-from datetime import time
+from datetime import time, date, datetime
 
 from hotel.models import Booking, Room, TimeSlot
 
@@ -211,7 +211,7 @@ class SearchTimeSlotsForm(forms.Form):
     # available_from = forms.TimeField(widget=TimeInput(attrs={'class': 'unbold-form'}), initial=time(0))
     # available_till = forms.TimeField(widget=TimeInput(attrs={'class': 'unbold-form'}), initial=time(23,59))
 
-    date = forms.DateField(widget=FutureDateInput(attrs={'class': 'unbold-form'}), required=False, initial=datetime.date.today())
+    date = forms.DateField(widget=FutureDateInput(attrs={'class': 'unbold-form'}), required=False, initial=date.today())
 
     available_from = forms.TimeField(widget=TimeInput(attrs={'class': 'unbold-form'}), required=False)
     available_till = forms.TimeField(widget=TimeInput(attrs={'class': 'unbold-form'}), required=False)
@@ -276,8 +276,8 @@ class SearchTimeSlotsForm(forms.Form):
         #         )
         if available_from is not None:
             try:
-                datetime.datetime.strptime(str_available_from, format).time()
-                datetime.datetime.strptime(str_available_till, format).time()
+                datetime.strptime(str_available_from, format).time()
+                datetime.strptime(str_available_till, format).time()
             except Exception:
                 raise ValidationError(
                     _('Wrong time entered.'),
@@ -309,7 +309,7 @@ class AddTimeSlotForm(forms.ModelForm):
         format = '%H:%M:%S'
         if str_available_from != 'None':
             try:
-                datetime.datetime.strptime(str_available_from, format).time()
+                datetime.strptime(str_available_from, format).time()
             except Exception:
                 raise ValidationError(
                     _('Wrong time entered.'),
@@ -317,7 +317,7 @@ class AddTimeSlotForm(forms.ModelForm):
                 )
         if str_available_till != 'None':
             try:
-                    datetime.datetime.strptime(str_available_till, format).time()
+                    datetime.strptime(str_available_till, format).time()
             except Exception:
                 raise ValidationError(
                     _('Wrong time entered.'),
@@ -378,7 +378,7 @@ class AddTimeSlotForm(forms.ModelForm):
 """class used for booking."""
 class BookingForm(forms.Form):
 
-    check_in_date = forms.DateField(widget=FutureDateInput(attrs={'class': 'unbold-form'}), initial=datetime.date.today())
+    check_in_date = forms.DateField(widget=FutureDateInput(attrs={'class': 'unbold-form'}), initial=date.today())
     check_in_time = forms.TimeField(widget=TimeInput(attrs={'class': 'unbold-form'}))
     check_out_time = forms.TimeField(widget=TimeInput(attrs={'class': 'unbold-form'}))
     PERSONS = (
@@ -412,8 +412,8 @@ class BookingForm(forms.Form):
         str_check_out_time = str(normal_check_out_time)
         format = '%H:%M:%S'
         try:
-            datetime.datetime.strptime(str_check_in_time, format).time()
-            datetime.datetime.strptime(str_check_out_time, format).time()
+            datetime.strptime(str_check_in_time, format).time()
+            datetime.strptime(str_check_out_time, format).time()
         except Exception:
             raise ValidationError(
                 _('Wrong time entered.'),
@@ -455,7 +455,7 @@ class BookingForm(forms.Form):
 def convert_to_date(date_time):
     format = '%Y-%m-%d'
     try:
-        datetime.datetime.strptime(date_time, format).date()
+        datetime.strptime(date_time, format).date()
     except Exception:
         raise ValidationError(
                 "Wrong date format entered.", code='Wrong date format'
@@ -465,7 +465,7 @@ def convert_to_date(date_time):
 def convert_to_time(value):
     format = '%H:%M:%S'
     try:
-        datetime.datetime.strptime(value, format).time()
+        datetime.strptime(value, format).time()
     except Exception:
         raise ValidationError(
             _('%(value)s Wrong time format entered.'),
@@ -477,7 +477,7 @@ def convert_to_time(value):
 def validate_check_in_time(value):
     format = '%H:%M:%S'
     try:
-        datetime.datetime.strptime(value, format).time()
+        datetime.strptime(value, format).time()
     except Exception:
         raise ValidationError(
             _('%(value)s Wrong time format entered.'),
@@ -552,7 +552,7 @@ class ManageBookingForm(forms.Form):
         format = '%H:%M:%S'
         if str_check_in_time != 'None':
             try:
-                datetime.datetime.strptime(str_check_in_time, format).time()
+                datetime.strptime(str_check_in_time, format).time()
             except Exception:
                 raise ValidationError(
                     _('Wrong time entered.'),
@@ -560,7 +560,7 @@ class ManageBookingForm(forms.Form):
                 )
         if str_check_out_time != 'None':
             try:
-                    datetime.datetime.strptime(str_check_out_time, format).time()
+                    datetime.strptime(str_check_out_time, format).time()
             except Exception:
                 raise ValidationError(
                     _('Wrong time entered.'),
@@ -620,7 +620,7 @@ class ManageViewTimeSlotForm(forms.ModelForm):
         format = '%H:%M:%S'
         if str_available_from != 'None':
             try:
-                datetime.datetime.strptime(str_available_from, format).time()
+                datetime.strptime(str_available_from, format).time()
             except Exception:
                 raise ValidationError(
                     _('Wrong time entered.'),
@@ -628,7 +628,7 @@ class ManageViewTimeSlotForm(forms.ModelForm):
                 )
         if str_available_till != 'None':
             try:
-                    datetime.datetime.strptime(str_available_till, format).time()
+                    datetime.strptime(str_available_till, format).time()
             except Exception:
                 raise ValidationError(
                     _('Wrong time entered.'),
@@ -659,7 +659,7 @@ class ManageViewTimeSlotForm(forms.ModelForm):
 
 
 
-from datetime import time
+#from datetime import time
 """class used for booking a time slot."""
 class RoomForm2(forms.ModelForm):
 
@@ -695,7 +695,7 @@ class RoomForm2(forms.ModelForm):
         )
     class TimeInput(forms.TimeInput):
         input_type = 'time'
-        default=datetime.time()
+        default=time()
 
     available_from = forms.TimeField(
         required=False,
@@ -737,8 +737,8 @@ class RoomForm2(forms.ModelForm):
         str_available_till = str(available_till)
         format = '%H:%M:%S'
         try:
-            datetime.datetime.strptime(str_available_from, format).time()
-            datetime.datetime.strptime(str_available_till, format).time()
+            datetime.strptime(str_available_from, format).time()
+            datetime.strptime(str_available_till, format).time()
         except Exception:
             raise ValidationError(
                 _('Wrong time entered.'),
