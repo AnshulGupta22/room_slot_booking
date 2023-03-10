@@ -69,7 +69,11 @@ class Booking(models.Model):
         validators=[MaxValueValidator(100), MinValueValidator(1)], unique=True
         )'''
     #room_numbers = models.CharField(validators=[int_list_validator(' ,')], max_length=4000)
-    time_slots_ids = models.CharField(validators=[int_list_validator(' ,')], max_length=4000)
+    time_slot_ids = models.CharField(validators=[int_list_validator(', ')], max_length=4000)
+
+    def __str__(self):
+        return f'Customer name: {self.customer_name}, check in date: {self.check_in_date}, time_slot_ids: {self.time_slot_ids}'
+
     # CATEGORIES = (
     #     ('Regular', 'Regular'),
     #     ('Executive', 'Executive'),
