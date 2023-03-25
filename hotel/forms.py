@@ -391,9 +391,9 @@ class BookingForm(forms.Form):
         widget=forms.RadioSelect(attrs={'class': 'unbold-form'}),
         choices=PERSONS, initial=1
     )
-    no_of_rooms =  forms.IntegerField(
-        validators=[MaxValueValidator(100), MinValueValidator(1)], initial=1
-        )
+    # no_of_rooms =  forms.IntegerField(
+    #     validators=[MaxValueValidator(100), MinValueValidator(1)], initial=1
+    #     )
 
 
         # widgets = {

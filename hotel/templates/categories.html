@@ -84,6 +84,7 @@
     </button>
     <div class="dropdown-content">
       <a href="{% url 'hotel:view_profile' %}">View Profile</a>
+      <a href="{% url 'hotel:edit_profile' %}">Edit Profile</a>
       <a href="{% url 'hotel:logout' %}">Logout</a>
     </div>
   </div>
@@ -96,7 +97,7 @@
         <li><b>Check in:</b> {{ check_in }}</li>
         <li><b>Check out:</b> {{ check_out }}</li>
         <li><b>Person:</b> {{ person }}</li>
-        <li><b>Number of rooms required:</b> {{ no_of_rooms_required }}</li>
+        <!-- <li><b>Number of rooms:</b> {{ no_of_rooms_required }}</li> -->
       </ul>
   </div>
     <div id="lef-hea">

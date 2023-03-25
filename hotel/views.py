@@ -2,7 +2,6 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
-#import datetime
 from datetime import date, datetime, timedelta
 from django.db.models import Q
 from django.utils import timezone
@@ -499,7 +498,7 @@ def time_slots(request, number):
                 'room': room,
                 #'number': number,
                 #'time_slots': TimeSlot.objects.filter(room=number, manager=request.user),
-                'time_slots': TimeSlot.objects.filter(room_id=number),
+                'time_slots': TimeSlot.objects.filter(room_id=number).order_by('available_from'),
                 'username': request.user.username
                 }
         return render(request, 'time_slots.html', context)
@@ -691,9 +690,12 @@ def delete_time_slot(request, pk):
         return redirect('../book/')
 
 """Function that returns the list of available categories."""
+# def search_availability(
+#         book_date_str, check_in_str, check_out_str,
+#         person, no_of_rooms_required):
 def search_availability(
         book_date_str, check_in_str, check_out_str,
-        person, no_of_rooms_required):
+        person):
     #book_date = convert_to_date(book_date_str)
 
     # Converting string to date.
@@ -737,18 +739,21 @@ def search_availability(
             except Exception:
             #if not taken:
                 if (time_slot.room.category == 'Regular'):
-                    regular_rooms = regular_rooms + 1
-                elif (time_slot.room.category == 'Executive'):
-                    executive_rooms = executive_rooms + 1
-                elif (time_slot.room.category == 'Deluxe'):
-                    deluxe_rooms = deluxe_rooms + 1
-
-                if (regular_rooms == no_of_rooms_required and time_slot.room.category == 'Regular'):
+                    #regular_rooms = regular_rooms + 1
                     available_categories.append('Regular')
-                if (executive_rooms == no_of_rooms_required and time_slot.room.category == 'Executive'):
+                elif (time_slot.room.category == 'Executive'):
+                    #executive_rooms = executive_rooms + 1
                     available_categories.append('Executive')
-                if (deluxe_rooms == no_of_rooms_required and time_slot.room.category == 'Deluxe'):
+                elif (time_slot.room.category == 'Deluxe'):
+                    #deluxe_rooms = deluxe_rooms + 1
                     available_categories.append('Deluxe')
+
+                # if (regular_rooms == no_of_rooms_required and time_slot.room.category == 'Regular'):
+                #     available_categories.append('Regular')
+                # if (executive_rooms == no_of_rooms_required and time_slot.room.category == 'Executive'):
+                #     available_categories.append('Executive')
+                # if (deluxe_rooms == no_of_rooms_required and time_slot.room.category == 'Deluxe'):
+                #     available_categories.append('Deluxe')
     return available_categories
 
             # if not taken:
@@ -824,21 +829,25 @@ def booking(request):
             request.session['check_in'] = request.POST['check_in_time']
             request.session['check_out'] = request.POST['check_out_time']
             request.session['person'] = int(request.POST['person'])
-            request.session['no_of_rooms_required'] = int(
-                request.POST['no_of_rooms']
-                )
+            # request.session['no_of_rooms_required'] = int(
+            #     request.POST['no_of_rooms']
+            #     )
+            # response = search_availability(request.session['book_date'],
+            #                                request.session['check_in'],
+            #                                request.session['check_out'],
+            #                                request.session['person'],
+            #                                request.session['no_of_rooms_required'])
             response = search_availability(request.session['book_date'],
                                            request.session['check_in'],
                                            request.session['check_out'],
-                                           request.session['person'],
-                                           request.session['no_of_rooms_required'])
+                                           request.session['person'])
             #if response:
             context = {
                 'book_date': request.session['book_date'],
                 'check_in': request.session['check_in'],
                 'check_out': request.session['check_out'],
                 'person': request.session['person'],
-                'no_of_rooms_required': request.session['no_of_rooms_required'],
+                #'no_of_rooms_required': request.session['no_of_rooms_required'],
                 'categories': response,
                 'username': request.user.username
                 }
@@ -1076,9 +1085,12 @@ def bubbleSort(time_slots):
             return
 
 """Function to check if the room(s) is/are available."""
+# def available_time_slots(
+#         room_type, book_date_str,check_in_str,
+#         check_out_str, person, no_of_rooms_required):
 def available_time_slots(
         room_type, book_date_str,check_in_str,
-        check_out_str, person, no_of_rooms_required):
+        check_out_str, person):
     # Converting string to date.
     book_date = datetime.strptime(book_date_str, '%Y-%m-%d').date()
     check_in = datetime.strptime(check_in_str, '%H:%M').time()
@@ -1410,7 +1422,10 @@ def booked_regular(request):
         customer_name=request.user.username,
         check_in_date=request.session['book_date']
     )
-    print(time_slot_bookings)
+    time_slots = TimeSlot.objects.none()
+    time_slots_list = time_slot_bookings.last().time_slot_ids.split(', ')
+    for time_slot in time_slots_list:
+        time_slots = TimeSlot.objects.filter(pk=time_slot).union(time_slots)
     try:
         context = {'book_date': request.session['book_date'],
                 'check_in': request.session['check_in'],
@@ -1418,7 +1433,8 @@ def booked_regular(request):
                 'person': request.session['person'],
                 'no_of_rooms_required': request.session['no_of_rooms_required'],
                 'category': 'Regular',
-                'username': request.user.username}
+                'username': request.user.username,
+                'time_slots': time_slots}
     except Exception:
         return redirect('../book/')
     return render(request, 'booked.html', context)
@@ -1501,22 +1517,39 @@ def all_bookings(request, pk=None):
             return redirect('../../all_bookings/')
         else:
             return HttpResponse("Not allowed.")
-    # Future bookings.
+
+
+
     future_bookings = Booking.objects.filter(
         customer_name=request.user.username,
-        check_in_date__gt=now.date()
-    ).order_by('-check_in_date', 'check_in_time')
-    # Current and past bookings.
-    current_and_past_bookings = Booking.objects.filter(
-        customer_name=request.user.username,
-        check_in_date__lte=now.date()
-    ).order_by('-check_in_date', 'check_in_time')
-    context = {
-        'future_bookings': future_bookings,
-        'current_and_past_bookings': current_and_past_bookings,
-        'username': request.user.username
-    }
-    return render(request, 'all_bookings.html', context)
+        check_in_date__gte=now.date()
+    ).order_by('check_in_date')
+    future_time_slots = TimeSlot.objects.none()
+    future_time_slot_ids = list()
+    for future_booking in future_bookings:
+        future_time_slot_ids = future_booking.time_slot_ids.split(', ')
+
+    for future_time_slot_id in future_time_slot_ids:
+        future_time_slots = TimeSlot.objects.filter(pk=future_time_slot_id).union(future_time_slots)#.order_by('available_from')
+    print(future_time_slots)
+
+    # # Future bookings.
+    # future_bookings = Booking.objects.filter(
+    #     customer_name=request.user.username,
+    #     check_in_date__gt=now.date()
+    # ).order_by('-check_in_date', 'check_in_time')
+    # # Current and past bookings.
+    # current_and_past_bookings = Booking.objects.filter(
+    #     customer_name=request.user.username,
+    #     check_in_date__lte=now.date()
+    # ).order_by('-check_in_date', 'check_in_time')
+    # context = {
+    #     'future_bookings': future_bookings,
+    #     'current_and_past_bookings': current_and_past_bookings,
+    #     'username': request.user.username
+    # }
+    #return render(request, 'all_bookings.html', context)
+    return render(request, 'all_bookings.html')
 
 """API endpoints for User management, Rooms, Time Slots, and
 corresponding Bookings.
