@@ -1085,10 +1085,10 @@ def bubbleSort(time_slots):
             return
 
 """Function to check if the room(s) is/are available."""
-# def available_time_slots(
+# def best_available_time_slot(
 #         room_type, book_date_str,check_in_str,
 #         check_out_str, person, no_of_rooms_required):
-def available_time_slots(
+def best_available_time_slot(
         room_type, book_date_str,check_in_str,
         check_out_str, person):
     # Converting string to date.
@@ -1295,14 +1295,14 @@ def slots_booking(response, request):
 @login_required(login_url="/hotel/sign_in/")
 def regular(request):
     if request.method == 'POST':
-        # response = available_time_slots('Regular',
+        # response = best_available_time_slot('Regular',
         #                         request.session['book_date'],
         #                         request.session['check_in'],
         #                         request.session['check_out'],
         #                         request.session['person'],
         #                         request.session['no_of_rooms_required'])
         print("njifdr")
-        response = available_time_slots('Regular',
+        response = best_available_time_slot('Regular',
                                 request.session['book_date'],
                                 request.session['check_in'],
                                 request.session['check_out'],
@@ -1322,7 +1322,7 @@ def regular(request):
             'time_slots': response,
             'username': request.user.username
             }
-        return render(request, 'available_time_slots.html', context)
+        return render(request, 'best_available_time_slot.html', context)
         # time_slot_ids = list()
         # for i in range(len(response)):
         #     time_slot_ids.append(response[i].id)
@@ -1336,13 +1336,13 @@ def regular(request):
         # booking.save()
         # Implemented Post/Redirect/Get.
         
-    # response = available_time_slots('Regular',
+    # response = best_available_time_slot('Regular',
     #                             request.session['book_date'],
     #                             request.session['check_in'],
     #                             request.session['check_out'],
     #                             request.session['person'],
     #                             request.session['no_of_rooms_required'])
-    response = available_time_slots('Regular',
+    response = best_available_time_slot('Regular',
                                 request.session['book_date'],
                                 request.session['check_in'],
                                 request.session['check_out'],
@@ -1354,10 +1354,10 @@ def regular(request):
         'check_out': request.session['check_out'],
         'person': request.session['person'],
         #'no_of_rooms_required': request.session['no_of_rooms_required'],
-        'time_slots': response,
+        'time_slot': response,
         'username': request.user.username
         }
-    return render(request, 'available_time_slots.html', context)
+    return render(request, 'best_available_time_slot.html', context)
 
     if response == 1:
         # Implemented Post/Redirect/Get.
@@ -1370,14 +1370,14 @@ def regular(request):
 """Function to book room of this category if available."""
 @login_required(login_url="/hotel/sign_in/")
 def executive(request):
-    # response = available_time_slots('Executive',
+    # response = best_available_time_slot('Executive',
     #                             request.user.username,
     #                             request.session['book_date'],
     #                             request.session['check_in'],
     #                             request.session['check_out'],
     #                             request.session['person'],
     #                             request.session['no_of_rooms_required'])
-    response = available_time_slots('Executive',
+    response = best_available_time_slot('Executive',
                                 #request.user.username,
                                 request.session['book_date'],
                                 request.session['check_in'],
@@ -1394,13 +1394,13 @@ def executive(request):
 """Function to book room of this category if available."""
 @login_required(login_url="/hotel/sign_in/")
 def deluxe(request):
-    # response = available_time_slots('Deluxe', request.user.username,
+    # response = best_available_time_slot('Deluxe', request.user.username,
     #                             request.session['book_date'],
     #                             request.session['check_in'],
     #                             request.session['check_out'],
     #                             request.session['person'],
     #                             request.session['no_of_rooms_required'])
-    response = available_time_slots('Deluxe', #request.user.username,
+    response = best_available_time_slot('Deluxe', #request.user.username,
                                 request.session['book_date'],
                                 request.session['check_in'],
                                 request.session['check_out'],
@@ -1416,7 +1416,7 @@ def deluxe(request):
 """Function to book room of this category if available."""
 @login_required(login_url="/hotel/sign_in/")
 def king(request):
-    response = available_time_slots('King', #request.user.username,
+    response = best_available_time_slot('King', #request.user.username,
                                 request.session['book_date'],
                                 request.session['check_in'],
                                 request.session['check_out'],
@@ -1433,7 +1433,7 @@ def king(request):
 """Function to book room of this category if available."""
 @login_required(login_url="/hotel/sign_in/")
 def queen(request):
-    response = available_time_slots('Queen', #request.user.username,
+    response = best_available_time_slot('Queen', #request.user.username,
                                 request.session['book_date'],
                                 request.session['check_in'],
                                 request.session['check_out'],
