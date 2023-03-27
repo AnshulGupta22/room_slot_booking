@@ -84,6 +84,7 @@
     </button>
     <div class="dropdown-content">
       <a href="{% url 'hotel:view_profile' %}">View Profile</a>
+      <a href="{% url 'hotel:edit_profile' %}">Edit Profile</a>
       <a href="{% url 'hotel:logout' %}">Logout</a>
     </div>
   </div>
@@ -96,7 +97,7 @@
         <li><b>Check in:</b> {{ check_in }}</li>
         <li><b>Check out:</b> {{ check_out }}</li>
         <li><b>Person:</b> {{ person }}</li>
-        <li><b>Number of rooms required:</b> {{ no_of_rooms_required }}</li>
+        <!-- <li><b>Number of rooms:</b> {{ no_of_rooms_required }}</li> -->
       </ul>
   </div>
     <div id="lef-hea">
@@ -143,7 +144,7 @@
             <img src = "{% static 'hotel/images/deluxe.jpeg' %}" alt="Room" class="room-photo">
             <div class="container3">
               <h2><b>Deluxe</b></h2> 
-              <p>Situated in an exclusive block, these rooms with dark wood paneling, soft décor and spacious bathrooms with walk-in shower chambers, are ultimate in privacy and comfort.</p>
+              <p>Situated in an exclusive block, these rooms with dark wood paneling, spacious bathrooms with walk-in shower chambers, are ultimate in privacy and comfort.</p>
               <b>Accommodation Details</b>
               <ul>
                 <li>20% off on food & soft beverages,Spa, Salon & laundry</li>
@@ -151,40 +152,6 @@
                 <li>Wi-Fi</li>
               </ul>
               <p><a class="submit" href = "{% url 'hotel:deluxe' %}"> Book Now </a></p>
-            </div>
-          </div>
-			  {% endif %}
-			  
-			  {% if category == 'King' %}
-		      <div class="card card-width">
-            <img src = "{% static 'hotel/images/king.jpeg' %}" alt="Room" class="room-photo">
-            <div class="container3">
-              <h2><b>King</b></h2>
-              <p>Situated in an exclusive block, these rooms with dark wood paneling, soft décor and spacious bathrooms with walk-in shower chambers, are ultimate in privacy and comfort.</p>
-              <b>Accommodation Details</b>
-              <ul>
-                <li>20% off on food & soft beverages,Spa, Salon & laundry</li>
-                <li>2 major meals ;pre-set Lunch & Dinner at Coffee Shop</li>
-                <li>Wi-Fi</li>
-              </ul>
-              <p><a class="submit" href = "{% url 'hotel:king' %}"> Book Now </a></p>
-            </div>
-          </div>
-			  {% endif %}
-			  
-			  {% if category == 'Queen' %}
-	        <div class="card card-width">
-            <img src = "{% static 'hotel/images/queen.jpeg' %}" alt="Room" class="room-photo">
-            <div class="container3">
-              <h2><b>Queen</b></h2> 
-              <p>Situated in an exclusive block, these rooms with dark wood paneling, soft décor and spacious bathrooms with walk-in shower chambers, are ultimate in privacy and comfort.</p>
-              <b>Accommodation Details</b>
-              <ul>
-                <li>20% off on food & soft beverages,Spa, Salon & laundry</li>
-                <li>2 major meals ;pre-set Lunch & Dinner at Coffee Shop</li>
-                <li>Wi-Fi</li>
-              </ul>
-              <p><a class="submit" href = "{% url 'hotel:queen' %}"> Book Now </a></p>
             </div>
           </div>
 			  {% endif %}

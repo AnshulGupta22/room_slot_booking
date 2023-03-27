@@ -1,0 +1,108 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Available Time Slots</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="{% static 'hotel/css/base.css' %}">
+    <style>
+      .card-width {
+        width: 40%;
+      }
+
+      img {
+        border-radius: 5px 0 0 0;
+        float: left;
+        width: 50%;
+        margin-right: 10px;
+      }
+
+      .container3 {
+        padding: 2px 16px;
+      }
+
+      body{
+        padding: 0; margin: 0;
+      }
+      
+      #foott{
+        margin-top: 25px;
+      }
+
+      .room-photo {
+        margin-right: 20px;
+        margin-bottom: 15px;
+      }
+
+      .lef-hea {
+        margin-left: 25px;
+      }
+    </style>
+  </head>
+	<body id="body-color">
+<!-- Navigation Bar -->
+<div class="w3-bar w3-white w3-large">
+  <div class="w3-bar-item w3-red w3-mobile"><i class="fa fa-bed w3-margin-right"></i>Logo</div>
+
+  <div class="dropdown w3-right ert">
+    <button class="dropbtn">{{ username }} 
+      <i class="fa fa-caret-down"></i>
+    </button>
+    <div class="dropdown-content">
+      <a href="{% url 'hotel:view_profile' %}">View Profile</a>
+      <a href="{% url 'hotel:edit_profile' %}">Edit Profile</a>
+      <a href="{% url 'hotel:logout' %}">Logout</a>
+    </div>
+  </div>
+  </div>
+  <div class="card card-width container3" style="float: right;">
+    <h2>Booking Details</h2>
+      <ul>
+        <li><b>Book date:</b> {{ book_date }}</li>
+        <li><b>Check in:</b> {{ check_in }}</li>
+        <li><b>Check out:</b> {{ check_out }}</li>
+        <li><b>Person:</b> {{ person }}</li>
+        <li><b>Number of rooms:</b> {{ no_of_rooms_required }}</li>
+      </ul>
+  </div>
+    <div class="lef-hea">
+      <h1>Select Time Slots</h1>
+    </div>
+	  {% if time_slots %}
+      <div class="lef-hea">
+        <h2>Category: {{category}}</h2>
+        <form method="POST" id="bold-form">
+          {% csrf_token %}
+          <input type="submit" class= "submit" value="Book Now" />
+        </form>
+      </div>
+		  {% for time_slot in time_slots %}
+        <div class="card card-width">
+          <div class="container3">
+            <!--<input type="checkbox" id="vehicle1" name="vehicle1" value="Bike">-->
+            Capacity: {{time_slot.room.capacity}}<br/>
+            Room Manager: {{time_slot.room.manager}}<br/>
+            Available From: {{time_slot.available_from}}<br/>
+            Available Till: {{time_slot.available_till}}
+          </div>
+        </div>
+		  {% endfor %}
+	  {% else %}
+		  <p> No time slots are available </p>
+	{% endif %}
+  <!-- Footer -->
+  <footer class="w3-padding-32 w3-black w3-center w3-margin-top" id="foott">
+    <h5>Find Us On</h5>
+    <div class="w3-xlarge w3-padding-16">
+      <a href="#" class="fa fa-facebook"></a>
+      <a href="#" class="fa fa-instagram"></a>
+      <a href="#" class="fa fa-twitter"></a>
+      <a href="#" class="fa fa-youtube"></a>
+      <a href="#" class="fa fa-linkedin-square"></a>
+    </div>
+    <p>Powered by <a href="https://www.w3schools.com/w3css/default.asp" target="_blank" class="w3-hover-text-green">w3.css</a></p>
+  </footer>
+	</body>
+</html>
+

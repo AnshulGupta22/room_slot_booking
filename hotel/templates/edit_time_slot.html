@@ -37,8 +37,18 @@
 					<a href="{% url 'hotel:logout' %}">Logout</a>
 				</div>
 			</div>
-      <a href="../../view_time_slots/{{room_number}}" class="w3-right ert"> Search Time Slots </a>
   	</div>
+    <br/>
+    <ul class="breadcrumb">
+      <li>
+        <a href="{% url 'hotel:rooms' %}">Rooms</a>
+        &nbsp;>&nbsp;
+        <a href="../../time_slots/{{number}}">Time Slots</a>
+        &nbsp;>&nbsp;
+        <span class="current">Edit Time Slot</span>
+      </li>
+    </ul>
+    <br/>
     <h3> Edit time slot</h3>
   	<form method="POST">
       {% csrf_token %}
