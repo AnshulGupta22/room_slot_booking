@@ -212,7 +212,6 @@ class SearchTimeSlotsForm(forms.Form):
     # available_till = forms.TimeField(widget=TimeInput(attrs={'class': 'unbold-form'}), initial=time(23,59))
 
     date = forms.DateField(widget=FutureDateInput(attrs={'class': 'unbold-form'}), required=False, initial=date.today())
-
     available_from = forms.TimeField(widget=TimeInput(attrs={'class': 'unbold-form'}), required=False)
     available_till = forms.TimeField(widget=TimeInput(attrs={'class': 'unbold-form'}), required=False)
 
@@ -248,7 +247,7 @@ class SearchTimeSlotsForm(forms.Form):
         available_till = cleaned_data.get("available_till")
 
         if (available_from is not None and available_till is None) or (available_from is None and available_till is not None):
-            # Here we're raising a ValidationError that refers to a specific
+            # Raising a ValidationError that refers to a specific
             # field so the error is better pointed out to the user.
             raise ValidationError(
                 _("You can either fill both 'Available from' and 'Available till' or choose not to fill both of them."),

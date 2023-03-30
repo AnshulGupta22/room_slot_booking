@@ -88,22 +88,17 @@
       <br/><br/><h2>Booking Details</h2><br/>
       <ul style="line-height: 2em;">
         <li><b>Book date:</b> {{ book_date }}</li>
-        <li><b>Check in:</b> {{ check_in }}</li>
-        <li><b>Check out:</b> {{ check_out }}</li>
+        <!-- <li><b>Check in:</b> {{ check_in }}</li>
+        <li><b>Check out:</b> {{ check_out }}</li> -->
         <li><b>Person:</b> {{ person }}</li>
-        <li><b>Number of rooms required:</b> {{ no_of_rooms_required }}</li>
         <li><b>Category:</b> {{ category }}</li>
-
-        {% if time_slots %}
-          {% for time_slot in time_slots %}
+        {% if manager %}
             <hr>
-            <li><b>Capacity:</b> {{ time_slot.room.capacity }}</li>
-            <li><b>Manager:</b> {{ time_slot.room.manager }}</li>
-            <li><b>Available From:</b> {{ time_slot.available_from }}</li>
-            <li><b>Available Till:</b> {{ time_slot.available_till }}</li>
-          {% endfor %}
+            <li><b>Manager:</b> {{ manager }}</li>
+            <li><b>Available From:</b> {{ available_from }}</li>
+            <li><b>Available Till:</b> {{ available_till }}</li>
         {% else %}
-          <p>No time slots are available.</p>
+          <p>No time slot is available.</p>
         {% endif %}
       </ul>
       <br/><br/><br/>

@@ -43,8 +43,8 @@ class Room(models.Model):
         return f'Number: {self.number}, category: {self.category}, capacity: {self.capacity}, advance: {self.advance}, manager: {self.manager}'
 
 class TimeSlot(models.Model):
-    #class Meta:
-      #ordering = ['available_from']    commented it because otherwise we will not be able to get the last time slot.
+    class Meta:
+        ordering = ['available_from']
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
     available_from = models.TimeField()
     available_till = models.TimeField()
