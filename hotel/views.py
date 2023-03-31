@@ -269,7 +269,7 @@ def delete_room(request, number):
 
 """Returns timeslots based on the search criterias."""
 def time_slots_search(
-        number, str_available_from, str_available_till, occupancy, sort_by):
+        number, str_available_from, str_available_till, sort_by):
     room_obj = Room.objects.get(number=number)
     '''if str_numbers != '':
         spaces_numbers = list(str_numbers.split(","))
@@ -423,7 +423,7 @@ def time_slots_search(
         available_categories.append('Queen')
     return available_categories"""
 
-"""Function to search time slots."""
+"""Displays the time slots based on the selected criterias."""
 @login_required(login_url="/hotel/sign_in/")
 def time_slots(request, number):
     if request.user.email.endswith("@anshul.com"):
@@ -467,17 +467,33 @@ def time_slots(request, number):
 
                 time_slots = time_slots_search(number,
                                         request.session['available_from'],
-                                        request.session['available_till'], request.session['occupancy'], request.POST['sort_by']
+                                        request.session['available_till'], 
+                                        request.POST['sort_by']
                                         )
                 #if response:
-                occ = list()
-                vac = list()
-                for time_slot in time_slots:
-                    try:
-                        Booking.objects.get(check_in_date=request.session['date'], timeslot=time_slot)
-                        occ.append(time_slot)
-                    except Exception:
-                        vac.append(time_slot)
+                print(time_slots)
+                if request.session['occupancy'] == '':
+                    for time_slot in time_slots:
+                        try:
+                            Booking.objects.get(check_in_date=request.session['date'], timeslot=time_slot)
+                            time_slot.occupancy = "Booked"
+                        except Exception:
+                            time_slot.occupancy = "Vacant"
+                        print(time_slot.occupancy)
+                elif request.session['occupancy'] == 'Vacant':
+                    for time_slot in time_slots:
+                        try:
+                            Booking.objects.get(check_in_date=request.session['date'], timeslot=time_slot)
+                            time_slot.delete()
+                        except Exception:
+                            time_slot.occupancy = "Vacant"
+                elif request.session['occupancy'] == 'Booked':
+                    for time_slot in time_slots:
+                        try:
+                            Booking.objects.get(check_in_date=request.session['date'], timeslot=time_slot)
+                            time_slot.occupancy = "Booked"
+                        except Exception:
+                            time_slot.exclude()
                 context = {
                     'form': form,
                     'room': room,
@@ -494,19 +510,26 @@ def time_slots(request, number):
                     'username': request.user.username
                     }
                 return render(request, 'time_slots.html', context)
+        time_slots = TimeSlot.objects.filter(room_id=number)
+        for time_slot in time_slots:
+            try:
+                Booking.objects.get(check_in_date=request.session['date'], timeslot=time_slot)
+                time_slot.occupancy = "Booked"
+            except Exception:
+                time_slot.occupancy = "Vacant"
         context = {
                 'form': SearchTimeSlotsForm(),
                 'room': room,
                 #'number': number,
                 #'time_slots': TimeSlot.objects.filter(room=number, manager=request.user),
-                'time_slots': TimeSlot.objects.filter(room_id=number),#.order_by('available_from'),
+                'time_slots': time_slots,#.order_by('available_from'),
                 'username': request.user.username
                 }
         return render(request, 'time_slots.html', context)
     else:
         return redirect('../book/')
 
-"""Function to add time slot."""
+"""Adds a time slot."""
 @login_required(login_url="/hotel/sign_in/")
 def add_time_slot(request, number):
     if request.user.email.endswith("@anshul.com"):
@@ -569,7 +592,7 @@ def add_time_slot(request, number):
     else:
         return redirect('../book/')
 
-"""Function to convert string to time."""
+"""Converts string to time."""
 def convert_to_time_sec(date_time):
     format = '%H:%M:%S'
     try:
@@ -578,7 +601,7 @@ def convert_to_time_sec(date_time):
         datetime_str = None
     return datetime_str
 
-"""Function to edit time slot."""
+"""Edits a time slot."""
 @login_required(login_url="/hotel/sign_in/")
 def edit_time_slot(request, pk):
     if request.user.email.endswith("@anshul.com"):
@@ -674,7 +697,7 @@ def edit_time_slot(request, pk):
     else:
         return redirect('../book/')
 
-"""Function to delete time slot."""
+"""Deletes a time slot."""
 @login_required(login_url="/hotel/sign_in/")
 def delete_time_slot(request, pk):
     if request.user.email.endswith("@anshul.com"):
@@ -690,11 +713,11 @@ def delete_time_slot(request, pk):
     else:
         return redirect('../book/')
 
-"""Function that returns the list of available categories."""
-# def search_availability(
+"""Returns the list of available categories."""
+# def search_available_categories(
 #         book_date_str, check_in_str, check_out_str,
 #         person, no_of_rooms_required):
-def search_availability(
+def search_available_categories(
         book_date_str, check_in_str, check_out_str,
         person):
     #book_date = convert_to_date(book_date_str)
@@ -707,9 +730,9 @@ def search_availability(
     room_list = Room.objects.filter(
         capacity__gte=person
     ).order_by('capacity')
-    regular_rooms = 0
-    executive_rooms = 0
-    deluxe_rooms = 0
+    # regular_rooms = 0
+    # executive_rooms = 0
+    # deluxe_rooms = 0
     available_categories = list()
     #time_slots = TimeSlot.objects.none()
     for room in room_list:
@@ -820,7 +843,7 @@ def search_availability(
 #         capacity__gte=person
 #     )
 
-"""Function for booking."""
+"""Displays the available categories."""
 @login_required(login_url="/hotel/sign_in/")
 def booking(request):
     if request.method == 'POST':
@@ -833,12 +856,12 @@ def booking(request):
             # request.session['no_of_rooms_required'] = int(
             #     request.POST['no_of_rooms']
             #     )
-            # response = search_availability(request.session['book_date'],
+            # response = search_available_categories(request.session['book_date'],
             #                                request.session['check_in'],
             #                                request.session['check_out'],
             #                                request.session['person'],
             #                                request.session['no_of_rooms_required'])
-            response = search_availability(request.session['book_date'],
+            response = search_available_categories(request.session['book_date'],
                                            request.session['check_in'],
                                            request.session['check_out'],
                                            request.session['person'])
@@ -1876,7 +1899,7 @@ def booking_list(request):
             request.session['api_check_out'] = str(serializer.validated_data['check_out_time'])
             request.session['api_person'] = serializer.validated_data['person']
             request.session['no_of_rooms'] = serializer.validated_data['no_of_rooms']
-            response = search_availability(request.session['api_book_date'], request.session['api_check_in'], request.session['api_check_out'], request.session['api_person'], request.session['no_of_rooms'])
+            response = search_available_categories(request.session['api_book_date'], request.session['api_check_in'], request.session['api_check_out'], request.session['api_person'], request.session['no_of_rooms'])
             if response:
                 context = {'categories': response}
 
