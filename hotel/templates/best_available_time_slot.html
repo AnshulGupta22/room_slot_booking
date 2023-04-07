@@ -55,6 +55,7 @@
       <a href="{% url 'hotel:logout' %}">Logout</a>
     </div>
   </div>
+  <a href="{% url 'hotel:all_bookings' %}" class="w3-right ert"> Your Bookings </a>
   </div>
   <div class="card card-width container3" style="float: right;">
     <h2>Booking Details</h2>
@@ -66,11 +67,15 @@
         <li><b>Number of rooms:</b> {{ no_of_rooms_required }}</li>
       </ul>
   </div>
-    <div class="lef-hea">
-      <h1>Select Time Slots</h1>
-    </div>
-	  {% if time_slot %}
+    {% if time_slot == 'n' %}
+      <p>
+        Sorry...This time slot is no longer available.
+        <br/>
+        <a class="submit" href = "{% url 'hotel:regular' %}">Click here</a> to search for another.
+      </p>
+	  {% elif time_slot %}
       <div class="lef-hea">
+        <h1>Select Time Slots</h1>
         <h2>Category: {{category}}</h2>
         <form method="POST" id="bold-form">
           {% csrf_token %}
@@ -87,7 +92,10 @@
           </div>
         </div>
 	  {% else %}
-		  <p> No time slot is available </p>
+		  <p>
+        No time slot for {{category}} category is available.
+        <a class="submit" href = "{% url 'hotel:book' %}">Click here</a> to change booking details.
+      </p>
 	{% endif %}
   <!-- Footer -->
   <footer class="w3-padding-32 w3-black w3-center w3-margin-top" id="foott">

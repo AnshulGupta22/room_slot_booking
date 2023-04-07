@@ -20,7 +20,7 @@ urlpatterns = [
     path('edit_time_slot/<int:pk>/', views.edit_time_slot, name='edit_time_slot'),
     path('delete_time_slot/<int:pk>/', views.delete_time_slot, name='delete_time_slot'),
     path('book/', views.booking, name='book'),
-    path('manage_bookings/', views.manage_bookings, name='manage_bookings'),
+    path('bookings/', views.bookings, name='bookings'),
     path('regular/', views.regular, name='regular'),
     path('executive/', views.executive, name='executive'),
     path('deluxe/', views.deluxe, name='deluxe'),
@@ -36,11 +36,11 @@ urlpatterns = [
     #path('rooms/', views.room_list),
     #path('rooms/<int:pk>/', views.room_detail),
     path('users/', views.user_list),
-    path('bookings/', views.booking_list),
-    path('bookings/<int:pk>/', views.booking_detail),
-    path('bookings/<category>/', views.booking_category),
+    # path('bookings/', views.booking_list),
+    # path('bookings/<int:pk>/', views.booking_detail),
+    # path('bookings/<category>/', views.booking_category),
     path('profile_view/', views.profile_view),
-    path('manage_time_slots/', views.manage_time_slots, name='manage_time_slots'),
+    #path('manage_time_slots/', views.manage_time_slots, name='manage_time_slots'),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
