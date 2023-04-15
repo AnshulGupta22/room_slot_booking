@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Add Room</title>
+    <title>Edit Room</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -19,7 +19,7 @@
     <div class="w3-bar w3-white w3-large">
 			<div class="w3-bar-item w3-red w3-mobile"><i class="fa fa-bed w3-margin-right"></i>Logo</div>
       <a href="{% url 'hotel:rooms' %}" class="w3-bar-item w3-button w3-mobile active">Rooms</a>
-      <a href="{% url 'hotel:manage_bookings' %}" class="w3-bar-item w3-button w3-mobile">Bookings</a>
+      <a href="{% url 'hotel:manager_bookings' %}" class="w3-bar-item w3-button w3-mobile">Bookings</a>
 			<div class="dropdown w3-right ert">
 				<button class="dropbtn">{{ username }}
 					<i class="fa fa-caret-down"></i>
@@ -60,6 +60,3 @@
     </footer>
 	</body>
 </html>
-
-
-

@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>All Bookings</title>
+    <title>Customer Bookings</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="{% static 'hotel/css/base.css' %}">
@@ -66,6 +66,7 @@
         <div class="card card-width">
           <div class="container3">
             <h2><b> Future Bookings </b></h2>
+              {{ count_future_bookings }} results for future bookings
               {% for future_booking in future_bookings %}
                 <div class="card card-width container3 inner-card">
                   <!--<img src = "{% static 'hotel/images/hotel.jpg' %}" alt="Room" style="width:30%">-->
@@ -75,7 +76,7 @@
                   <b>Category</b> - {{ future_booking.timeslot.room.category }}<br/>
                   <b>Capacity</b> - {{ future_booking.timeslot.room.capacity }}<br/>
                   <b>Manager</b> - {{ future_booking.timeslot.room.manager }}<br/>
-                  <a href='/hotel/all_bookings/{{future_booking.pk}}' class="submit" style="padding: 2px 20px;"> Delete </a>
+                  <a href='/hotel/customer_bookings/{{future_booking.pk}}' class="submit" style="padding: 2px 20px;"> Delete </a>
                 </div>
               {% endfor %}
           </div>
@@ -86,6 +87,7 @@
         <div class="card card-width">
           <div class="container3">
             <h2><b> Past and Present Bookings </b></h2>
+            {{ count_past_present_bookings }} results for past and present bookings
               {% for past_present_booking in past_present_bookings %}
                 <div class="card card-width">
                   <!--<img src = "sample-room.jpg" alt="Room" style="width:30%">-->

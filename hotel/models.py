@@ -12,7 +12,7 @@ class Room(models.Model):
     class Meta:
       ordering = ['number']
     number =  models.PositiveSmallIntegerField(
-        validators=[MaxValueValidator(1000), MinValueValidator(1)],
+        validators=[MaxValueValidator(550), MinValueValidator(1)],
         primary_key=True
         )
     CATEGORIES = (

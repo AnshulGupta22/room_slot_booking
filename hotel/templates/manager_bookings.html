@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Manager</title>
+    <title>Manager Bookings</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -44,6 +44,7 @@
       <input type="submit" class= "submit submit-right" value="Search Bookings" />
     </form>
     {% if manager_bookings %}
+      {{ count }} results for bookings
       {% for manager_booking in manager_bookings %}
         <div class="card card-width container3">
           <b>Customer:</b> {{ manager_booking.customer }}<br/>
@@ -51,6 +52,7 @@
           <b>Check in date:</b> {{ manager_booking.check_in_date }}<br/>
           <b>Available from:</b> {{ manager_booking.timeslot.available_from }}<br/>
           <b>Available till:</b> {{ manager_booking.timeslot.available_till }}<br/>
+          <a href='../../hotel/manager_delete_booking/{{manager_booking.id}}'> [Delete]</a>
           <!-- <b>Category:</b> {{ manager_booking.timeslot.room.category }}<br/>
           <b>Capacity:</b> {{ manager_booking.timeslot.room.capacity }}<br/>
           <b>No of rooms:</b> {{ manager_booking.no_of_rooms }}<br/> -->
@@ -73,5 +75,3 @@
     </footer>
   </body>
 </html>
-
-

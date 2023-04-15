@@ -30,7 +30,7 @@
     <div class="w3-bar w3-white w3-large">
 			<div class="w3-bar-item w3-red w3-mobile"><i class="fa fa-bed w3-margin-right"></i>Logo</div>
       <a href="#" class="w3-bar-item w3-button w3-mobile active">Rooms</a>
-      <a href="{% url 'hotel:bookings' %}" class="w3-bar-item w3-button w3-mobile">Bookings</a>
+      <a href="{% url 'hotel:manager_bookings' %}" class="w3-bar-item w3-button w3-mobile">Bookings</a>
 			<div class="dropdown w3-right ert">
 				<button class="dropbtn">{{ username }}
 					<i class="fa fa-caret-down"></i>
@@ -61,7 +61,9 @@
       <input type="submit" class= "submit submit-right" value="Search" />
     </form>
     <br/>
+    <br/>
 		{% if rooms %}
+      {{ count }} results for rooms
 		  {% for room in rooms %}
       <div class="card">
         <b>Number:</b> {{ room.number }}<br/>

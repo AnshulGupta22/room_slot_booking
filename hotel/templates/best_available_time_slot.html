@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Available Time Slots</title>
+    <title>Best available Time Slot</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="{% static 'hotel/css/base.css' %}">
@@ -55,7 +55,7 @@
       <a href="{% url 'hotel:logout' %}">Logout</a>
     </div>
   </div>
-  <a href="{% url 'hotel:all_bookings' %}" class="w3-right ert"> Your Bookings </a>
+  <a href="{% url 'hotel:customer_bookings' %}" class="w3-right ert"> Your Bookings </a>
   </div>
   <div class="card card-width container3" style="float: right;">
     <h2>Booking Details</h2>
@@ -111,4 +111,3 @@
   </footer>
 	</body>
 </html>
-

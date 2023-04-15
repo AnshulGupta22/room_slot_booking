@@ -81,7 +81,7 @@
         <a href="{% url 'hotel:logout' %}">Logout</a>
       </div>
     </div>
-    <a href="{% url 'hotel:all_bookings' %}" class="w3-right ert"> Your Bookings </a>
+    <a href="{% url 'hotel:customer_bookings' %}" class="w3-right ert"> Your Bookings </a>
   </div>
 	  <div class="container2" id="booke">
       <h1>Booked</h1>
@@ -93,10 +93,10 @@
         <li><b>Person:</b> {{ person }}</li>
         <li><b>Category:</b> {{ category }}</li>
         {% if manager %}
-            <hr>
-            <li><b>Manager:</b> {{ manager }}</li>
-            <li><b>Available From:</b> {{ available_from }}</li>
-            <li><b>Available Till:</b> {{ available_till }}</li>
+          <hr>
+          <li><b>Manager:</b> {{ manager }}</li>
+          <li><b>Available From:</b> {{ available_from }}</li>
+          <li><b>Available Till:</b> {{ available_till }}</li>
         {% else %}
           <p>No time slot is available.</p>
         {% endif %}
