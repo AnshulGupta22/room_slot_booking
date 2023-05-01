@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Available Time Slots</title>
+    <title>Best Available Time Slot</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="{% static 'hotel/css/base.css' %}">
@@ -55,6 +55,7 @@
       <a href="{% url 'hotel:logout' %}">Logout</a>
     </div>
   </div>
+  <a href="{% url 'hotel:customer_bookings' %}" class="w3-right ert"> Your Bookings </a>
   </div>
   <div class="card card-width container3" style="float: right;">
     <h2>Booking Details</h2>
@@ -66,18 +67,21 @@
         <li><b>Number of rooms:</b> {{ no_of_rooms_required }}</li>
       </ul>
   </div>
-    <div class="lef-hea">
-      <h1>Select Time Slots</h1>
-    </div>
-	  {% if time_slots %}
+    {% if time_slot == 'n' %}
+      <p>
+        Sorry...This time slot is no longer available.
+        <br/>
+        <a class="submit" href = "{% url 'hotel:regular' %}">Click here</a> to search for another.
+      </p>
+	  {% elif time_slot %}
       <div class="lef-hea">
+        <h1>Select Time Slots</h1>
         <h2>Category: {{category}}</h2>
         <form method="POST" id="bold-form">
           {% csrf_token %}
           <input type="submit" class= "submit" value="Book Now" />
         </form>
       </div>
-		  {% for time_slot in time_slots %}
         <div class="card card-width">
           <div class="container3">
             <!--<input type="checkbox" id="vehicle1" name="vehicle1" value="Bike">-->
@@ -87,9 +91,11 @@
             Available Till: {{time_slot.available_till}}
           </div>
         </div>
-		  {% endfor %}
 	  {% else %}
-		  <p> No time slots are available </p>
+		  <p>
+        No time slot for {{category}} category is available.
+        <a class="submit" href = "{% url 'hotel:book' %}">Click here</a> to change booking details.
+      </p>
 	{% endif %}
   <!-- Footer -->
   <footer class="w3-padding-32 w3-black w3-center w3-margin-top" id="foott">
@@ -105,4 +111,3 @@
   </footer>
 	</body>
 </html>
-

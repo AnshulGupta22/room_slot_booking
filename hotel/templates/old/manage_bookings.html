@@ -4,6 +4,7 @@
   <head>
     <title>Manager</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="{% static 'hotel/css/base.css' %}">
     <style>
@@ -27,32 +28,35 @@
     <!-- Navigation Bar -->
     <div class="w3-bar w3-white w3-large">
 			<div class="w3-bar-item w3-red w3-mobile"><i class="fa fa-bed w3-margin-right"></i>Logo</div>
+      <a href="{% url 'hotel:rooms' %}" class="w3-bar-item w3-button w3-mobile">Rooms</a>
+      <a href="{% url 'hotel:manager_bookings' %}" class="w3-bar-item w3-button w3-mobile active">Bookings</a>
 			<div class="dropdown w3-right ert">
 				<button class="dropbtn">{{ username }}
 					<i class="fa fa-caret-down"></i>
 				</button>
 				<div class="dropdown-content">
+          <a href="{% url 'hotel:view_profile' %}">View Profile</a>
+          <a href="{% url 'hotel:edit_profile' %}">Edit Profile</a>
 					<a href="{% url 'hotel:logout' %}">Logout</a>
 				</div>
 			</div>
-      <a href="{% url 'hotel:manage' %}" class="w3-right ert"> Manage </a>
   	</div>
     <form method="POST">
       {% csrf_token %}
       {{ form.as_p }}
       <input type="submit" class= "submit submit-right" value="Search Availability" />
     </form>
-		{% if bookings %}
-		  {% for booking in bookings %}
+		{% if manager_bookings %}
+		  {% for manager_booking in manager_bookings %}
       <div class="card card-width container3">
-          <b>Room Number:</b> {{ booking.room_numbers }}<br/>
-          <b>Customer name:</b> {{ booking.customer_name }}<br/>
-          <b>Check in date:</b> {{ booking.check_in_date }}<br/>
-          <b>Check in time:</b> {{ booking.check_in_time }}<br/>
-          <b>Check out time:</b> {{ booking.check_out_time }}<br/>
-          <b>Category:</b> {{ booking.category }}<br/>
-          <b>Person:</b> {{ booking.person }}<br/>
-          <b>No of rooms:</b> {{ booking.no_of_rooms }}<br/>
+          <b>Customer:</b> {{ manager_booking.customer }}<br/>
+          <b>Number:</b> {{ manager_booking.timeslot.room.number }}<br/>
+          <b>Check in date:</b> {{ manager_booking.check_in_date }}<br/>
+          <b>Available from:</b> {{ manager_booking.timeslot.available_from }}<br/>
+          <b>Available till:</b> {{ manager_booking.timeslot.available_till }}<br/>
+          <!-- <b>Category:</b> {{ manager_booking.timeslot.room.category }}<br/>
+          <b>Capacity:</b> {{ manager_booking.timeslot.room.capacity }}<br/>
+          <b>No of rooms:</b> {{ manager_booking.no_of_rooms }}<br/> -->
       </div>
 		  {% endfor %}
 	  {% else %}

@@ -19,7 +19,7 @@
     <div class="w3-bar w3-white w3-large">
 			<div class="w3-bar-item w3-red w3-mobile"><i class="fa fa-bed w3-margin-right"></i>Logo</div>
       <a href="{% url 'hotel:rooms' %}" class="w3-bar-item w3-button w3-mobile active">Rooms</a>
-      <a href="{% url 'hotel:manage_bookings' %}" class="w3-bar-item w3-button w3-mobile">Bookings</a>
+      <a href="{% url 'hotel:manager_bookings' %}" class="w3-bar-item w3-button w3-mobile">Bookings</a>
 			<div class="dropdown w3-right ert">
 				<button class="dropbtn">{{ username }}
 					<i class="fa fa-caret-down"></i>
@@ -52,19 +52,20 @@
       <input type="submit" class= "submit submit-right" value="Search" />
     </form>
     {% if time_slots %}
+      {{ count }} results for time slots
       <br/>
       <h3>Time slots</h3>
 		  {% for time_slot in time_slots %}
-        <div class="card card-width container3">
-          <b>Available From:</b> {{ time_slot.available_from }}<br/>
-          <b>Available Till:</b> {{ time_slot.available_till }}<br/>
-          <b>Occupancy:</b> {{ time_slot.occupancy }}
-          {% if time_slot.occupancy == 'Vacant' %}
+        {% if time_slot.occupancy != '' %}
+          <div class="card card-width container3">
+            <b>Available From:</b> {{ time_slot.available_from }}<br/>
+            <b>Available Till:</b> {{ time_slot.available_till }}<br/>
+            <b>Occupancy:</b> {{ time_slot.occupancy }}
             <br/>
             <a href='../../edit_time_slot/{{time_slot.pk}}'> [Edit]</a><br/>
             <a href='../../delete_time_slot/{{time_slot.pk}}'> [Delete]</a>
-          {% endif %}
-        </div>
+          </div>
+        {% endif %}
 		  {% endfor %}
 	  {% else %}
 		  <p> No time slots are available </p>

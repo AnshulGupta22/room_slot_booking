@@ -1,18 +1,18 @@
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 #from django.core.validators import validate_comma_separated_integer_list, int_list_validator
-from django.core.validators import int_list_validator
+#from django.core.validators import int_list_validator
 from django.conf import settings
 from django.contrib.auth.models import User
 
 # Create your models here.
 
-"""class for representing a room."""
+"""Represents a room."""
 class Room(models.Model):
     class Meta:
       ordering = ['number']
     number =  models.PositiveSmallIntegerField(
-        validators=[MaxValueValidator(1000), MinValueValidator(1)],
+        validators=[MaxValueValidator(550), MinValueValidator(1)],
         primary_key=True
         )
     CATEGORIES = (
@@ -42,9 +42,10 @@ class Room(models.Model):
     def __str__(self):
         return f'Number: {self.number}, category: {self.category}, capacity: {self.capacity}, advance: {self.advance}, manager: {self.manager}'
 
+"""Represents a time slot."""
 class TimeSlot(models.Model):
-    #class Meta:
-      #ordering = ['available_from']    commented it because otherwise we will not be able to get the last time slot.
+    class Meta:
+        ordering = ['available_from']
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
     available_from = models.TimeField()
     available_till = models.TimeField()
@@ -59,7 +60,7 @@ class TimeSlot(models.Model):
         #return f'Room: {self.room}, from: {self.available_from}, till: {self.available_till}, occupancy: {self.occupancy}'
         return f'Room: {self.room}, from: {self.available_from}, till: {self.available_till}'
 
-"""class used when a user books a room slot."""
+"""Represents a booking."""
 class Booking(models.Model):
     #class Meta:
     #  ordering = ['-check_in_date', 'check_in_time']

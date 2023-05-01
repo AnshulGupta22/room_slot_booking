@@ -4,12 +4,14 @@ from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.utils import timezone
+#from django.utils.timezone import now
 #import datetime
-from django.core.validators import int_list_validator, MaxValueValidator, MinValueValidator, RegexValidator
+#from django.core.validators import int_list_validator, MaxValueValidator, MinValueValidator, RegexValidator
+from django.core.validators import int_list_validator, RegexValidator
 from django.utils.regex_helper import _lazy_re_compile
-from datetime import time, date, datetime
+from datetime import date, datetime#, time
 
-from hotel.models import Booking, Room, TimeSlot
+from hotel.models import Room, TimeSlot
 
 slug_re = _lazy_re_compile(r"^[-a-zA-Z0-9_]+\Z")
 # A RegexValidator instance that ensures a value consists of only
@@ -20,7 +22,7 @@ validate_slug2 = RegexValidator(
     "invalid",
 )
 
-"""Function to check if the username already exists or not."""
+"""Checks if the username already exists or not."""
 def validate_username(value):
     new = User.objects.filter(username=value)
     if new.count():
@@ -30,7 +32,9 @@ def validate_username(value):
             params={'value': value},
         )
 
-"""Function to check if the first name and last name contain only English letters."""
+"""Checks if the first name and last name contain only English
+letters.
+"""
 def validate_name(value):
     if not value.isalpha():
         raise ValidationError(
@@ -39,7 +43,7 @@ def validate_name(value):
             params={'value': value},
         )
 
-"""Function to check if the email already exists or not."""
+"""Checks if the email already exists or not."""
 def validate_email(value):
     new = User.objects.filter(email=value)
     if new.count():
@@ -49,19 +53,25 @@ def validate_email(value):
             params={'value': value},
         )
 
-"""class for user sign up."""
-class CustomerForm(forms.Form):
-    username = forms.CharField(label='Desired Username', max_length=150,
-                               validators=[validate_slug2, validate_username])
-    first_name  = forms.CharField(label='First Name', max_length=150, validators=[validate_name])
-    last_name = forms.CharField(label='Last Name', max_length=150, validators=[validate_name])
+"""For sign up."""
+class SignUpForm(forms.Form):
+    username = forms.CharField(
+        label='Desired Username', max_length=150,
+        validators=[validate_slug2, validate_username]
+        )
+    first_name  = forms.CharField(
+        label='First Name', max_length=150, validators=[validate_name]
+        )
+    last_name = forms.CharField(
+        label='Last Name', max_length=150, validators=[validate_name]
+        )
     email = forms.EmailField(label='Your Email', validators=[validate_email])
-    password1 = forms.CharField(label='Enter Password',
-                                widget=forms.PasswordInput, min_length=8)
-    password2 = forms.CharField(label='Retype Password',
-                                widget=forms.PasswordInput, min_length=8)
+    password1 = forms.CharField(
+        label='Enter Password', widget=forms.PasswordInput, min_length=8)
+    password2 = forms.CharField(
+        label='Retype Password', widget=forms.PasswordInput, min_length=8)
 
-    """Function to check if password and retyped password match or not."""
+    """Checks if password and retyped password matches or not."""
     def clean(self):
         cleaned_data = super().clean()
         password1 = cleaned_data.get("password1")
@@ -72,12 +82,14 @@ class CustomerForm(forms.Form):
                 code='Passwords do not match'
             )
 
-"""class for user sign in."""
+"""For sign in."""
 class SignInForm(forms.Form):
-    username = forms.CharField(label='Username', max_length=150, validators=[validate_slug2])
+    username = forms.CharField(
+        label='Username', max_length=150, validators=[validate_slug2]
+        )
     password = forms.CharField(label='Password', widget=forms.PasswordInput)
 
-    """Function to check if username and password match or not."""
+    """Checks if username and password matches or not."""
     def clean(self):
         cleaned_data = super().clean()
         username = cleaned_data.get("username")
@@ -89,16 +101,17 @@ class SignInForm(forms.Form):
                 code='invalid'
             )
 
-"""class for editing a user profile."""
+"""For editing profile."""
 class EditForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ['first_name', 'last_name', 'email']
 
-"""class for searching rooms."""
+"""For searching rooms."""
 class RoomsForm(forms.Form):
-
-    numbers = forms.CharField(validators=[int_list_validator()], required=False, max_length=4000, widget=forms.TextInput(attrs={'class': 'unbold-form'}))
+    numbers = forms.CharField(
+        validators=[int_list_validator()], required=False, max_length=550,
+        widget=forms.TextInput(attrs={'class': 'unbold-form'}))
 
     ROOM_CATEGORIES = (
         ('Regular', 'Regular'),
@@ -171,17 +184,22 @@ class AddRoomForm(forms.ModelForm):
         fields = ['number', 'category', 'capacity', 'advance']
 '''
 
-"""class for adding a room."""
+"""For adding a room."""
 class AddRoomForm(forms.ModelForm):
     class Meta:
         model = Room
         fields = ['number', 'category', 'capacity', 'advance']
-        widgets = {'number': forms.NumberInput(attrs={'class': 'unbold-form'}), 'category': forms.RadioSelect(attrs={'class': 'unbold-form'}), 'capacity': forms.RadioSelect(attrs={'class': 'unbold-form'}), 'advance': forms.NumberInput(attrs={'class': 'unbold-form'})}
+        widgets = {
+            'number': forms.NumberInput(attrs={'class': 'unbold-form'}),
+            'category': forms.RadioSelect(attrs={'class': 'unbold-form'}),
+            'capacity': forms.RadioSelect(attrs={'class': 'unbold-form'}),
+            'advance': forms.NumberInput(attrs={'class': 'unbold-form'})
+            }
 
-class NumberInput(forms.NumberInput):
-    input_type = 'number'
+# class NumberInput(forms.NumberInput):
+#     input_type = 'number'
 
-"""class for editing a room."""
+"""For editing a room."""
 class EditRoomForm(forms.ModelForm):
     class Meta:
         model = Room
@@ -191,19 +209,20 @@ class EditRoomForm(forms.ModelForm):
         #            'number': NumberInput(attrs={'readonly': True, 'class': 'unbold-form'}), 'category': forms.RadioSelect(attrs={'class': 'unbold-form'}), 'capacity': forms.RadioSelect(attrs={'class': 'unbold-form'}), 'advance': forms.NumberInput(attrs={'class': 'unbold-form'})
         #        }
         widgets = {
-                    'category': forms.RadioSelect(attrs={'class': 'unbold-form'}), 'capacity': forms.RadioSelect(attrs={'class': 'unbold-form'}), 'advance': forms.NumberInput(attrs={'class': 'unbold-form'})
-                }
-class FutureDateInput(forms.DateInput):
+            'category': forms.RadioSelect(attrs={'class': 'unbold-form'}),
+            'capacity': forms.RadioSelect(attrs={'class': 'unbold-form'}),
+            'advance': forms.NumberInput(attrs={'class': 'unbold-form'})
+            }
+
+"""Represents as date format in HTML."""
+class DateInput(forms.DateInput):
     input_type = 'date'
 
-    def get_context(self, name, value, attrs):
-        attrs.setdefault('min', now().strftime('%Y-%m-%d'))
-        return super().get_context(name, value, attrs)
-
+"""Represents as time format in HTML."""
 class TimeInput(forms.TimeInput):
     input_type = 'time'
 
-"""class for searching time slots."""
+"""For searching time slots."""
 class SearchTimeSlotsForm(forms.Form):
     # available_from = forms.TimeField(required=False, widget=TimeInput(attrs={'class': 'unbold-form'}), initial=time(0))
     # available_till = forms.TimeField(required=False, widget=TimeInput(attrs={'class': 'unbold-form'}), initial=time(23,59,59))
@@ -211,10 +230,18 @@ class SearchTimeSlotsForm(forms.Form):
     # available_from = forms.TimeField(widget=TimeInput(attrs={'class': 'unbold-form'}), initial=time(0))
     # available_till = forms.TimeField(widget=TimeInput(attrs={'class': 'unbold-form'}), initial=time(23,59))
 
-    date = forms.DateField(widget=FutureDateInput(attrs={'class': 'unbold-form'}), required=False, initial=date.today())
+    date = forms.DateField(
+        widget=DateInput(attrs={'class': 'unbold-form'}), initial=date.today()
+        )
+    available_from = forms.TimeField(
+        widget=TimeInput(attrs={'class': 'unbold-form'}), required=False
+        )
+    available_till = forms.TimeField(
+        widget=TimeInput(attrs={'class': 'unbold-form'}), required=False
+        )
 
-    available_from = forms.TimeField(widget=TimeInput(attrs={'class': 'unbold-form'}), required=False)
-    available_till = forms.TimeField(widget=TimeInput(attrs={'class': 'unbold-form'}), required=False)
+    # available_from = forms.TimeField(widget=TimeInput(attrs={'class': 'unbold-form'}), initial=time(0))
+    # available_till = forms.TimeField(widget=TimeInput(attrs={'class': 'unbold-form'}), initial=time(23,59,59))
 
     STATUS = (
         (None, 'Any'),
@@ -241,14 +268,17 @@ class SearchTimeSlotsForm(forms.Form):
         choices=SORT,
     )
 
-    """Function to ensure that booking is done for future and check out is after check in"""
+    """Ensures that booking is done for future and check out
+    is after check in.
+    """
     def clean(self):
         cleaned_data = super().clean()
         available_from = cleaned_data.get("available_from")
         available_till = cleaned_data.get("available_till")
 
-        if (available_from is not None and available_till is None) or (available_from is None and available_till is not None):
-            # Here we're raising a ValidationError that refers to a specific
+        if ((available_from is not None and available_till is None)
+                or (available_from is None and available_till is not None)):
+            # Raising a ValidationError that refers to a specific
             # field so the error is better pointed out to the user.
             raise ValidationError(
                 _("You can either fill both 'Available from' and 'Available till' or choose not to fill both of them."),
@@ -285,21 +315,63 @@ class SearchTimeSlotsForm(forms.Form):
                 )
             if available_till <= available_from:
                 raise ValidationError(
-                    "Available till should be after available from.", code='Available till after available from'
+                    "Available till should be after available from.",
+                    code='Available till after available from'
                 )
 
+# class ManageViewTimeSlotForm(forms.ModelForm):
+#     class Meta:
+#         model = TimeSlot
+#         fields = ['room', 'available_from', 'available_till']
+#         widgets = {
+#                     'room': forms.IntegerField(validators=[MaxValueValidator(1000), MinValueValidator(1)]),
+#                     'available_from': TimeInput(attrs={'required': False}),
+#                     'available_till': TimeInput(attrs={'required': False}),
+#                 }
+
+#     """Function to ensure that booking is done for future and check out is after check in"""
+#     def clean(self):
+#         cleaned_data = super().clean()
+#         available_from = cleaned_data.get("available_from")
+#         available_till = cleaned_data.get("available_till")
+#         str_available_from = str(available_from)
+#         str_available_till = str(available_till)
+#         format = '%H:%M:%S'
+#         if str_available_from != 'None':
+#             try:
+#                 datetime.strptime(str_available_from, format).time()
+#             except Exception:
+#                 raise ValidationError(
+#                     _('Wrong time entered.'),
+#                     code='Wrong time entered.',
+#                 )
+#         if str_available_till != 'None':
+#             try:
+#                     datetime.strptime(str_available_till, format).time()
+#             except Exception:
+#                 raise ValidationError(
+#                     _('Wrong time entered.'),
+#                     code='Wrong time entered.',
+#                 )
+#         if available_till is not None and available_from is not None:
+#             if available_till <= available_from:
+#                 raise ValidationError(
+#                     "Available till should be after available from.", code='Available till after available from'
+#                 )
+
+"""For adding a time slot"""
 class AddTimeSlotForm(forms.ModelForm):
     class Meta:
         model = TimeSlot
         fields = ['available_from', 'available_till']
         widgets = {
-                    #'number': PositiveSmallIntegerField(validators=[MaxValueValidator(1000), MinValueValidator(1)], attrs={'readonly': True}),
-                    #'available_from': TimeInput(attrs={'readonly': True}),
-                    'available_from': TimeInput(attrs={'class': 'unbold-form'}),
-                    'available_till': TimeInput(attrs={'class': 'unbold-form'})
-                }
+            'available_from': TimeInput(attrs={'class': 'unbold-form'}),
+            'available_till': TimeInput(attrs={'class': 'unbold-form'})
+            }
 
-    """Function to ensure that booking is done for future and check out is after check in"""
+    """Ensures that booking is done for future and check out
+    is after check in.
+    """
     def clean(self):
         cleaned_data = super().clean()
         available_from = cleaned_data.get("available_from")
@@ -307,31 +379,30 @@ class AddTimeSlotForm(forms.ModelForm):
         str_available_from = str(available_from)
         str_available_till = str(available_till)
         format = '%H:%M:%S'
-        if str_available_from != 'None':
-            try:
-                datetime.strptime(str_available_from, format).time()
-            except Exception:
-                raise ValidationError(
-                    _('Wrong time entered.'),
-                    code='Wrong time entered.',
-                )
-        if str_available_till != 'None':
-            try:
-                    datetime.strptime(str_available_till, format).time()
-            except Exception:
-                raise ValidationError(
-                    _('Wrong time entered.'),
-                    code='Wrong time entered.',
-                )
-        if available_till is not None and available_from is not None:
-            if available_till <= available_from:
-                raise ValidationError(
-                    "Available till should be after available from.", code='Available till after available from'
-                )
+        #if str_available_from != 'None':
+        try:
+            datetime.strptime(str_available_from, format).time()
+        except Exception:
+            raise ValidationError(
+                _('Wrong time entered.'),
+                code='Wrong time entered.',
+            )
+        #if str_available_till != 'None':
+        try:
+            datetime.strptime(str_available_till, format).time()
+        except Exception:
+            raise ValidationError(
+                _('Wrong time entered.'),
+                code='Wrong time entered.',
+            )
+        #if available_till is not None and available_from is not None:
+        if available_till <= available_from:
+            raise ValidationError(
+                "Available till should be after available from.",
+                code='Available till after available from'
+            )
 
-
-
-"""class used for booking."""
+#"""class used for booking."""
 # class BookingForm(forms.ModelForm):
 #     class Meta:
 #         model = Booking
@@ -375,10 +446,22 @@ class AddTimeSlotForm(forms.ModelForm):
 #                 "Check out should be after check in.", code='check out after check in'
 #             )
 
-"""class used for booking."""
-class BookingForm(forms.Form):
+"""Represents as date format in HTML and ensures that only future date
+can be selected.
+"""
+class FutureDateInput(forms.DateInput):
+    input_type = 'date'
 
-    check_in_date = forms.DateField(widget=FutureDateInput(attrs={'class': 'unbold-form'}), initial=date.today())
+    def get_context(self, name, value, attrs):
+        attrs.setdefault('min', timezone.now().strftime('%Y-%m-%d'))
+        return super().get_context(name, value, attrs)
+
+"""For booking a timeslot by the customer."""
+class BookingForm(forms.Form):
+    check_in_date = forms.DateField(
+        widget=FutureDateInput(attrs={'class': 'unbold-form'}),
+        initial=date.today()
+        )
     check_in_time = forms.TimeField(widget=TimeInput(attrs={'class': 'unbold-form'}))
     check_out_time = forms.TimeField(widget=TimeInput(attrs={'class': 'unbold-form'}))
     PERSONS = (
@@ -402,7 +485,9 @@ class BookingForm(forms.Form):
         #             'check_out_time': TimeInput(),
         #         }
 
-    """Function to ensure that booking is done for future and check out is after check in"""
+    """Ensures that booking is done for future and check out
+    is after check in.
+    """
     def clean(self):
         cleaned_data = super().clean()
         normal_book_date = cleaned_data.get("check_in_date")
@@ -413,210 +498,138 @@ class BookingForm(forms.Form):
         format = '%H:%M:%S'
         try:
             datetime.strptime(str_check_in_time, format).time()
+        except Exception:
+            raise ValidationError(
+                _('Wrong check in time entered.'),
+                code='Wrong check in time entered.',
+            )
+
+        try:
             datetime.strptime(str_check_out_time, format).time()
         except Exception:
             raise ValidationError(
-                _('Wrong time entered.'),
-                code='Wrong time entered.',
+                _('Wrong check out time entered.'),
+                code='Wrong check out time entered.',
             )
-
         # now is the date and time on which the user is booking.
         now = timezone.now()
+        #now = now()
         if (normal_book_date < now.date() or
             (normal_book_date == now.date() and
-            normal_check_in_time < now.time())):
+             normal_check_in_time < now.time())):
             raise ValidationError(
                 "You can only book for future.", code='only book for future'
             )
         if normal_check_out_time <= normal_check_in_time:
             raise ValidationError(
-                "Check out should be after check in.", code='check out after check in'
+                "Check out should be after check in.",
+                code='check out after check in'
             )
 
 
 
+# """Function to convert string to date."""
+# def convert_to_date(date_time):
+#     format = '%Y-%m-%d'
+#     try:
+#         datetime.strptime(date_time, format).date()
+#     except Exception:
+#         raise ValidationError(
+#             "Wrong date format entered.", code='Wrong date format'
+#             )
+
+# """Function to convert string to time."""
+# def convert_to_time(value):
+#     format = '%H:%M:%S'
+#     try:
+#         datetime.strptime(value, format).time()
+#     except Exception:
+#         raise ValidationError(
+#             _('%(value)s Wrong time format entered.'),
+#             code='Wrong time format entered.',
+#             params={'value': value},
+#         )
+
+# """Function to check if the email already exists or not."""
+# def validate_check_in_time(value):
+#     format = '%H:%M:%S'
+#     try:
+#         datetime.strptime(value, format).time()
+#     except Exception:
+#         raise ValidationError(
+#             _('%(value)s Wrong time format entered.'),
+#             code='Wrong time format entered.',
+#             params={'value': value},
+#         )
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-"""Function to convert string to date."""
-def convert_to_date(date_time):
-    format = '%Y-%m-%d'
-    try:
-        datetime.strptime(date_time, format).date()
-    except Exception:
-        raise ValidationError(
-                "Wrong date format entered.", code='Wrong date format'
-            )
-
-"""Function to convert string to time."""
-def convert_to_time(value):
-    format = '%H:%M:%S'
-    try:
-        datetime.strptime(value, format).time()
-    except Exception:
-        raise ValidationError(
-            _('%(value)s Wrong time format entered.'),
-            code='Wrong time format entered.',
-            params={'value': value},
+"""Used to search bookings the room manager."""
+class BookingsForm(forms.Form):
+    numbers = forms.CharField(
+        validators=[int_list_validator()],
+        widget=forms.TextInput(attrs={'class': 'unbold-form'}),
+        required=False, max_length=4000
         )
-
-"""Function to check if the email already exists or not."""
-def validate_check_in_time(value):
-    format = '%H:%M:%S'
-    try:
-        datetime.strptime(value, format).time()
-    except Exception:
-        raise ValidationError(
-            _('%(value)s Wrong time format entered.'),
-            code='Wrong time format entered.',
-            params={'value': value},
-        )
-
-
-
-from django.utils.timezone import now
-
-
-
-
-
-
-class ManageBookingForm(forms.Form):
-
-    room_numbers = forms.CharField(validators=[int_list_validator()], required=False, max_length=4000)
-    customer_name = forms.CharField(
-        max_length=150,
+    customers = forms.CharField(
+        #max_length=150,
+        #validators=[int_list_validator()],
+        widget=forms.TextInput(attrs={'class': 'unbold-form'}),
         required=False,
-        validators=[validate_slug2]
+        #validators=[validate_slug2]
+        #validators=[int_list_validator(), validate_slug2]
     )
     check_in_date = forms.DateField(
         required=False,
-        widget=forms.SelectDateWidget(),
+        widget=DateInput(attrs={'class': 'unbold-form'}),
+        #widget=forms.SelectDateWidget(),
     )
-    check_in_time = forms.TimeField(
+    available_from = forms.TimeField(
         required=False,
-        widget=TimeInput()
+        widget=TimeInput(attrs={'class': 'unbold-form'}),
+        #widget=TimeInput()
     )
-    check_out_time = forms.TimeField(
+    available_till = forms.TimeField(
         required=False,
-        widget=TimeInput()
+        widget=TimeInput(attrs={'class': 'unbold-form'}),
+        #widget=TimeInput()
     )
-    ROOM_CATEGORIES = (
-        ('Regular', 'Regular'),
-        ('Executive', 'Executive'),
-        ('Deluxe', 'Deluxe'),
-        ('King', 'King'),
-        ('Queen', 'Queen'),
-    )
-    category = forms.MultipleChoiceField(
-        required=False,
-        widget=forms.CheckboxSelectMultiple,
-        choices=ROOM_CATEGORIES,
-    )
-    PERSON = (
-        (1, '1'),
-        (2, '2'),
-        (3, '3'),
-        (4, '4'),
-    )
-    person = forms.MultipleChoiceField(
-        required=False,
-        widget=forms.CheckboxSelectMultiple,
-        choices=PERSON,
-        )
-    no_of_rooms = forms.IntegerField(
-        required=False,
-        validators=[MaxValueValidator(1000), MinValueValidator(1)]
-        )
+    # ROOM_CATEGORIES = (
+    #     ('Regular', 'Regular'),
+    #     ('Executive', 'Executive'),
+    #     ('Deluxe', 'Deluxe'),
+    #     ('King', 'King'),
+    #     ('Queen', 'Queen'),
+    # )
+    # category = forms.MultipleChoiceField(
+    #     required=False,
+    #     widget=forms.CheckboxSelectMultiple,
+    #     choices=ROOM_CATEGORIES,
+    # )
+    # PERSON = (
+    #     (1, '1'),
+    #     (2, '2'),
+    #     (3, '3'),
+    #     (4, '4'),
+    # )
+    # person = forms.MultipleChoiceField(
+    #     required=False,
+    #     widget=forms.CheckboxSelectMultiple,
+    #     choices=PERSON,
+    #     )
+    # no_of_rooms = forms.IntegerField(
+    #     required=False,
+    #     validators=[MaxValueValidator(1000), MinValueValidator(1)]
+    #     )
 
-    """Function to ensure that booking is done for future and check out is after check in"""
+    """Ensures that time is correct and available till is after
+    available from.
+    """
     def clean(self):
         cleaned_data = super().clean()
-        normal_check_in_time = cleaned_data.get("check_in_time")
-        normal_check_out_time = cleaned_data.get("check_out_time")
-        str_check_in_time = str(normal_check_in_time)
-        str_check_out_time = str(normal_check_out_time)
-        format = '%H:%M:%S'
-        if str_check_in_time != 'None':
-            try:
-                datetime.strptime(str_check_in_time, format).time()
-            except Exception:
-                raise ValidationError(
-                    _('Wrong time entered.'),
-                    code='Wrong time entered.',
-                )
-        if str_check_out_time != 'None':
-            try:
-                    datetime.strptime(str_check_out_time, format).time()
-            except Exception:
-                raise ValidationError(
-                    _('Wrong time entered.'),
-                    code='Wrong time entered.',
-                )
-        if normal_check_out_time is not None and normal_check_in_time is not None:
-            if normal_check_out_time <= normal_check_in_time:
-                raise ValidationError(
-                    "Check out should be after check in.", code='check out after check in'
-                )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-'''class SearchTimeSlotsForm(forms.ModelForm):
-    class Meta:
-        model = TimeSlot
-        fields = ['available_from', 'available_till']
-        widgets = {
-                    #'number': PositiveSmallIntegerField(validators=[MaxValueValidator(1000), MinValueValidator(1)], attrs={'readonly': True}),
-                    'available_from': TimeInput(attrs={'required': False}),
-                    'available_till': TimeInput(attrs={'required': False}),
-                }'''
-
-    
-
-class ManageViewTimeSlotForm(forms.ModelForm):
-    class Meta:
-        model = TimeSlot
-        fields = ['room', 'available_from', 'available_till']
-        widgets = {
-                    'room': forms.IntegerField(validators=[MaxValueValidator(1000), MinValueValidator(1)]),
-                    'available_from': TimeInput(attrs={'required': False}),
-                    'available_till': TimeInput(attrs={'required': False}),
-                }
-
-    """Function to ensure that booking is done for future and check out is after check in"""
-    def clean(self):
-        cleaned_data = super().clean()
-        available_from = cleaned_data.get("available_from")
-        available_till = cleaned_data.get("available_till")
-        str_available_from = str(available_from)
-        str_available_till = str(available_till)
+        normal_available_from = cleaned_data.get("available_from")
+        normal_available_till = cleaned_data.get("available_till")
+        str_available_from = str(normal_available_from)
+        str_available_till = str(normal_available_till)
         format = '%H:%M:%S'
         if str_available_from != 'None':
             try:
@@ -634,118 +647,109 @@ class ManageViewTimeSlotForm(forms.ModelForm):
                     _('Wrong time entered.'),
                     code='Wrong time entered.',
                 )
-        if available_till is not None and available_from is not None:
-            if available_till <= available_from:
+        if normal_available_till is not None and normal_available_from is not None:
+            if normal_available_till <= normal_available_from:
                 raise ValidationError(
-                    "Available till should be after available from.", code='Available till after available from'
+                    "Check out should be after check in.", code='check out after check in'
                 )
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+'''class SearchTimeSlotsForm(forms.ModelForm):
+    class Meta:
+        model = TimeSlot
+        fields = ['available_from', 'available_till']
+        widgets = {
+                    #'number': PositiveSmallIntegerField(validators=[MaxValueValidator(1000), MinValueValidator(1)], attrs={'readonly': True}),
+                    'available_from': TimeInput(attrs={'required': False}),
+                    'available_till': TimeInput(attrs={'required': False}),
+                }'''
 
 #from datetime import time
-"""class used for booking a time slot."""
-class RoomForm2(forms.ModelForm):
+# """class used for booking a time slot."""
+# class RoomForm2(forms.ModelForm):
 
-    number = forms.IntegerField(
-        required=False,
-    )
+#     number = forms.IntegerField(
+#         required=False,
+#     )
 
-    ROOM_CATEGORIES = (
-        ('', ''),
-        ('Regular', 'Regular'),
-        ('Executive', 'Executive'),
-        ('Deluxe', 'Deluxe'),
-        ('King', 'King'),
-        ('Queen', 'Queen'),
-    )
+#     ROOM_CATEGORIES = (
+#         ('', ''),
+#         ('Regular', 'Regular'),
+#         ('Executive', 'Executive'),
+#         ('Deluxe', 'Deluxe'),
+#         ('King', 'King'),
+#         ('Queen', 'Queen'),
+#     )
 
-    category = forms.CharField(
-        max_length=9,
-        required=False,
-        widget=forms.Select(choices=ROOM_CATEGORIES),
-    )
+#     category = forms.CharField(
+#         max_length=9,
+#         required=False,
+#         widget=forms.Select(choices=ROOM_CATEGORIES),
+#     )
 
-    ROOM_CAPACITY = (
-        ('', ''),
-        (1, '1'),
-        (2, '2'),
-        (3, '3'),
-        (4, '4'),
-    )
-    capacity = forms.IntegerField(
-        required=False,
-        widget=forms.Select(choices=ROOM_CAPACITY),
-        )
-    class TimeInput(forms.TimeInput):
-        input_type = 'time'
-        default=time()
+#     ROOM_CAPACITY = (
+#         ('', ''),
+#         (1, '1'),
+#         (2, '2'),
+#         (3, '3'),
+#         (4, '4'),
+#     )
+#     capacity = forms.IntegerField(
+#         required=False,
+#         widget=forms.Select(choices=ROOM_CAPACITY),
+#         )
+#     class TimeInput(forms.TimeInput):
+#         input_type = 'time'
+#         default=time()
 
-    available_from = forms.TimeField(
-        required=False,
-        widget=TimeInput(),
-        initial=time(0)
-        )
+#     available_from = forms.TimeField(
+#         required=False,
+#         widget=TimeInput(),
+#         initial=time(0)
+#         )
 
-    available_till = forms.TimeField(
-        required=False,
-        widget=TimeInput(),
-        initial=time(23,59,59)
-        )
+#     available_till = forms.TimeField(
+#         required=False,
+#         widget=TimeInput(),
+#         initial=time(23,59,59)
+#         )
 
-    advance = forms.IntegerField(
-        required=False,
-    )
+#     advance = forms.IntegerField(
+#         required=False,
+#     )
 
-    class Meta:
-        model = Room
-        fields = ['number','category', 'capacity', 'available_from',
-                    'available_till', 'advance']
+#     class Meta:
+#         model = Room
+#         fields = ['number','category', 'capacity', 'available_from',
+#                     'available_till', 'advance']
 
-        '''widgets = {
-            'name': Textarea(attrs={'cols': 80, 'rows': 20}),
-        }'''
+#         '''widgets = {
+#             'name': Textarea(attrs={'cols': 80, 'rows': 20}),
+#         }'''
 
-        """widgets = {
-                    #'number': forms.PositiveSmallIntegerField(attrs={'cols': 80, 'rows': 20}),
-                    'available_from': TimeInput(),
-                    'available_till': TimeInput(),
-                }"""
+#         """widgets = {
+#                     #'number': forms.PositiveSmallIntegerField(attrs={'cols': 80, 'rows': 20}),
+#                     'available_from': TimeInput(),
+#                     'available_till': TimeInput(),
+#                 }"""
 
-    """Function to ensure that booking is done for future and check out is after check in"""
-    def clean(self):
-        cleaned_data = super().clean()
-        available_from = cleaned_data.get("available_from")
-        available_till = cleaned_data.get("available_till")
-        str_available_from = str(available_from)
-        str_available_till = str(available_till)
-        format = '%H:%M:%S'
-        try:
-            datetime.strptime(str_available_from, format).time()
-            datetime.strptime(str_available_till, format).time()
-        except Exception:
-            raise ValidationError(
-                _('Wrong time entered.'),
-                code='Wrong time entered.',
-            )
+#     """Function to ensure that booking is done for future and check out is after check in"""
+#     def clean(self):
+#         cleaned_data = super().clean()
+#         available_from = cleaned_data.get("available_from")
+#         available_till = cleaned_data.get("available_till")
+#         str_available_from = str(available_from)
+#         str_available_till = str(available_till)
+#         format = '%H:%M:%S'
+#         try:
+#             datetime.strptime(str_available_from, format).time()
+#             datetime.strptime(str_available_till, format).time()
+#         except Exception:
+#             raise ValidationError(
+#                 _('Wrong time entered.'),
+#                 code='Wrong time entered.',
+#             )
 
-        if available_till <= available_from:
-            raise ValidationError(
-                "Available till should be after available from.", code='Available till after available from'
-            )
+#         if available_till <= available_from:
+#             raise ValidationError(
+#                 "Available till should be after available from.", code='Available till after available from'
+#             )

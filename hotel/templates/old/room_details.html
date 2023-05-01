@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Manager</title>
+    <title>Room Details</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="{% static 'hotel/css/base.css' %}">
@@ -38,19 +38,19 @@
   	</div>
 		{% if rooms %}
 		  {% for room in rooms %}
-            <div class="card card-width container3 inner-card">
-              <!--<img src = "{% static 'hotel/images/hotel.jpg' %}" alt="Room" style="width:30%">-->
-              <b>Booking Date</b> - {{ rooms.room_number }}<br/>
-              <b>Booking From Time</b> - {{ rooms.check_in_time }}<br/>
-              <b>Booking Till Time</b> - {{ rooms.check_out_time }}<br/>
-              <b>Category</b> - {{ rooms.category }}<br/>
-              <b>Person</b> - {{ rooms.person }}<br/>
-              <b>Number of Rooms</b> - {{ rooms.no_of_rooms }}<br/>
-            </div>
+        <div class="card card-width container3 inner-card">
+          <!--<img src = "{% static 'hotel/images/hotel.jpg' %}" alt="Room" style="width:30%">-->
+          <b>Booking Date</b> - {{ rooms.room_number }}<br/>
+          <b>Booking From Time</b> - {{ rooms.check_in_time }}<br/>
+          <b>Booking Till Time</b> - {{ rooms.check_out_time }}<br/>
+          <b>Category</b> - {{ rooms.category }}<br/>
+          <b>Person</b> - {{ rooms.person }}<br/>
+          <b>Number of Rooms</b> - {{ rooms.no_of_rooms }}<br/>
+        </div>
 		  {% endfor %}
 	  {% else %}
 		  <p> No rooms are available </p>
-	{% endif %}
+	  {% endif %}
     <!-- Footer -->
     <footer class="w3-padding-32 w3-black w3-center w3-margin-top">
       <h5>Find Us On</h5>
@@ -65,4 +65,3 @@
     </footer>
 	</body>
 </html>
-

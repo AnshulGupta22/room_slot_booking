@@ -5,6 +5,7 @@ from django.contrib.auth import authenticate, login, logout
 from datetime import date, datetime, timedelta
 from django.db.models import Q
 from django.utils import timezone
+#from django.utils.timezone import now
 from django.http import HttpResponse
 
 from rest_framework import status
@@ -12,7 +13,10 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
-from hotel.forms import CustomerForm, SignInForm, BookingForm, RoomsForm, ManageBookingForm, AddRoomForm, ManageViewTimeSlotForm, SearchTimeSlotsForm, AddTimeSlotForm, EditRoomForm, EditForm
+from hotel.forms import (
+    SignUpForm, SignInForm, BookingForm, RoomsForm, BookingsForm,
+    AddRoomForm, SearchTimeSlotsForm, AddTimeSlotForm, EditRoomForm,
+    EditForm)
 from .models import Room, Booking, TimeSlot
 
 from .serializers import (
@@ -22,15 +26,14 @@ from .serializers import (
     )
 
 # Create your views here.
-
-"""Function to go to home page."""
+"""To go to home page."""
 def home(request):
     return render(request, 'home.html')
 
-"""Function for sign up."""
+"""For sign up."""
 def sign_up(request):
     if request.method == 'POST':
-        form = CustomerForm(request.POST)
+        form = SignUpForm(request.POST)
         if form.is_valid():
             try:
                 user = User.objects.create_user(
@@ -47,10 +50,10 @@ def sign_up(request):
         else:
             context = {'form': form}
             return render(request, 'sign_up.html', context)
-    context = {'form': CustomerForm()}
+    context = {'form': SignUpForm()}
     return render(request, 'sign_up.html', context)
 
-"""Function for sign in."""
+"""For sign in."""
 def sign_in(request):
     if request.method == 'POST':
         form = SignInForm(request.POST)
@@ -69,7 +72,7 @@ def sign_in(request):
     context = {'form': SignInForm()}
     return render(request, 'sign_in.html', context)
 
-"""Function for viewing profile."""
+"""To view profile."""
 @login_required(login_url="/hotel/sign_in/")
 def view_profile(request):
     profile = User.objects.filter(
@@ -78,7 +81,7 @@ def view_profile(request):
     context = {'profile': profile}
     return render(request, 'view_profile.html', context)
 
-"""Function for editing profile."""
+"""To edit profile."""
 @login_required(login_url="/hotel/sign_in/")
 def edit_profile(request):
     profile = User.objects.get(username=request.user.username)
@@ -90,38 +93,39 @@ def edit_profile(request):
         else:
             context = {'form': form}
             return render(request, 'edit_profile.html', context)
-    context = {'form': EditForm(instance=profile), 'username': request.user.username}
+    context = {'form': EditForm(instance=profile),
+               'username': request.user.username}
     return render(request, 'edit_profile.html', context)
 
-"""Function for logout."""
+"""For logout."""
 def logout_view(request):
     logout(request)
     return redirect('../sign_in/')
 
-"""Function that returns the list of rooms based on the search criterias."""
+"""Returns the list of rooms based on the search criterias."""
 def rooms_search(
         str_numbers, categories, capacities, advance, manager, sort_by):
     if str_numbers != '':
-        spaces_numbers = list(str_numbers.split(","))
+        str_number_list = list(str_numbers.split(","))
         numbers = list()
-        for i in spaces_numbers:
-            numbers.append(i.strip())
+        for i in str_number_list:
+            numbers.append(int(i))
     else:
-        numbers = ''
-    keys = ['number__in', 'category__in', 'capacity__in', 'advance__gte', 'manager']
+        numbers = None
+    keys = ['number__in', 'category__in', 'capacity__in', 'advance__gte',
+            'manager']
     values = [numbers, categories, capacities, advance, manager]
     parameters = {}
     for key, value in zip(keys, values):
-        if value is not None and value !=[] and value != '':
+        if value is not None and value != []: #and value != '':
             parameters[key] = value
     room_list = Room.objects.filter(**parameters).order_by(sort_by)
     return room_list
 
-"""Function to display rooms based on the selected criterias."""
+"""Displays the rooms based on the selected criterias."""
 @login_required(login_url="/hotel/sign_in/")
 def rooms(request):
     if request.user.email.endswith("@anshul.com"):
-        #rooms = Room.objects.filter(manager=request.user)
         rooms = Room.objects.filter(manager=request.user)
         if request.method == 'POST':
             form = RoomsForm(request.POST)
@@ -129,7 +133,7 @@ def rooms(request):
                 try:
                     request.session['numbers'] = request.POST['numbers']
                 except Exception:
-                    request.session['numbers'] = ''
+                    request.session['numbers'] = None
                 request.session['categories'] = form.cleaned_data.get("categories")
                 str_capacity = form.cleaned_data.get("capacities")
                 # using list comprehension to perform conversion
@@ -150,6 +154,7 @@ def rooms(request):
                 context = {
                     'form': form,
                     'rooms': response,
+                    'count': len(response),
                     'username': request.user.username
                     }
                 return render(request, 'rooms.html', context)
@@ -163,13 +168,14 @@ def rooms(request):
         context = {
                 'form': RoomsForm(),
                 'rooms': rooms,
+                'count': len(rooms),
                 'username': request.user.username
                 }
         return render(request, 'rooms.html', context)
     else:
         return redirect('../book/')
 
-"""Function to add a room."""
+"""Adds a room."""
 @login_required(login_url="/hotel/sign_in/")
 def add_room(request):
     if request.user.email.endswith("@anshul.com"):
@@ -194,14 +200,14 @@ def add_room(request):
                     }
                 return render(request, 'add_room.html', context)
         context = {
-                'form': AddRoomForm(),
-                'username': request.user.username
-                }
+            'form': AddRoomForm(),
+            'username': request.user.username
+            }
         return render(request, 'add_room.html', context)
     else:
         return redirect('../book/')
 
-"""Function to edit a room."""
+"""Edits a room."""
 @login_required(login_url="/hotel/sign_in/")
 def edit_room(request, number):
     if request.user.email.endswith("@anshul.com"):
@@ -233,20 +239,20 @@ def edit_room(request, number):
                     }
                 return render(request, 'edit_room.html', context)
         context = {
-                'form': EditRoomForm(instance=room),
-                'number': number,
-                'username': request.user.username
-                }
+            'form': EditRoomForm(instance=room),
+            'number': number,
+            'username': request.user.username}
         return render(request, 'edit_room.html', context)
     else:
         return redirect('../book/')
 
-"""Function to delete room."""
+"""Deletes a room."""
 @login_required(login_url="/hotel/sign_in/")
-def delete_rooms(request, number):
+def delete_room(request, number):
     if request.user.email.endswith("@anshul.com"):
         try:
-            room = Room.objects.get(Q(number=number) & Q(manager=request.user))
+            room = Room.objects.get(Q(number=number)
+                                    & Q(manager=request.user))
         except Exception:
             return HttpResponse("Not Found.")
         room.delete()
@@ -260,7 +266,7 @@ def delete_rooms(request, number):
 #     try:
 #         datetime_str = datetime.datetime.strptime(date_time, format).time()
 #     except Exception:
-#         datetime_str = None
+#         datetime_str is None
 #     return datetime_str
 
 
@@ -268,13 +274,9 @@ def delete_rooms(request, number):
 # def convert_to_time(date_time):
 #     return datetime.datetime.strptime(date_time, '%H:%M').time()
 
-
-
-
-
-"""Function that returns the list of rooms based on the search criteria."""
+"""Returns timeslots based on the search criterias."""
 def time_slots_search(
-        number, date, str_available_from, str_available_till, occupancy, sort_by):
+        number, str_available_from, str_available_till, sort_by):
     room_obj = Room.objects.get(number=number)
     '''if str_numbers != '':
         spaces_numbers = list(str_numbers.split(","))
@@ -286,8 +288,9 @@ def time_slots_search(
     available_from = ''
     available_till = ''
     if str_available_from != '':
-        available_from = datetime.strptime(str_available_from, '%H:%M').time() #Function to convert string to time.
-        available_till = datetime.strptime(str_available_till, '%H:%M').time() #Function to convert string to time.
+        # Converting string to time.
+        available_from = datetime.strptime(str_available_from, '%H:%M').time()
+        available_till = datetime.strptime(str_available_till, '%H:%M').time()
 
     # if available_from is None or available_till is None:
     #     return None
@@ -346,9 +349,8 @@ def time_slots_search(
     # keys = ['room', 'available_from__lte', 'available_till__gte', 'occupancy']
     # values = [room_obj, available_from, available_till, occupancy]
 
-    keys = ['room', 'available_from__lte', 'available_till__gte', 'occupancy']
-    values = [room_obj, available_from, available_till, occupancy]
-
+    keys = ['room', 'available_from__lte', 'available_till__gte']
+    values = [room_obj, available_from, available_till]
     parameters = {}
     #temp = {'category__in': categories, 'available_from__lte': available_from, 'available_till__gte': available_till, 'capacity__in': capacities, 'advance__gte': advance}
 
@@ -428,7 +430,7 @@ def time_slots_search(
         available_categories.append('Queen')
     return available_categories"""
 
-"""Function to search time slots."""
+"""Displays the time slots based on the selected criterias."""
 @login_required(login_url="/hotel/sign_in/")
 def time_slots(request, number):
     if request.user.email.endswith("@anshul.com"):
@@ -459,28 +461,49 @@ def time_slots(request, number):
                 try:
                     request.session['capacity'] = [int(i) for i in str_capacity]
                 except Exception:
-                    request.session['capacity'] = None'''
+                    request.session['capacity'] is None'''
                 request.session['date'] = request.POST['date']
                 request.session['available_from'] = request.POST['available_from']
                 request.session['available_till'] = request.POST['available_till']
                 request.session['occupancy'] = form.cleaned_data.get("occupancy")
-
                 '''try:
                     request.session['advance'] = int(request.POST['advance'])
                 except Exception:
-                    request.session['advance'] = None'''
+                    request.session['advance'] is None'''
 
                 time_slots = time_slots_search(number,
-                                        request.session['date'],
-                                        request.session['available_from'],
-                                        request.session['available_till'], request.session['occupancy'], request.POST['sort_by']
-                                        )
-                #if response:
-                #print(time_slots)
+                                               request.session['available_from'],
+                                               request.session['available_till'], 
+                                               request.POST['sort_by'])
+                if request.session['occupancy'] == '':
+                    for time_slot in time_slots:
+                        try:
+                            Booking.objects.get(check_in_date=request.session['date'],
+                                                timeslot=time_slot)
+                            time_slot.occupancy = "Booked"
+                        except Exception:
+                            time_slot.occupancy = "Vacant"
+                elif request.session['occupancy'] == 'Vacant':
+                    for time_slot in time_slots:
+                        try:
+                            Booking.objects.get(check_in_date=request.session['date'],
+                                                timeslot=time_slot)
+                            time_slot.occupancy = ""
+                        except Exception:
+                            time_slot.occupancy = "Vacant"
+                elif request.session['occupancy'] == 'Booked':
+                    for time_slot in time_slots:
+                        try:
+                            Booking.objects.get(check_in_date=request.session['date'],
+                                                timeslot=time_slot)
+                            time_slot.occupancy = "Booked"
+                        except Exception:
+                            time_slot.occupancy = ""
                 context = {
                     'form': form,
                     'room': room,
                     'time_slots': time_slots,
+                    'count': len(time_slots),
                     'username': request.user.username
                     }
                 return render(request, 'time_slots.html', context)
@@ -493,19 +516,28 @@ def time_slots(request, number):
                     'username': request.user.username
                     }
                 return render(request, 'time_slots.html', context)
+        time_slots = TimeSlot.objects.filter(room_id=number)
+        for time_slot in time_slots:
+            try:
+                Booking.objects.get(check_in_date=request.session['date'],
+                                    timeslot=time_slot)
+                time_slot.occupancy = "Booked"
+            except Exception:
+                time_slot.occupancy = "Vacant"
         context = {
                 'form': SearchTimeSlotsForm(),
                 'room': room,
                 #'number': number,
                 #'time_slots': TimeSlot.objects.filter(room=number, manager=request.user),
-                'time_slots': TimeSlot.objects.filter(room_id=number).order_by('available_from'),
+                'time_slots': time_slots,#.order_by('available_from'),
+                'count': len(time_slots),
                 'username': request.user.username
                 }
         return render(request, 'time_slots.html', context)
     else:
         return redirect('../book/')
 
-"""Function to add time slot."""
+"""Adds a time slot."""
 @login_required(login_url="/hotel/sign_in/")
 def add_time_slot(request, number):
     if request.user.email.endswith("@anshul.com"):
@@ -513,12 +545,15 @@ def add_time_slot(request, number):
             form = AddTimeSlotForm(request.POST)
             if form.is_valid():
                 try:
-                    room_obj = Room.objects.get(number=number, manager=request.user)
+                    room_obj = Room.objects.get(number=number,
+                                                manager=request.user)
                 except Exception:
                     return HttpResponse("Not Found.")
-
-                available_till = datetime.strptime(request.POST['available_till'], '%H:%M').time() #Function to convert string to time.
-                available_from = datetime.strptime(request.POST['available_from'], '%H:%M').time() #Function to convert string to time.
+                # Converting string to time.
+                available_till = datetime.strptime(request.POST['available_till'],
+                                                   '%H:%M').time()
+                available_from = datetime.strptime(request.POST['available_from'],
+                                                   '%H:%M').time()
 
                 # To ensure no rooms are booked within a gap of 1 hour
                 # after checkout.
@@ -568,7 +603,7 @@ def add_time_slot(request, number):
     else:
         return redirect('../book/')
 
-"""Function to convert string to time."""
+"""Converts string to time."""
 def convert_to_time_sec(date_time):
     format = '%H:%M:%S'
     try:
@@ -577,25 +612,26 @@ def convert_to_time_sec(date_time):
         datetime_str = None
     return datetime_str
 
-"""Function to edit time slot."""
+"""Edits a time slot."""
 @login_required(login_url="/hotel/sign_in/")
 def edit_time_slot(request, pk):
     if request.user.email.endswith("@anshul.com"):
         try:
             #time_slot_obj = TimeSlot.objects.get(pk=pk)
-            time_slot_obj = TimeSlot.objects.get(Q(pk=pk) & Q(occupancy='Vacant'))
+            time_slot_obj = TimeSlot.objects.get(pk=pk)
         except Exception:
             return HttpResponse("Not Found.")
 
         if str(time_slot_obj.room.manager) != request.user.username:
-            return HttpResponse("Not Found.")
+            return HttpResponse("Forbidden.")
         #if time_slot_obj.occupancy == 'Booked':
             #return HttpResponse("Bad request.")
         if request.method == 'POST':
             form = AddTimeSlotForm(request.POST, instance=time_slot_obj)
             if form.is_valid():
                 try:
-                    Room.objects.get(number=time_slot_obj.room.number, manager=request.user)
+                    Room.objects.get(number=time_slot_obj.room.number,
+                                     manager=request.user)
                 except Exception:
                     return HttpResponse("Not Found.")
                 #print(type(request.POST['available_from']))
@@ -632,8 +668,14 @@ def edit_time_slot(request, pk):
                 else:
                     if taken.count() == 1:
                         for record in taken:
-                            # Checking if the new time slot is a smaller version of the existing time slot. For e.g. if the existing time slot is from 1:00 to 8:00 and we are changing it to 4:00 to 5:00.
-                            if record.pk == time_slot_obj.pk and time_slot_obj.available_from <= available_from and time_slot_obj.available_till >= available_till:
+                            # Checking if the new time slot is a
+                            # smaller version of the existing time
+                            # slot. For e.g. if the existing time slot
+                            # is from 1:00 to 8:00 and we are changing
+                            # it to 4:00 to 5:00.
+                            if (record.pk == time_slot_obj.pk
+                                    and time_slot_obj.available_from <= available_from
+                                    and time_slot_obj.available_till >= available_till):
                                 time_slot_obj.available_from = available_from
                                 time_slot_obj.available_till = available_till
                                 time_slot_obj.save()
@@ -673,46 +715,217 @@ def edit_time_slot(request, pk):
     else:
         return redirect('../book/')
 
-"""Function to delete time slot."""
+"""Deletes a time slot."""
 @login_required(login_url="/hotel/sign_in/")
 def delete_time_slot(request, pk):
     if request.user.email.endswith("@anshul.com"):
         try:
-            time_slot_obj = TimeSlot.objects.get(Q(pk=pk) & Q(occupancy='Vacant'))
+            time_slot_obj = TimeSlot.objects.get(pk=pk)
         except Exception:
             return HttpResponse("Not Found.")
         if str(time_slot_obj.room.manager) != request.user.username:
-            return HttpResponse("Not Found.")
+            return HttpResponse("Forbidden.")
         time_slot_obj.delete()
         # Implemented Post/Redirect/Get.
         return redirect(f'../../time_slots/{time_slot_obj.room.number}/')
     else:
         return redirect('../book/')
 
-"""Function that returns the list of available categories."""
-# def search_availability(
+"""Returns the list of bookings for a room manager based on the search
+criterias.
+"""
+def search_manager_bookings(
+        str_numbers, str_customers, str_check_in_date, str_available_from,
+        str_available_till, manager):
+    #print(str_available_from == '')
+    #booking_list = Booking.objects.none()
+    #print(manager_bookings)
+    if str_numbers != '':
+        str_number_list = list(str_numbers.split(","))
+        numbers = list()
+        for i in str_number_list:
+            # numbers.append(int(i.strip()))
+            numbers.append(int(i))
+    else:
+        numbers = None
+
+    if str_customers != '':
+        spaces_customers = list(str_customers.split(","))
+        customers = list()
+        for i in spaces_customers:
+            customers.append(i.strip())
+    else:
+        customers = None
+
+    check_in_date = None
+    if str_check_in_date != '':
+        #check_in_date = convert_to_date(str_check_in_date)
+        check_in_date = datetime.strptime(str_check_in_date, '%Y-%m-%d').date()
+    available_from = None
+    if str_available_from != '':
+        #check_in_time = convert_to_time(str_check_in_time)
+        available_from = datetime.strptime(str_available_from, '%H:%M').time()
+
+    available_till = None
+    if str_available_till != '':
+        #check_out_time = convert_to_time(str_check_out_time)
+        available_till = datetime.strptime(str_available_till, '%H:%M').time()
+
+    #keys = ['number__in', 'customer', 'check_in_date', 'available_from__gte', 'available_till__lte']
+    #values = [numbers, customer_name, check_in_date, available_from, available_till]
+    #print(customer_name)
+    keys = ['check_in_date']
+    values = [check_in_date]
+    parameters = {}
+    for key, value in zip(keys, values):
+        if value is not None:# and value != [] and value != '':
+            parameters[key] = value
+    #print(manager_bookings.filter(**parameters))
+    bookings = Booking.objects.filter(**parameters)#.union(booking_list)#.order_by('-check_in_date', 'check_in_time')
+    # keys = ['booking.customer.username ==', 'booking.timeslot.room.number in', 'booking.timeslot.available_from <=', 'booking.timeslot.available_till >=']
+    # keys = ['booking.customer.username', 'booking.timeslot.room.number', 'booking.timeslot.available_from', 'booking.timeslot.available_till']
+    # values = [customer_name, numbers, available_from, available_till]
+    # if all(x is None or x == y or x in y or x <= y or x >= y for x, y in zip(keys, values)):
+    
+    #print(bookings)
+
+    required_bookings = list()
+    for booking in bookings:
+        #if ((booking.customer.username is None or booking.customer.username == customer_name) and (booking.timeslot.room.number is None or booking.timeslot.room.number in numbers) and (booking.timeslot.available_from is None or booking.timeslot.available_from <= booking.timeslot.available_from) and (booking.timeslot.available_till is None or booking.timeslot.available_till >= booking.timeslot.available_till)):
+
+        if ((customers is None or booking.customer.username in customers)
+                and (numbers is None or booking.timeslot.room.number in numbers)
+                and (available_from is None or booking.timeslot.available_from <= available_from)
+                and (available_till is None or booking.timeslot.available_till >= available_till)
+                and booking.timeslot.room.manager == manager):
+            required_bookings.append(booking)
+    return required_bookings
+
+"""Displays bookings for room manager based on the selected criterias."""
+@login_required(login_url="/hotel/sign_in/")
+def manager_bookings(request):
+    if request.user.email.endswith("@anshul.com"):
+        bookings = Booking.objects.all()
+        #bookings = Booking.objects.filter(booking.timeslot.room.manager=request.user)
+        manager_bookings = list()
+        for booking in bookings:
+            if booking.timeslot.room.manager == request.user:
+                manager_bookings.append(booking)
+        #         manager_bookings = booking.union(manager_bookings)
+        #print(manager_bookings)
+
+        if request.method == 'POST':
+            form = BookingsForm(request.POST)
+            if form.is_valid():
+                try:
+                    request.session['numbers'] = request.POST['numbers']
+                except Exception:
+                    request.session['numbers'] = None
+                try:
+                    request.session['customers'] = request.POST['customers']
+                except Exception:
+                    request.session['customers'] = None
+                #print(request.session['numbers'])
+                #request.session['customer'] = request.POST['customer']
+                try:
+                    # request.session['check_in_date_day'] = request.POST['check_in_date_day']
+                    # request.session['check_in_date_month'] = request.POST['check_in_date_month']
+                    # request.session['check_in_date_year'] = request.POST['check_in_date_year']
+                    # str_check_in_date = request.session['check_in_date_year'] + '-' + request.session['check_in_date_month'] + '-' + request.session['check_in_date_day']
+                    request.session['check_in_date'] = request.POST['check_in_date']
+                except Exception:
+                    request.session['check_in_date'] = None
+                try:
+                    request.session['available_from'] = request.POST['available_from']
+                except Exception:
+                    request.session['available_from'] = ''
+                try:
+                    request.session['available_till'] = request.POST['available_till']
+                except Exception:
+                    request.session['available_till'] = ''
+                #request.session['category'] = form.cleaned_data.get("category")
+                #str_person = form.cleaned_data.get("person")
+                # using list comprehension to
+                # perform conversion
+                # try:
+                #     request.session['person'] = [int(i) for i in str_person]
+                # except Exception:
+                #     request.session['person'] is None
+                # try:
+                #     request.session['no_of_rooms'] = int(request.POST['no_of_rooms'])
+                # except Exception:
+                #     request.session['no_of_rooms'] is None
+                #print(request.session['check_in_date_year'])
+                response = search_manager_bookings(request.session['numbers'],
+                                                   request.session['customers'],
+                                                   request.session['check_in_date'],
+                                                   request.session['available_from'],
+                                                   request.session['available_till'],
+                                                   request.user)
+                context = {
+                    'form': form,
+                    'manager_bookings': response,
+                    'count': len(response),
+                    'username': request.user.username
+                    }
+                return render(request, 'manager_bookings.html', context)
+            else:
+                context = {
+                    'form': form,
+                    'manager_bookings': None,
+                    'username': request.user.username
+                    }
+                return render(request, 'manager_bookings.html', context)
+        context = {
+                'form': BookingsForm(),
+                'manager_bookings': manager_bookings,
+                'count': len(manager_bookings),
+                'username': request.user.username
+                }
+        return render(request, 'manager_bookings.html', context)
+    else:
+        return redirect('../book/')
+
+"""Deletes a booking by room manager."""
+@login_required(login_url="/hotel/sign_in/")
+def manager_delete_booking(request, pk):
+    if request.user.email.endswith("@anshul.com"):
+        try:
+            booking_obj = Booking.objects.get(pk=pk)
+        except Exception:
+            return HttpResponse("Not Found.")
+        if str(booking_obj.timeslot.room.manager) != request.user.username:
+            return HttpResponse("Forbidden.")
+        booking_obj.delete()
+        # Implemented Post/Redirect/Get.
+        return redirect(f'../../manager_bookings/')
+    else:
+        return redirect('../book/')
+
+now = timezone.now()
+#now = now()
+"""Returns the list of available categories."""
+# def search_available_categories(
 #         book_date_str, check_in_str, check_out_str,
 #         person, no_of_rooms_required):
-def search_availability(
-        book_date_str, check_in_str, check_out_str,
-        person):
+def search_available_categories(
+        book_date_str, check_in_str, check_out_str, person):
     #book_date = convert_to_date(book_date_str)
-
     # Converting string to date.
     book_date = datetime.strptime(book_date_str, '%Y-%m-%d').date()
+    # Converting string to time.
     check_in = datetime.strptime(check_in_str, '%H:%M').time()
     check_out = datetime.strptime(check_out_str, '%H:%M').time()
 
     room_list = Room.objects.filter(
         capacity__gte=person
     ).order_by('capacity')
-    regular_rooms = 0
-    executive_rooms = 0
-    deluxe_rooms = 0
+    # regular_rooms = 0
+    # executive_rooms = 0
+    # deluxe_rooms = 0
     available_categories = list()
     #time_slots = TimeSlot.objects.none()
     for room in room_list:
-        
         # Calculating the maximum date to which a room can be
         # booked in advance.
         max_book = now + timedelta(days=room.advance)
@@ -723,7 +936,6 @@ def search_availability(
                 #     available_from_lte=check_in,
                 #     available_till_gte=check_out,
                 # ).union(time_slots)
-
                 time_slot = TimeSlot.objects.get(
                     room=room,
                     available_from__lte=check_in,
@@ -734,17 +946,20 @@ def search_availability(
             try:
                 #taken = Booking.objects.get(Q(time_slot_ids__contains=time_slot.id)
                 #                            & Q(check_in_date=book_date))
-                Booking.objects.get(Q(time_slot_ids__contains=time_slot.id)
-                                            & Q(check_in_date=book_date))
+                Booking.objects.get(Q(timeslot=time_slot)
+                                    & Q(check_in_date=book_date))
             except Exception:
             #if not taken:
-                if (time_slot.room.category == 'Regular' and 'Regular' not in available_categories):
+                if (time_slot.room.category == 'Regular'
+                        and 'Regular' not in available_categories):
                     #regular_rooms = regular_rooms + 1
                     available_categories.append('Regular')
-                elif (time_slot.room.category == 'Executive' and 'Executive' not in available_categories):
+                elif (time_slot.room.category == 'Executive'
+                        and 'Executive' not in available_categories):
                     #executive_rooms = executive_rooms + 1
                     available_categories.append('Executive')
-                elif (time_slot.room.category == 'Deluxe' and 'Deluxe' not in available_categories):
+                elif (time_slot.room.category == 'Deluxe'
+                        and 'Deluxe' not in available_categories):
                     #deluxe_rooms = deluxe_rooms + 1
                     available_categories.append('Deluxe')
 
@@ -819,7 +1034,7 @@ def search_availability(
 #         capacity__gte=person
 #     )
 
-"""Function for booking."""
+"""Displays the available categories."""
 @login_required(login_url="/hotel/sign_in/")
 def booking(request):
     if request.method == 'POST':
@@ -832,16 +1047,17 @@ def booking(request):
             # request.session['no_of_rooms_required'] = int(
             #     request.POST['no_of_rooms']
             #     )
-            # response = search_availability(request.session['book_date'],
+            # response = search_available_categories(request.session['book_date'],
             #                                request.session['check_in'],
             #                                request.session['check_out'],
             #                                request.session['person'],
             #                                request.session['no_of_rooms_required'])
-            response = search_availability(request.session['book_date'],
-                                           request.session['check_in'],
-                                           request.session['check_out'],
-                                           request.session['person'])
+            response = search_available_categories(request.session['book_date'],
+                                                   request.session['check_in'],
+                                                   request.session['check_out'],
+                                                   request.session['person'])
             #if response:
+            print(response)
             context = {
                 'book_date': request.session['book_date'],
                 'check_in': request.session['check_in'],
@@ -865,8 +1081,6 @@ def booking(request):
         }
     return render(request, 'book.html', context)
 
-now = timezone.now()
-
 """Function to convert string to date."""
 # def convert_to_date(date_time):
 #     format = '%Y-%m-%d'
@@ -875,207 +1089,148 @@ now = timezone.now()
 
 #         datetime.datetime.strptime(date_time, '%Y-%m-%d').date()
 #     except Exception:
-#         datetime_str = None
+#         datetime_str is None
 #     return datetime_str
 
-"""Function to add/ edit time_slot."""
-@login_required(login_url="/hotel/sign_in/")
-def manage_time_slots(request):
-    if request.user.email.endswith("@anshul.com"):
-        '''if number:
-            time_slot = TimeSlot.objects.get(number=number)
-        else:
-            time_slot = TimeSlot()'''
-        asd = TimeSlot.objects.all()
-        for course in asd:
-            print(getattr(course, 'category'))
-        if request.method == 'POST':
-            form = ManageViewTimeSlotForm(request.POST)
-            if form.is_valid():
-                try:
-                    request.session['numbers'] = request.POST['numbers']
-                    #print(request.session['numbers'])
-                    #request.session['number'] = int(request.POST['number'])
-                except Exception:
-                    request.session['numbers'] = ''
-                request.session['category'] = form.cleaned_data.get("category")
-                str_capacity = form.cleaned_data.get("capacity")
-                # using list comprehension to
-                # perform conversion
-                try:
-                    request.session['capacity'] = [int(i) for i in str_capacity]
-                except Exception:
-                    request.session['capacity'] = None
-                request.session['available_from'] = request.POST['available_from']
-                request.session['available_till'] = request.POST['available_till']
-                try:
-                    request.session['advance'] = int(request.POST['advance'])
-                except Exception:
-                    request.session['advance'] = None
-                #print(request.POST['numbers'])
-                response = rooms_search(request.session['numbers'],
-                                        request.session['category'],
-                                        request.session['capacity'],
-                                        request.session['available_from'],
-                                        request.session['available_till'],
-                                        request.session['advance'],
-                                        request.user)
-                #if response:
-                context = {
-                    'form': form,
-                    'rooms': response,
-                    'username': request.user.username
-                    }
-                return render(request, 'rooms.html', context)
-                #return HttpResponse("Not Available")
-            else:
-                context = {
-                    'form': form,
-                    'time_slots': TimeSlot.objects.filter(room_id=number, manager=request.user),
-                    'username': request.user.username
-                    }
-                return render(request, 'rooms.html', context)
-        context = {
-                'form': ManageViewTimeSlotForm(),
-                #'number': number,
-                'time_slots': TimeSlot.objects.filter(manager=request.user),
-                'username': request.user.username
-                }
-        return render(request, 'time_slots.html', context)
-    else:
-        return redirect('../book/')
+# """Function to add/ edit time_slot."""
+# @login_required(login_url="/hotel/sign_in/")
+# def manage_time_slots(request):
+#     if request.user.email.endswith("@anshul.com"):
+#         '''if number:
+#             time_slot = TimeSlot.objects.get(number=number)
+#         else:
+#             time_slot = TimeSlot()'''
+#         asd = TimeSlot.objects.all()
+#         for course in asd:
+#             print(getattr(course, 'category'))
+#         if request.method == 'POST':
+#             form = ManageViewTimeSlotForm(request.POST)
+#             if form.is_valid():
+#                 try:
+#                     request.session['numbers'] = request.POST['numbers']
+#                     #print(request.session['numbers'])
+#                     #request.session['number'] = int(request.POST['number'])
+#                 except Exception:
+#                     request.session['numbers'] = ''
+#                 request.session['category'] = form.cleaned_data.get("category")
+#                 str_capacity = form.cleaned_data.get("capacity")
+#                 # using list comprehension to
+#                 # perform conversion
+#                 try:
+#                     request.session['capacity'] = [int(i) for i in str_capacity]
+#                 except Exception:
+#                     request.session['capacity'] is None
+#                 request.session['available_from'] = request.POST['available_from']
+#                 request.session['available_till'] = request.POST['available_till']
+#                 try:
+#                     request.session['advance'] = int(request.POST['advance'])
+#                 except Exception:
+#                     request.session['advance'] is None
+#                 #print(request.POST['numbers'])
+#                 response = rooms_search(request.session['numbers'],
+#                                         request.session['category'],
+#                                         request.session['capacity'],
+#                                         request.session['available_from'],
+#                                         request.session['available_till'],
+#                                         request.session['advance'],
+#                                         request.user)
+#                 #if response:
+#                 context = {
+#                     'form': form,
+#                     'rooms': response,
+#                     'username': request.user.username
+#                     }
+#                 return render(request, 'rooms.html', context)
+#                 #return HttpResponse("Not Available")
+#             else:
+#                 context = {
+#                     'form': form,
+#                     'time_slots': TimeSlot.objects.filter(room_id=number, manager=request.user),
+#                     'username': request.user.username
+#                     }
+#                 return render(request, 'rooms.html', context)
+#         context = {
+#                 'form': ManageViewTimeSlotForm(),
+#                 #'number': number,
+#                 'time_slots': TimeSlot.objects.filter(manager=request.user),
+#                 'username': request.user.username
+#                 }
+#         return render(request, 'time_slots.html', context)
+#     else:
+#         return redirect('../book/')
 
 
 
-"""Function that returns the list of bookings based on the search criteria."""
-def manager_book_search(
-        str_numbers, customer_name, str_check_in_date, str_check_in_time, str_check_out_time, category, person, no_of_rooms, manager):
-
-    booking_list = Booking.objects.none()
-    spaces_numbers = list(str_numbers.split(","))
-    numbers = list()
-    for i in spaces_numbers:
-        numbers.append(i.strip())
-    #check_in_date = convert_to_date(str_check_in_date)
-    check_in_date = datetime.strptime(str_check_in_date, '%Y-%m-%d').date()
-
-    #check_in_time = convert_to_time(str_check_in_time)
-    check_in_time = datetime.strptime(str_check_in_time, '%H:%M').time()
-
-    #check_out_time = convert_to_time(str_check_out_time)
-    check_out_time = datetime.strptime(str_check_out_time, '%H:%M').time()
-
-    for number in numbers:
-        room_number_regex = rf"\b{number}\b"
-        '''keys = ['room_numbers__iregex', 'customer_name', 'check_in_date', 'check_in_time__gte', 'check_out_time__lte', 'category__in', 'person__in', 'no_of_rooms', 'room_managers__regex']
-        values = [room_number_regex, customer_name, check_in_date, check_in_time, check_out_time, category, person, no_of_rooms, room_manager_regex]'''
-        keys = ['numbers__iregex', 'customer_name', 'check_in_date', 'check_in_time__gte', 'check_out_time__lte', 'category__in', 'person__in', 'no_of_rooms', 'room_managers__regex']
-        values = [room_number_regex, customer_name, check_in_date, check_in_time, check_out_time, category, person, no_of_rooms]
-        parameters = {}
-        for key, value in zip(keys, values):
-            if value is not None and value !=[] and value != '':
-                parameters[key] = value
-        booking_list = Booking.objects.filter(**parameters).union(booking_list).order_by('-check_in_date', 'check_in_time')
-    return booking_list
-
-"""Function to display bookings based on the selected criteria."""
-@login_required(login_url="/hotel/sign_in/")
-def manage_bookings(request):
-    if request.user.email.endswith("@anshul.com"):
-        bookings = Booking.objects.filter(manager=request.user)
-        if request.method == 'POST':
-            form = ManageBookingForm(request.POST)
-            if form.is_valid():
-                request.session['numbers'] = request.POST['numbers']
-                #print(request.session['numbers'])
-                request.session['customer_name'] = request.POST['customer_name']
-                try:
-                    request.session['check_in_date_month'] = request.POST['check_in_date_month']
-                    request.session['check_in_date_day'] = request.POST['check_in_date_day']
-                    request.session['check_in_date_year'] = request.POST['check_in_date_year']
-                    str_check_in_date = request.session['check_in_date_year'] + '-' + request.session['check_in_date_month'] + '-' + request.session['check_in_date_day']
-                except Exception:
-                    str_check_in_date = None
-                try:
-                    request.session['check_in_time'] = request.POST['check_in_time']
-                except Exception:
-                    request.session['check_in_time'] = None
-                try:
-                    request.session['check_out_time'] = request.POST['check_out_time']
-                except Exception:
-                    request.session['check_out_time'] = None
-                request.session['category'] = form.cleaned_data.get("category")
-                str_person = form.cleaned_data.get("person")
-                # using list comprehension to
-                # perform conversion
-                try:
-                    request.session['person'] = [int(i) for i in str_person]
-                except Exception:
-                    request.session['person'] = None
-                try:
-                    request.session['no_of_rooms'] = int(request.POST['no_of_rooms'])
-                except Exception:
-                    request.session['no_of_rooms'] = None
-                response = manager_book_search(request.session['numbers'],
-                                        request.session['customer_name'],
-                                        str_check_in_date,
-                                        request.session['check_in_time'],
-                                        request.session['check_out_time'],
-                                        request.session['category'],
-                                        request.session['person'],
-                                        request.session['no_of_rooms'],
-                                        request.user.username)
-                context = {
-                    'form': form,
-                    'bookings': response,
-                    'username': request.user.username
-                    }
-                return render(request, 'manage_bookings.html', context)
-            else:
-                context = {
-                    'form': form,
-                    'bookings': bookings,
-                    'username': request.user.username
-                    }
-                return render(request, 'manage_bookings.html', context)
-        context = {
-                'form': ManageBookingForm(),
-                'bookings': bookings,
-                'username': request.user.username
-                }
-        return render(request, 'manage_bookings.html', context)
-    else:
-        return redirect('../book/')
-
-"""Function to book the time slot."""
-def time_booking(
-        numbers, room_type, no_of_rooms_required, username,
-        book_date, check_in, check_out, person, room_managers):
-    #for i in range(no_of_rooms_required):
-        #room_no = numbers.pop()
-    #print(numbers)
 
 
-    # getting the comma-separated string from the list
-    room_numbers_string = ", ".join([str(item) for item in numbers if item])
-    room_managers_string = ", ".join([str(item) for item in room_managers if item])
+    # for booking in bookings:
+    #     all(keys[i] == values[i] for i in range(len(keys)) if values[i] is not None)
+    #     required_bookings.append(booking)
+    # print(required_bookings)
+    # parameters = {}
+    # for key, value in zip(keys, values):
+    #     if value is not None:
+    #         parameters[key] = value
+    #print(**parameters)
+    #required_bookings = list()
+    # for booking in bookings:
+    #     if(**parameters):
+    #         required_bookings.append(booking)
+    #print(required_bookings)
 
-    time_slot = Booking(customer_name=username,
-                        check_in_date=book_date,
-                        check_in_time=check_in,
-                        check_out_time=check_out,
-                        numbers=room_numbers_string,
-                        category=room_type, person=person,
-                        no_of_rooms = no_of_rooms_required,
-                        room_managers=room_managers_string)
-    time_slot.save()
+        #print(booking.timeslot.available_till >= available_till)
+        # if(booking.customer.username == customer_name and booking.timeslot.room.number in numbers and booking.timeslot.available_from <= available_from and booking.timeslot.available_till >= available_till):
+    # for number in numbers:
+    #     room_number_regex = rf"\b{number}\b"
+    #     '''keys = ['room_numbers__iregex', 'customer_name', 'check_in_date', 'check_in_time__gte', 'check_out_time__lte', 'category__in', 'person__in', 'no_of_rooms', 'room_managers__regex']
+    #     values = [room_number_regex, customer_name, check_in_date, check_in_time, check_out_time, category, person, no_of_rooms, room_manager_regex]'''
+    #     keys = ['numbers__iregex', 'customer_name', 'check_in_date', 'check_in_time__gte', 'check_out_time__lte', 'category__in', 'person__in', 'no_of_rooms', 'room_managers__regex']
+    #     values = [room_number_regex, customer_name, check_in_date, check_in_time, check_out_time, category, person, no_of_rooms]
+    #     parameters = {}
+    #     for key, value in zip(keys, values):
+    #         if value is not None and value != [] and value != '':
+    #             parameters[key] = value
+    #     booking_list = Booking.objects.filter(**parameters).union(booking_list).order_by('-check_in_date', 'check_in_time')
+#     return booking_list
 
-def bubbleSort(time_slots):
+
+
+# """Function to book the time slot."""
+# def time_booking(
+#         numbers, room_type, no_of_rooms_required, username,
+#         book_date, check_in, check_out, person, room_managers):
+#     #for i in range(no_of_rooms_required):
+#         #room_no = numbers.pop()
+#     #print(numbers)
+
+
+#     # getting the comma-separated string from the list
+#     room_numbers_string = ", ".join([str(item) for item in numbers if item])
+#     room_managers_string = ", ".join([str(item) for item in room_managers if item])
+
+#     time_slot = Booking(customer_name=username,
+#                         check_in_date=book_date,
+#                         check_in_time=check_in,
+#                         check_out_time=check_out,
+#                         numbers=room_numbers_string,
+#                         category=room_type, person=person,
+#                         no_of_rooms = no_of_rooms_required,
+#                         room_managers=room_managers_string)
+#     time_slot.save()
+
+"""Sorts the time slots according to the best duration
+(duration = available_till - available_from)of stay by the customer.
+Stable sort, here bubble sort, is used.
+"""
+def sort_time_slot(time_slots):
     swapped = False
     # Looping from size of array from last index[-1] to index [0]
     for n in range(len(time_slots)-1, 0, -1):
         for i in range(n):
-            if (datetime.combine(date.today(), time_slots[i].available_till) - datetime.combine(date.today(), time_slots[i].available_from)) > (datetime.combine(date.today(), time_slots[i + 1].available_till) - datetime.combine(date.today(), time_slots[i + 1].available_from)):
+            if ((datetime.combine(date.today(), time_slots[i].available_till)
+                 - datetime.combine(date.today(), time_slots[i].available_from))
+                > (datetime.combine(date.today(), time_slots[i + 1].available_till)
+                   - datetime.combine(date.today(), time_slots[i + 1].available_from))):
                 swapped = True
                 # swapping data if the element is less than next element in the array
                 time_slots[i], time_slots[i + 1] = time_slots[i + 1], time_slots[i]       
@@ -1084,11 +1239,12 @@ def bubbleSort(time_slots):
             # meaning that the array is already sorted.
             return
 
-"""Function to check if the room(s) is/are available."""
-# def available_time_slots(
+#"""Function to check if the room(s) is/are available."""
+# def best_available_time_slot(
 #         room_type, book_date_str,check_in_str,
 #         check_out_str, person, no_of_rooms_required):
-def available_time_slots(
+"""Returns the best available time slot."""
+def best_available_time_slot(
         room_type, book_date_str,check_in_str,
         check_out_str, person):
     # Converting string to date.
@@ -1104,7 +1260,7 @@ def available_time_slots(
     # check_in = datetime.datetime.strptime(check_in_str, '%H:%M').time()
     # check_out = datetime.datetime.strptime(check_out_str, '%H:%M').time()
 
-    room_list = Room.objects.filter(
+    rooms = Room.objects.filter(
         capacity__gte=person,
         category=room_type
     ).order_by('capacity')
@@ -1114,8 +1270,8 @@ def available_time_slots(
     #time_slots = TimeSlot.objects.none()
     #count_time_slots = 0
     time_slots = list()
-    #print(room_list)
-    for room in room_list:
+    #print(rooms)
+    for room in rooms:
         # Calculating the maximum date to which a room can be
         # booked in advance.
         max_book = now + timedelta(days=room.advance)
@@ -1140,22 +1296,21 @@ def available_time_slots(
                 # Booking.objects.get(Q(time_slot_ids__contains=time_slot.id)
                 #                             & Q(check_in_date=book_date))
                 Booking.objects.get(Q(timeslot=time_slot)
-                                            & Q(check_in_date=book_date))
+                                    & Q(check_in_date=book_date))
             except Exception:
             #if not taken:
                 time_slots.append(time_slot)
                 #if len(time_slots) == no_of_rooms_required:
-    bubbleSort(time_slots)
+    sort_time_slot(time_slots)  # Since the timeslots were already sorted by the capacity of the rooms, we have to sort them according to duration of stay by the customer. In short, we want time_slots.ORDER_BY(duration, capacity) where duration = available_till - available_from. Please note that a stable sort, here bubble sort, should be used.
     #    return time_slots
     try:
-        print(time_slots[0])
-        return time_slots[0]
+        return time_slots[0]    # time_slots[0] is the best available time slot.
     except Exception:
         return time_slots
 
     #if len(time_slots) >= no_of_rooms_required:
 
-        #bubbleSort(time_slots)
+        #sort_time_slot(time_slots)
 
         # for i in range(len(time_slots)):
         #print(time_slots)
@@ -1271,10 +1426,6 @@ def available_time_slots(
     #                 return 1
     # return 2
 
-
-
-
-
 def slots_booking(response, request):
     # time_slot_ids = list()
     # for i in range(len(response)):
@@ -1286,30 +1437,26 @@ def slots_booking(response, request):
     # booking = Booking(customer_name=request.user.username,
     #                 check_in_date=request.session['book_date'],
     #                 time_slot_ids=time_slot_ids_string)
-    booking = Booking(customer=request.user,
-                    check_in_date=request.session['book_date'],
-                    timeslot=response)
+    booking = Booking(
+        customer=request.user,
+        check_in_date=request.session['book_date'],
+        timeslot=response
+    )
     booking.save()
 
-"""Function to book room of this category if available."""
+"""Displays the best available time slot for regular category."""
 @login_required(login_url="/hotel/sign_in/")
 def regular(request):
     if request.method == 'POST':
-        # response = available_time_slots('Regular',
-        #                         request.session['book_date'],
-        #                         request.session['check_in'],
-        #                         request.session['check_out'],
-        #                         request.session['person'],
-        #                         request.session['no_of_rooms_required'])
-        print("njifdr")
-        response = available_time_slots('Regular',
-                                request.session['book_date'],
-                                request.session['check_in'],
-                                request.session['check_out'],
-                                request.session['person'])
-        print("hjbjhg")
+        response = best_available_time_slot('Regular',
+                                            request.session['book_date'],
+                                            request.session['check_in'],
+                                            request.session['check_out'],
+                                            request.session['person'])
         if response != []:
-            print("rkjnb")
+            if request.session['pk'] != response.pk:
+                response = 'n'
+        if response != [] and response != 'n':
             slots_booking(response, request)
             return redirect('../booked_regular/')
         context = {
@@ -1318,253 +1465,520 @@ def regular(request):
             'check_in': request.session['check_in'],
             'check_out': request.session['check_out'],
             'person': request.session['person'],
-            #'no_of_rooms_required': request.session['no_of_rooms_required'],
-            'time_slots': response,
+            'time_slot': response,
             'username': request.user.username
             }
-        return render(request, 'available_time_slots.html', context)
-        # time_slot_ids = list()
-        # for i in range(len(response)):
-        #     time_slot_ids.append(response[i].id)
-
-        # # getting the comma-separated string from the list
-        # time_slot_ids_string = ", ".join([str(item) for item in time_slot_ids if item])
-
-        # booking = Booking(customer_name=request.user.username,
-        #                 check_in_date=request.session['book_date'],
-        #                 time_slot_ids=time_slot_ids_string)
-        # booking.save()
-        # Implemented Post/Redirect/Get.
-        
-    # response = available_time_slots('Regular',
-    #                             request.session['book_date'],
-    #                             request.session['check_in'],
-    #                             request.session['check_out'],
-    #                             request.session['person'],
-    #                             request.session['no_of_rooms_required'])
-    response = available_time_slots('Regular',
-                                request.session['book_date'],
-                                request.session['check_in'],
-                                request.session['check_out'],
-                                request.session['person'])
+        return render(request, 'best_available_time_slot.html', context)
+    time_slot = best_available_time_slot('Regular',
+                                         request.session['book_date'],
+                                         request.session['check_in'],
+                                         request.session['check_out'],
+                                         request.session['person'])
+    if time_slot != []:
+        request.session['pk'] = time_slot.pk
     context = {
         'category': 'Regular',
         'book_date': request.session['book_date'],
         'check_in': request.session['check_in'],
         'check_out': request.session['check_out'],
         'person': request.session['person'],
-        #'no_of_rooms_required': request.session['no_of_rooms_required'],
-        'time_slots': response,
+        'time_slot': time_slot,
         'username': request.user.username
         }
-    return render(request, 'available_time_slots.html', context)
+    return render(request, 'best_available_time_slot.html', context)
 
-    if response == 1:
-        # Implemented Post/Redirect/Get.
-        return redirect('../booked_regular/')
-    elif response == 2:
-        return HttpResponse("Unavailable")
-    else:
-        return redirect('../book/')
-
-"""Function to book room of this category if available."""
+"""Displays the best available time slot for executive category."""
 @login_required(login_url="/hotel/sign_in/")
 def executive(request):
-    # response = available_time_slots('Executive',
-    #                             request.user.username,
-    #                             request.session['book_date'],
-    #                             request.session['check_in'],
-    #                             request.session['check_out'],
-    #                             request.session['person'],
-    #                             request.session['no_of_rooms_required'])
-    response = available_time_slots('Executive',
-                                #request.user.username,
-                                request.session['book_date'],
-                                request.session['check_in'],
-                                request.session['check_out'],
-                                request.session['person'])
-    if response == 1:
-        # Implemented Post/Redirect/Get.
-        return redirect('../booked_executive/')
-    elif response == 2:
-        return HttpResponse("Unavailable")
-    else:
-        return redirect('../book/')
+    if request.method == 'POST':
+        response = best_available_time_slot('Executive',
+                                            request.session['book_date'],
+                                            request.session['check_in'],
+                                            request.session['check_out'],
+                                            request.session['person'])
+        if response != []:
+            if request.session['pk'] != response.pk:
+                response = 'n'
+        if response != [] and response != 'n':
+            slots_booking(response, request)
+            return redirect('../booked_executive/')
+        context = {
+            'category': 'Executive',
+            'book_date': request.session['book_date'],
+            'check_in': request.session['check_in'],
+            'check_out': request.session['check_out'],
+            'person': request.session['person'],
+            'time_slot': response,
+            'username': request.user.username
+            }
+        return render(request, 'best_available_time_slot.html', context)
+    time_slot = best_available_time_slot('Executive',
+                                         request.session['book_date'],
+                                         request.session['check_in'],
+                                         request.session['check_out'],
+                                         request.session['person'])
+    if time_slot != []:
+        request.session['pk'] = time_slot.pk
+    context = {
+        'category': 'Executive',
+        'book_date': request.session['book_date'],
+        'check_in': request.session['check_in'],
+        'check_out': request.session['check_out'],
+        'person': request.session['person'],
+        'time_slot': time_slot,
+        'username': request.user.username
+        }
+    return render(request, 'best_available_time_slot.html', context)
 
-"""Function to book room of this category if available."""
+"""Displays the best available time slot for deluxe category."""
 @login_required(login_url="/hotel/sign_in/")
 def deluxe(request):
-    # response = available_time_slots('Deluxe', request.user.username,
-    #                             request.session['book_date'],
-    #                             request.session['check_in'],
-    #                             request.session['check_out'],
-    #                             request.session['person'],
-    #                             request.session['no_of_rooms_required'])
-    response = available_time_slots('Deluxe', #request.user.username,
-                                request.session['book_date'],
-                                request.session['check_in'],
-                                request.session['check_out'],
-                                request.session['person'])
-    if response == 1:
-        # Implemented Post/Redirect/Get.
-        return redirect('../booked_deluxe/')
-    elif response == 2:
-        return HttpResponse("Unavailable")
-    else:
-        return redirect('../book/')
+    if request.method == 'POST':
+        response = best_available_time_slot('Deluxe',
+                                            request.session['book_date'],
+                                            request.session['check_in'],
+                                            request.session['check_out'],
+                                            request.session['person'])
+        if response != []:
+            if request.session['pk'] != response.pk:
+                response = 'n'
+        if response != [] and response != 'n':
+            slots_booking(response, request)
+            return redirect('../booked_deluxe/')
+        context = {
+            'category': 'Deluxe',
+            'book_date': request.session['book_date'],
+            'check_in': request.session['check_in'],
+            'check_out': request.session['check_out'],
+            'person': request.session['person'],
+            'time_slot': response,
+            'username': request.user.username
+            }
+        return render(request, 'best_available_time_slot.html', context)
+    time_slot = best_available_time_slot('Deluxe',
+                                         request.session['book_date'],
+                                         request.session['check_in'],
+                                         request.session['check_out'],
+                                         request.session['person'])
+    if time_slot != []:
+        request.session['pk'] = time_slot.pk
+    context = {
+        'category': 'Deluxe',
+        'book_date': request.session['book_date'],
+        'check_in': request.session['check_in'],
+        'check_out': request.session['check_out'],
+        'person': request.session['person'],
+        'time_slot': time_slot,
+        'username': request.user.username
+        }
+    return render(request, 'best_available_time_slot.html', context)
 
-"""Function to book room of this category if available."""
-@login_required(login_url="/hotel/sign_in/")
-def king(request):
-    response = available_time_slots('King', #request.user.username,
-                                request.session['book_date'],
-                                request.session['check_in'],
-                                request.session['check_out'],
-                                request.session['person'],
-                                request.session['no_of_rooms_required'])
-    if response == 1:
-        # Implemented Post/Redirect/Get.
-        return redirect('../booked_king/')
-    elif response == 2:
-        return HttpResponse("Unavailable")
-    else:
-        return redirect('../book/')
+# """Displays the best available time slot for executive category."""
+# @login_required(login_url="/hotel/sign_in/")
+# def executive(request):
+#     if request.method == 'POST':
+#         response = best_available_time_slot('Executive',
+#                                 request.session['book_date'],
+#                                 request.session['check_in'],
+#                                 request.session['check_out'],
+#                                 request.session['person'])
+#         if response != []:
+#             slots_booking(response, request)
+#             return redirect('../booked_executive/')
+#         context = {
+#             'category': 'Executive',
+#             'book_date': request.session['book_date'],
+#             'check_in': request.session['check_in'],
+#             'check_out': request.session['check_out'],
+#             'person': request.session['person'],
+#             'time_slots': response,
+#             'username': request.user.username
+#             }
+#         return render(request, 'best_available_time_slot.html', context)
+#     response = best_available_time_slot('Executive',
+#                                 request.session['book_date'],
+#                                 request.session['check_in'],
+#                                 request.session['check_out'],
+#                                 request.session['person'])
+#     context = {
+#         'category': 'Executive',
+#         'book_date': request.session['book_date'],
+#         'check_in': request.session['check_in'],
+#         'check_out': request.session['check_out'],
+#         'person': request.session['person'],
+#         'time_slot': response,
+#         'username': request.user.username
+#         }
+#     return render(request, 'best_available_time_slot.html', context)
 
-"""Function to book room of this category if available."""
-@login_required(login_url="/hotel/sign_in/")
-def queen(request):
-    response = available_time_slots('Queen', #request.user.username,
-                                request.session['book_date'],
-                                request.session['check_in'],
-                                request.session['check_out'],
-                                request.session['person'],
-                                request.session['no_of_rooms_required'])
-    if response == 1:
-        # Implemented Post/Redirect/Get.
-        return redirect('../booked_queen/')
-    elif response == 2:
-        return HttpResponse("Unavailable")
-    else:
-        return redirect('../book/')
+# """Displays the best available time slot for deluxe category."""
+# @login_required(login_url="/hotel/sign_in/")
+# def deluxe(request):
+#     if request.method == 'POST':
+#         response = best_available_time_slot('Deluxe',
+#                                 request.session['book_date'],
+#                                 request.session['check_in'],
+#                                 request.session['check_out'],
+#                                 request.session['person'])
+#         if response != []:
+#             slots_booking(response, request)
+#             return redirect('../booked_deluxe/')
+#         context = {
+#             'category': 'Deluxe',
+#             'book_date': request.session['book_date'],
+#             'check_in': request.session['check_in'],
+#             'check_out': request.session['check_out'],
+#             'person': request.session['person'],
+#             'time_slots': response,
+#             'username': request.user.username
+#             }
+#         return render(request, 'best_available_time_slot.html', context)
+#     response = best_available_time_slot('Deluxe',
+#                                 request.session['book_date'],
+#                                 request.session['check_in'],
+#                                 request.session['check_out'],
+#                                 request.session['person'])
+#     context = {
+#         'category': 'Deluxe',
+#         'book_date': request.session['book_date'],
+#         'check_in': request.session['check_in'],
+#         'check_out': request.session['check_out'],
+#         'person': request.session['person'],
+#         'time_slot': response,
+#         'username': request.user.username
+#         }
+#     return render(request, 'best_available_time_slot.html', context)
 
-"""Function to show the booking for regular category.
+# """Function to book room of this category if available."""
+# @login_required(login_url="/hotel/sign_in/")
+# def regular(request):
+#     if request.method == 'POST':
+#         # response = best_available_time_slot('Regular',
+#         #                         request.session['book_date'],
+#         #                         request.session['check_in'],
+#         #                         request.session['check_out'],
+#         #                         request.session['person'],
+#         #                         request.session['no_of_rooms_required'])
+#         print("njifdr")
+#         response = best_available_time_slot('Regular',
+#                                 request.session['book_date'],
+#                                 request.session['check_in'],
+#                                 request.session['check_out'],
+#                                 request.session['person'])
+#         print("hjbjhg")
+#         if response != []:
+#             print("rkjnb")
+#             slots_booking(response, request)
+#             return redirect('../booked_regular/')
+#         context = {
+#             'category': 'Regular',
+#             'book_date': request.session['book_date'],
+#             'check_in': request.session['check_in'],
+#             'check_out': request.session['check_out'],
+#             'person': request.session['person'],
+#             #'no_of_rooms_required': request.session['no_of_rooms_required'],
+#             'time_slots': response,
+#             'username': request.user.username
+#             }
+#         return render(request, 'best_available_time_slot.html', context)
+#         # time_slot_ids = list()
+#         # for i in range(len(response)):
+#         #     time_slot_ids.append(response[i].id)
+
+#         # # getting the comma-separated string from the list
+#         # time_slot_ids_string = ", ".join([str(item) for item in time_slot_ids if item])
+
+#         # booking = Booking(customer_name=request.user.username,
+#         #                 check_in_date=request.session['book_date'],
+#         #                 time_slot_ids=time_slot_ids_string)
+#         # booking.save()
+#         # Implemented Post/Redirect/Get.
+        
+#     # response = best_available_time_slot('Regular',
+#     #                             request.session['book_date'],
+#     #                             request.session['check_in'],
+#     #                             request.session['check_out'],
+#     #                             request.session['person'],
+#     #                             request.session['no_of_rooms_required'])
+#     response = best_available_time_slot('Regular',
+#                                 request.session['book_date'],
+#                                 request.session['check_in'],
+#                                 request.session['check_out'],
+#                                 request.session['person'])
+#     context = {
+#         'category': 'Regular',
+#         'book_date': request.session['book_date'],
+#         'check_in': request.session['check_in'],
+#         'check_out': request.session['check_out'],
+#         'person': request.session['person'],
+#         #'no_of_rooms_required': request.session['no_of_rooms_required'],
+#         'time_slot': response,
+#         'username': request.user.username
+#         }
+#     return render(request, 'best_available_time_slot.html', context)
+
+#     if response == 1:
+#         # Implemented Post/Redirect/Get.
+#         return redirect('../booked_regular/')
+#     elif response == 2:
+#         return HttpResponse("Unavailable")
+#     else:
+#         return redirect('../book/')
+
+# """Function to book room of this category if available."""
+# @login_required(login_url="/hotel/sign_in/")
+# def executive(request):
+#     # response = best_available_time_slot('Executive',
+#     #                             request.user.username,
+#     #                             request.session['book_date'],
+#     #                             request.session['check_in'],
+#     #                             request.session['check_out'],
+#     #                             request.session['person'],
+#     #                             request.session['no_of_rooms_required'])
+#     response = best_available_time_slot('Executive',
+#                                 #request.user.username,
+#                                 request.session['book_date'],
+#                                 request.session['check_in'],
+#                                 request.session['check_out'],
+#                                 request.session['person'])
+#     if response == 1:
+#         # Implemented Post/Redirect/Get.
+#         return redirect('../booked_executive/')
+#     elif response == 2:
+#         return HttpResponse("Unavailable")
+#     else:
+#         return redirect('../book/')
+
+# """Function to book room of this category if available."""
+# @login_required(login_url="/hotel/sign_in/")
+# def deluxe(request):
+#     # response = best_available_time_slot('Deluxe', request.user.username,
+#     #                             request.session['book_date'],
+#     #                             request.session['check_in'],
+#     #                             request.session['check_out'],
+#     #                             request.session['person'],
+#     #                             request.session['no_of_rooms_required'])
+#     response = best_available_time_slot('Deluxe', #request.user.username,
+#                                 request.session['book_date'],
+#                                 request.session['check_in'],
+#                                 request.session['check_out'],
+#                                 request.session['person'])
+#     if response == 1:
+#         # Implemented Post/Redirect/Get.
+#         return redirect('../booked_deluxe/')
+#     elif response == 2:
+#         return HttpResponse("Unavailable")
+#     else:
+#         return redirect('../book/')
+
+# """Function to book room of this category if available."""
+# @login_required(login_url="/hotel/sign_in/")
+# def king(request):
+#     response = best_available_time_slot('King', #request.user.username,
+#                                 request.session['book_date'],
+#                                 request.session['check_in'],
+#                                 request.session['check_out'],
+#                                 request.session['person'],
+#                                 request.session['no_of_rooms_required'])
+#     if response == 1:
+#         # Implemented Post/Redirect/Get.
+#         return redirect('../booked_king/')
+#     elif response == 2:
+#         return HttpResponse("Unavailable")
+#     else:
+#         return redirect('../book/')
+
+# """Function to book room of this category if available."""
+# @login_required(login_url="/hotel/sign_in/")
+# def queen(request):
+#     response = best_available_time_slot('Queen', #request.user.username,
+#                                 request.session['book_date'],
+#                                 request.session['check_in'],
+#                                 request.session['check_out'],
+#                                 request.session['person'],
+#                                 request.session['no_of_rooms_required'])
+#     if response == 1:
+#         # Implemented Post/Redirect/Get.
+#         return redirect('../booked_queen/')
+#     elif response == 2:
+#         return HttpResponse("Unavailable")
+#     else:
+#         return redirect('../book/')
+
+"""Displays the booking details for regular category.
 Used for implementing Post/Redirect/Get."""
 @login_required(login_url="/hotel/sign_in/")
 def booked_regular(request):
-    time_slot_bookings = Booking.objects.filter(
-        customer_name=request.user.username,
+    customer_booking = Booking.objects.filter(
+        customer=request.user,
         check_in_date=request.session['book_date']
-    )
-    time_slots = TimeSlot.objects.none()
-    time_slots_list = time_slot_bookings.last().time_slot_ids.split(', ')
-    for time_slot in time_slots_list:
-        time_slots = TimeSlot.objects.filter(pk=time_slot).union(time_slots)
+    ).last()
+
+    # time_slots = TimeSlot.objects.none()
+    # time_slots_list = customer_bookings.last()#.time_slot_ids.split(', ')
+    # for time_slot in time_slots_list:
+    #     time_slots = TimeSlot.objects.filter(pk=time_slot).union(time_slots)
+
     try:
         context = {'book_date': request.session['book_date'],
-                'check_in': request.session['check_in'],
-                'check_out': request.session['check_out'],
-                'person': request.session['person'],
-                'no_of_rooms_required': request.session['no_of_rooms_required'],
-                'category': 'Regular',
-                'username': request.user.username,
-                'time_slots': time_slots}
+                   'person': request.session['person'],
+                   'category': 'Regular',
+                   'username': request.user.username,
+                   'manager': customer_booking.timeslot.room.manager,
+                   'available_from': customer_booking.timeslot.available_from,
+                   'available_till': customer_booking.timeslot.available_till}
     except Exception:
         return redirect('../book/')
     return render(request, 'booked.html', context)
 
-"""Function to show the booking for regular category.
+"""Displays the booking details for executive category.
 Used for implementing Post/Redirect/Get."""
 @login_required(login_url="/hotel/sign_in/")
 def booked_executive(request):
+    customer_booking = Booking.objects.filter(
+        customer=request.user,
+        check_in_date=request.session['book_date']
+    ).last()
+
+    # time_slots = TimeSlot.objects.none()
+    # time_slots_list = customer_bookings.last()#.time_slot_ids.split(', ')
+    # for time_slot in time_slots_list:
+    #     time_slots = TimeSlot.objects.filter(pk=time_slot).union(time_slots)
+
     try:
         context = {'book_date': request.session['book_date'],
-                'check_in': request.session['check_in'],
-                'check_out': request.session['check_out'],
-                'person': request.session['person'],
-                'no_of_rooms_required': request.session['no_of_rooms_required'],
-                'category': 'Executive',
-                'username': request.user.username}
+                   'person': request.session['person'],
+                   'category': 'Executive',
+                   'username': request.user.username,
+                   'manager': customer_booking.timeslot.room.manager,
+                   'available_from': customer_booking.timeslot.available_from,
+                   'available_till': customer_booking.timeslot.available_till}
     except Exception:
         return redirect('../book/')
     return render(request, 'booked.html', context)
 
-"""Function to show the booking for regular category.
+"""Displays the booking details for deluxe category.
 Used for implementing Post/Redirect/Get."""
 @login_required(login_url="/hotel/sign_in/")
 def booked_deluxe(request):
+    customer_booking = Booking.objects.filter(
+        customer=request.user,
+        check_in_date=request.session['book_date']
+    ).last()
+
+    # time_slots = TimeSlot.objects.none()
+    # time_slots_list = customer_bookings.last()#.time_slot_ids.split(', ')
+    # for time_slot in time_slots_list:
+    #     time_slots = TimeSlot.objects.filter(pk=time_slot).union(time_slots)
+
     try:
         context = {'book_date': request.session['book_date'],
-                'check_in': request.session['check_in'],
-                'check_out': request.session['check_out'],
-                'person': request.session['person'],
-                'no_of_rooms_required': request.session['no_of_rooms_required'],
-                'category': 'Deluxe',
-                'username': request.user.username}
+                   'person': request.session['person'],
+                   'category': 'Deluxe',
+                   'username': request.user.username,
+                   'manager': customer_booking.timeslot.room.manager,
+                   'available_from': customer_booking.timeslot.available_from,
+                   'available_till': customer_booking.timeslot.available_till}
     except Exception:
         return redirect('../book/')
     return render(request, 'booked.html', context)
 
-"""Function to show the booking for regular category.
-Used for implementing Post/Redirect/Get."""
-@login_required(login_url="/hotel/sign_in/")
-def booked_king(request):
-    try:
-        context = {'book_date': request.session['book_date'],
-                'check_in': request.session['check_in'],
-                'check_out': request.session['check_out'],
-                'person': request.session['person'],
-                'no_of_rooms_required': request.session['no_of_rooms_required'],
-                'category': 'King',
-                'username': request.user.username}
-    except Exception:
-        return redirect('../book/')
-    return render(request, 'booked.html', context)
+# """Function to show the booking for regular category.
+# Used for implementing Post/Redirect/Get."""
+# @login_required(login_url="/hotel/sign_in/")
+# def booked_executive(request):
+#     try:
+#         context = {'book_date': request.session['book_date'],
+#                 'check_in': request.session['check_in'],
+#                 'check_out': request.session['check_out'],
+#                 'person': request.session['person'],
+#                 'no_of_rooms_required': request.session['no_of_rooms_required'],
+#                 'category': 'Executive',
+#                 'username': request.user.username}
+#     except Exception:
+#         return redirect('../book/')
+#     return render(request, 'booked.html', context)
 
-"""Function to show the booking for regular category.
-Used for implementing Post/Redirect/Get."""
-@login_required(login_url="/hotel/sign_in/")
-def booked_queen(request):
-    try:
-        context = {'book_date': request.session['book_date'],
-                'check_in': request.session['check_in'],
-                'check_out': request.session['check_out'],
-                'person': request.session['person'],
-                'no_of_rooms_required': request.session['no_of_rooms_required'],
-                'category': 'Queen',
-                'username': request.user.username}
-    except Exception:
-        return redirect('../book/')
-    return render(request, 'booked.html', context)
+# """Function to show the booking for regular category.
+# Used for implementing Post/Redirect/Get."""
+# @login_required(login_url="/hotel/sign_in/")
+# def booked_deluxe(request):
+#     try:
+#         context = {'book_date': request.session['book_date'],
+#                 'check_in': request.session['check_in'],
+#                 'check_out': request.session['check_out'],
+#                 'person': request.session['person'],
+#                 'no_of_rooms_required': request.session['no_of_rooms_required'],
+#                 'category': 'Deluxe',
+#                 'username': request.user.username}
+#     except Exception:
+#         return redirect('../book/')
+#     return render(request, 'booked.html', context)
+
+# """Function to show the booking for regular category.
+# Used for implementing Post/Redirect/Get."""
+# @login_required(login_url="/hotel/sign_in/")
+# def booked_king(request):
+#     try:
+#         context = {'book_date': request.session['book_date'],
+#                 'check_in': request.session['check_in'],
+#                 'check_out': request.session['check_out'],
+#                 'person': request.session['person'],
+#                 'no_of_rooms_required': request.session['no_of_rooms_required'],
+#                 'category': 'King',
+#                 'username': request.user.username}
+#     except Exception:
+#         return redirect('../book/')
+#     return render(request, 'booked.html', context)
+
+# """Function to show the booking for regular category.
+# Used for implementing Post/Redirect/Get."""
+# @login_required(login_url="/hotel/sign_in/")
+# def booked_queen(request):
+#     try:
+#         context = {'book_date': request.session['book_date'],
+#                 'check_in': request.session['check_in'],
+#                 'check_out': request.session['check_out'],
+#                 'person': request.session['person'],
+#                 'no_of_rooms_required': request.session['no_of_rooms_required'],
+#                 'category': 'Queen',
+#                 'username': request.user.username}
+#     except Exception:
+#         return redirect('../book/')
+#     return render(request, 'booked.html', context)
 
 """Function to return all the bookings."""
 @login_required(login_url="/hotel/sign_in/")
-def all_bookings(request, pk=None):
+def customer_bookings(request, pk=None):
     if pk:
         try:
             booking = Booking.objects.get(pk=pk)
         except Exception:
             return HttpResponse("Not Found.")
-        if booking.customer_name == request.user.username:
+        if booking.customer == request.user:
             booking.delete()
             # Implemented Post/Redirect/Get.
-            return redirect('../../all_bookings/')
+            return redirect('../../customer_bookings/')
         else:
             return HttpResponse("Not allowed.")
-
-
-
     future_bookings = Booking.objects.filter(
-        customer_name=request.user.username,
-        check_in_date__gte=now.date()
+        customer=request.user,
+        check_in_date__gt=now.date()
     ).order_by('check_in_date')
-    future_time_slots = TimeSlot.objects.none()
-    future_time_slot_ids = list()
-    for future_booking in future_bookings:
-        future_time_slot_ids = future_booking.time_slot_ids.split(', ')
 
-    for future_time_slot_id in future_time_slot_ids:
-        future_time_slots = TimeSlot.objects.filter(pk=future_time_slot_id).union(future_time_slots)#.order_by('available_from')
-    print(future_time_slots)
+    past_present_bookings = Booking.objects.filter(
+        customer=request.user,
+        check_in_date__lte=now.date()
+    ).order_by('-check_in_date')
+
+    # future_time_slots = TimeSlot.objects.none()
+    # future_time_slot_ids = list()
+    # for future_booking in future_bookings:
+    #     future_time_slot_ids = future_booking.time_slot_ids.split(', ')
+
+    # for future_time_slot_id in future_time_slot_ids:
+    #     future_time_slots = TimeSlot.objects.filter(pk=future_time_slot_id).union(future_time_slots)#.order_by('available_from')
+    #print(future_bookings)
 
     # # Future bookings.
     # future_bookings = Booking.objects.filter(
@@ -1576,13 +1990,15 @@ def all_bookings(request, pk=None):
     #     customer_name=request.user.username,
     #     check_in_date__lte=now.date()
     # ).order_by('-check_in_date', 'check_in_time')
-    # context = {
-    #     'future_bookings': future_bookings,
-    #     'current_and_past_bookings': current_and_past_bookings,
-    #     'username': request.user.username
-    # }
-    #return render(request, 'all_bookings.html', context)
-    return render(request, 'all_bookings.html')
+    context = {
+        'future_bookings': future_bookings,
+        'count_future_bookings': len(future_bookings),
+        'past_present_bookings': past_present_bookings,
+        'count_past_present_bookings': len(past_present_bookings),
+        'username': request.user.username
+    }
+    return render(request, 'customer_bookings.html', context)
+    #return render(request, 'all_bookings.html')
 
 """API endpoints for User management, Rooms, Time Slots, and
 corresponding Bookings.
@@ -1702,7 +2118,7 @@ def booking_list(request):
             request.session['api_check_out'] = str(serializer.validated_data['check_out_time'])
             request.session['api_person'] = serializer.validated_data['person']
             request.session['no_of_rooms'] = serializer.validated_data['no_of_rooms']
-            response = search_availability(request.session['api_book_date'], request.session['api_check_in'], request.session['api_check_out'], request.session['api_person'], request.session['no_of_rooms'])
+            response = search_available_categories(request.session['api_book_date'], request.session['api_check_in'], request.session['api_check_out'], request.session['api_person'], request.session['no_of_rooms'])
             if response:
                 context = {'categories': response}
 
@@ -1810,21 +2226,21 @@ def booking_category(request, category):
                 )
                 time_slot.save()
 
-                request.session['api_username'] = None
-                request.session['api_book_date'] = None
-                request.session['api_check_in'] = None
-                request.session['api_check_out'] = None
-                category = None
-                request.session['api_person'] = None
+                request.session['api_username'] is None
+                request.session['api_book_date'] is None
+                request.session['api_check_in'] is None
+                request.session['api_check_out'] is None
+                category is None
+                request.session['api_person'] is None
                 return Response({'msg': 'Booked'})
         return Response({'msg': 'Unavailable.'},
                         status=status.HTTP_404_NOT_FOUND)
-    request.session['api_username'] = None
-    request.session['api_book_date'] = None
-    request.session['api_check_in'] = None
-    request.session['api_check_out'] = None
-    category = None
-    request.session['api_person'] = None
+    request.session['api_username'] is None
+    request.session['api_book_date'] is None
+    request.session['api_check_in'] is None
+    request.session['api_check_out'] is None
+    category is None
+    request.session['api_person'] is None
     return Response({'msg': 'Unavailable'}, status=status.HTTP_404_NOT_FOUND)'''
 
 @api_view(['GET', 'PUT', 'DELETE'])
