@@ -7,7 +7,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="{% static 'hotel/css/base.css' %}">
     <style>
-
+      .fixed{
+        color: blue;
+      }
       /*.container {
 	      position: absolute;
 	      top:30%;
@@ -86,19 +88,18 @@
 	  <div class="container2" id="booke">
       <h1>Booked</h1>
       <br/><br/><h2>Booking Details</h2><br/>
-      <ul style="line-height: 2em;">
+      <ul style="line-height: 2em; list-style-type: none">
         <li><b>Book date:</b> {{ book_date }}</li>
         <!-- <li><b>Check in:</b> {{ check_in }}</li>
         <li><b>Check out:</b> {{ check_out }}</li> -->
         <li><b>Person:</b> {{ person }}</li>
         <li><b>Category:</b> {{ category }}</li>
         {% if manager %}
-          <hr>
-          <li><b>Manager:</b> {{ manager }}</li>
-          <li><b>Available From:</b> {{ available_from }}</li>
-          <li><b>Available Till:</b> {{ available_till }}</li>
+          <li class="fixed"><b>Manager:</b> {{ manager }}</li>
+          <li class="fixed"><b>Available From:</b> {{ available_from }}</li>
+          <li class="fixed"><b>Available Till:</b> {{ available_till }}</li>
         {% else %}
-          <p>No time slot is available.</p>
+          <li>No time slot is available.</li>
         {% endif %}
       </ul>
       <br/><br/><br/>
