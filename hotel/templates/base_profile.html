@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block nav-buttons %}
+  <div class="dropdown w3-right ert">
+    <button class="dropbtn">
+      {% block username %}{% endblock username %}
+      <i class="fa fa-caret-down"></i>
+    </button>
+    <div class="dropdown-content">
+      <a href="{% url 'hotel:view_profile' %}">View Profile</a>
+      <a href="{% url 'hotel:edit_profile' %}">Edit Profile</a>
+      <a href="{% url 'hotel:logout' %}">Logout</a>
+    </div>
+  </div>
+{% endblock nav-buttons %}
