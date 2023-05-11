@@ -1,208 +1,31 @@
+{% extends "base_profile.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <title>Edit Profile</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link rel="stylesheet" type="text/css" href="{% static 'hotel/css/base.css' %}">
-    <style>
-      *{
-	      padding: 0;
-	      margin: 0;
-      }
-
-      #sub-heading {
-        font-size: 0.8em;
-      }
-      
-      .login{
-        font-size: 0.9em;
-        line-height: 13px;
-      }
-
-/*
-      body{
-        font-family: "Raleway", Arial, Helvetica, sans-serif;
-        color:#000!important; 
-        background-color:#f1f1f1 !important;
-      }
-
-      .container2{
-	      position: absolute;
-	      top:30%;
-	      left: 50%;
-	      transform: translate(-50%, -50%);
-        padding: 20px;
-        background: rgb(0, 175, 0);
-	      width: 30%;
-	      height: 70%;
-	      margin-top: 10%;
-	      font-size: 0.8em;
-	      border-radius: 5px;
-	      line-height: 3em;
-	      color: white;
-      }
-
-      .submit{
-	      float: right;
-	      border: none;
-	      color: white;
-	      width: 110px;
-	      height: 35px;
-	      background: #ff6600;
-        cursor: pointer;
-        border-radius: 5px;
-      }
-
-      #heading {
-        text-align: center;
-      }
-      
-      .submit:link, .submit:visited {
-        background-color: rgb(255, 51, 51);
-      }
-
-      .submit:hover, .submit:active {
-        background-color: rgb(179, 0, 0);
-      }
-
-      .w3-right{float:right!important}
-      .w3-bar{width:100%;overflow:hidden; display:inline-block;}
-      .w3-white{color:#000!important;background-color:#fff!important}
-      .w3-large{font-size:18px!important}
-      .w3-bar-item{padding:8px 16px;float:left;border:none;outline:0;text-align:left;white-space:normal;text-align:center;}
-      
-      .w3-margin-top {
-        position: relative;
-        left: 0;
-        top: 467px;
-        width: 100%;
-        color: white;
-      }
-
-      a.ert:link, a.ert:visited {
-        background-color: white;
-        color: black;
-        border: 2px solid green;
-        padding: 3px 6px;
-        text-align: center;
-        text-decoration: none;
-        display: inline-block;
-        margin: 3px;
-        border-radius: 5px;
-      }
-
-      a.ert:hover, a.ert:active {
-        background-color: green;
-        color: white;
-      }
-      
-      .w3-red{color:#fff!important;background-color:#f44336!important}
-      .w3-mobile{display:block; text-align:center}
-      .w3-margin-right{margin-right:16px!important}
-      .w3-padding-32{padding-top:32px!important;padding-bottom:32px!important}
-      .w3-black{color:#fff!important;background-color:#000!important}
-      .w3-center{text-align:center!important}
-      .w3-xlarge{font-size:24px!important}
-      .w3-padding-16{padding-top:16px!important;padding-bottom:16px!important}
-      .w3-hover-text-green:hover{color:#4CAF50!important}
-      .w3-hover-text-green{color: white;}
-      a.fa {
-        padding: 3px;
-        border-radius: 3px;
-        font-size: 1em;
-        width: 27px;
-        text-align: center;
-        text-decoration: none;
-        margin: 5px 2px;
-      }
-
-      a.fa:hover {
-        opacity: 0.7;
-      }
-      
-      .fa-facebook {
-        background: rgb(59, 89, 152);
-        color: rgb(255, 255, 255);
-      }
-
-      .fa-instagram {
-        background: #f09433;
-        background: -moz-linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); 
-        background: -webkit-linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%); 
-        background: linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%); 
-        filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f09433', endColorstr='#bc1888',GradientType=1 );
-        color: white;
-      }
-
-      .fa-twitter {
-        background: #55ACEE;
-        color: white;
-      }
-
-      .fa-youtube {
-        background: #bb0000;
-        color: white;
-      }
-      
-      .fa-linkedin-square {
-        position: relative;
-        top: 4px;
-        left: -5px;
-        color: #1565c0;
-        background-color: rgba(0,0,0,.03);
-        font-size: 1.5em!important;
-      }
-      
-      .fa {
-        font-size: 1.2em;
-      }*/
-    </style>
-  </head>
-	<body id="body-color">
-	  <!-- Navigation Bar -->
-    <div class="w3-bar w3-white w3-large">
-      <div class="w3-bar-item w3-red w3-mobile"><i class="fa fa-bed w3-margin-right"></i>Logo</div>
-      <div class="dropdown w3-right ert">
-        <button class="dropbtn">{{ username }} 
-          <i class="fa fa-caret-down"></i>
-        </button>
-        <div class="dropdown-content">
-          <a href="{% url 'hotel:view_profile' %}">View Profile</a>
-          <a href="{% url 'hotel:edit_profile' %}">Edit Profile</a>
-          <a href="{% url 'hotel:logout' %}">Logout</a>
+{% block title %}Edit Profile{% endblock title %}
+<style>
+  *{
+    padding: 0;
+    margin: 0;
+  }
+</style>
+{% block username %}
+  {{ username }}
+{% endblock username %}
+{% block content %}
+  <div class="grid">
+    <div class="col-8-12">
+      <!-- content for large column here -->
+      <div class="container2" style="margin-top: 25%;">
+        <div class="w3-center">
+          <h1>Edit Profile</h1>
         </div>
+        <form method="POST">
+          {% csrf_token %}
+          {{ form.as_p }}
+          <br/>
+          <input type="submit" class= "submit submit-right" value="Submit" />
+          <br/>
+        </form>
       </div>
     </div>
-    <div class="grid">
-      <div class="col-8-12">
-        <!-- content for large column here -->
-        <div class="container2">
-          <div class="w3-center">
-            <h1>Edit Profile</h1>
-          </div>
-          <form method="POST">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <br/>
-            <input type="submit" class= "submit submit-right" value="Submit" />
-          </form>
-        </div>
-      </div>
-    </div>
-
-	  <!-- Footer -->
-    <footer class="w3-padding-32 w3-black w3-center w3-margin-top">
-      <h5>Find Us On</h5>
-      <div class="w3-xlarge w3-padding-16">
-        <a href="#" class="fa fa-facebook"></a>
-        <a href="#" class="fa fa-instagram"></a>
-        <a href="#" class="fa fa-twitter"></a>
-        <a href="#" class="fa fa-youtube"></a>
-        <a href="#" class="fa fa-linkedin-square"></a>
-      </div>
-      <p>Powered by <a href="https://www.w3schools.com/w3css/default.asp" target="_blank" class="w3-hover-text-green">w3.css</a></p>
-    </footer>
-	</body>
-</html>
+  </div>
+{% endblock content %}

@@ -1,50 +1,22 @@
+{% extends "base_profile.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <title>Profile</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link rel="stylesheet" type="text/css" href="{% static 'hotel/css/base.css' %}">
-    <style>
-      *{
-          padding: 0;
-          margin: 0;
-      }
-    </style>
-  </head>
-	<body id="body-color">
-    <!-- Navigation Bar -->
-    <div class="w3-bar w3-white w3-large">
-      <div class="w3-bar-item w3-red w3-mobile"><i class="fa fa-bed w3-margin-right"></i>Logo</div>
-      <div class="dropdown w3-right ert">
-        {% for x in profile %}
-          <button class="dropbtn">{{ x.username }} 
-            <i class="fa fa-caret-down"></i>
-          </button>
-          <div class="dropdown-content">
-            <a href="{% url 'hotel:view_profile' %}">View Profile</a>
-            <a href="{% url 'hotel:edit_profile' %}">Edit Profile</a>
-            <a href="{% url 'hotel:logout' %}">Logout</a>
-          </div>
-      </div>
-    </div>
-    <h3>User Profile</h3>
-      <p><b>First name:</b> {{x.first_name}}</p>
-      <p><b>Last name:</b> {{x.last_name}}</p>
-      <p><b>Email:</b> {{x.email}}</p>
-        {% endfor %}
-    <!-- Footer -->
-    <footer class="w3-padding-32 w3-black w3-center w3-margin-top">
-      <h5>Find Us On</h5>
-      <div class="w3-xlarge w3-padding-16">
-        <a href="#" class="fa fa-facebook"></a>
-        <a href="#" class="fa fa-instagram"></a>
-        <a href="#" class="fa fa-twitter"></a>
-        <a href="#" class="fa fa-youtube"></a>
-        <a href="#" class="fa fa-linkedin-square"></a>
-      </div>
-      <p>Powered by <a href="https://www.w3schools.com/w3css/default.asp" target="_blank" class="w3-hover-text-green">w3.css</a></p>
-    </footer>
-	</body>
-</html>
+{% block title %}Profile{% endblock title %}
+<style>
+  *{
+      padding: 0;
+      margin: 0;
+  }
+</style>
+{% block username %}
+  {% for x in profile %}
+  {{ x.username }}
+  {% endfor %}
+{% endblock username %}
+{% block content %}
+  <h3>User Profile</h3>
+  {% for x in profile %}
+    <p><b>First name:</b> {{x.first_name}}</p>
+    <p><b>Last name:</b> {{x.last_name}}</p>
+    <p><b>Email:</b> {{x.email}}</p>
+  {% endfor %}
+{% endblock content %}
