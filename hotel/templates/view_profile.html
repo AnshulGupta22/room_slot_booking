@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base_profile.html" %}
 {% load static %}
 {% block title %}Profile{% endblock title %}
 <style>
@@ -7,22 +7,11 @@
       margin: 0;
   }
 </style>
-<!-- Navigation Bar -->
-{% block nav-buttons %}
-  <div class="dropdown w3-right ert">
-      <button class="dropbtn">
-        {% for x in profile %}
-        {{ x.username }}
-        {% endfor %}
-        <i class="fa fa-caret-down"></i>
-      </button>
-      <div class="dropdown-content">
-        <a href="{% url 'hotel:view_profile' %}">View Profile</a>
-        <a href="{% url 'hotel:edit_profile' %}">Edit Profile</a>
-        <a href="{% url 'hotel:logout' %}">Logout</a>
-      </div>
-  </div>
-{% endblock nav-buttons %}
+{% block username %}
+  {% for x in profile %}
+  {{ x.username }}
+  {% endfor %}
+{% endblock username %}
 {% block content %}
   <h3>User Profile</h3>
   {% for x in profile %}

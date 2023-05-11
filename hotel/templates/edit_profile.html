@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base_profile.html" %}
 {% load static %}
 {% block title %}Edit Profile{% endblock title %}
 <style>
@@ -7,48 +7,25 @@
     margin: 0;
   }
 </style>
-	  <!-- Navigation Bar -->
-    {% block nav-buttons %}
-      <div class="dropdown w3-right ert">
-        <button class="dropbtn">{{ username }}
-          <i class="fa fa-caret-down"></i>
-        </button>
-        <div class="dropdown-content">
-          <a href="{% url 'hotel:view_profile' %}">View Profile</a>
-          <a href="{% url 'hotel:edit_profile' %}">Edit Profile</a>
-          <a href="{% url 'hotel:logout' %}">Logout</a>
+{% block username %}
+  {{ username }}
+{% endblock username %}
+{% block content %}
+  <div class="grid">
+    <div class="col-8-12">
+      <!-- content for large column here -->
+      <div class="container2" style="margin-top: 25%;">
+        <div class="w3-center">
+          <h1>Edit Profile</h1>
         </div>
+        <form method="POST">
+          {% csrf_token %}
+          {{ form.as_p }}
+          <br/>
+          <input type="submit" class= "submit submit-right" value="Submit" />
+          <br/>
+        </form>
       </div>
     </div>
-    {% endblock nav-buttons %}
-    <div class="grid">
-      <div class="col-8-12">
-        <!-- content for large column here -->
-        <div class="container2">
-          <div class="w3-center">
-            <h1>Edit Profile</h1>
-          </div>
-          <form method="POST">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <br/>
-            <input type="submit" class= "submit submit-right" value="Submit" />
-          </form>
-        </div>
-      </div>
-    </div>
-
-	  <!-- Footer -->
-    <footer class="w3-padding-32 w3-black w3-center w3-margin-top">
-      <h5>Find Us On</h5>
-      <div class="w3-xlarge w3-padding-16">
-        <a href="#" class="fa fa-facebook"></a>
-        <a href="#" class="fa fa-instagram"></a>
-        <a href="#" class="fa fa-twitter"></a>
-        <a href="#" class="fa fa-youtube"></a>
-        <a href="#" class="fa fa-linkedin-square"></a>
-      </div>
-      <p>Powered by <a href="https://www.w3schools.com/w3css/default.asp" target="_blank" class="w3-hover-text-green">w3.css</a></p>
-    </footer>
-	</body>
-</html>
+  </div>
+{% endblock content %}
